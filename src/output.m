@@ -1,3 +1,5 @@
+% print output header
+fprintf('\n***** print output frame %d\n',step/nop);
 
 % get segregation velocities and compaction pressures
 ustar = sum(omvx.*u,1);

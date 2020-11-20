@@ -1,4 +1,10 @@
 
+% print header
+fprintf(1,'\n\n****************************************************\n');
+fprintf(1,'*****  pantarhei | multi-phase flow simulator  *****\n');
+fprintf(1,'****************************************************\n\n');
+
+
 % prepare workspace
 if   ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
 load('ocean.mat','ocean');
@@ -63,7 +69,7 @@ while time <= tend  % keep stepping until final run time reached
     step = step+1;
     
     % print time step diagnostics
-    fprintf(1,'\n\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
+    fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
     
     % store phase fractions of previous step
     fo = f;  dto = dt;
