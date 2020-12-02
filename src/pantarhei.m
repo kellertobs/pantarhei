@@ -135,7 +135,7 @@ while time <= tend  % keep stepping until final run time reached
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
             res_w(:,[1,end],:) = 0;
-        elseif ~mod(it,nupd) || it==1
+        else
             res_u = res_u-mean(res_u(:));
             res_w = res_w-mean(res_w(:));
             res_p = res_p-mean(res_p(:));
@@ -160,7 +160,7 @@ while time <= tend  % keep stepping until final run time reached
             if res>=2*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
             if it==1 || res>res0; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-            figure(10); if it==nupd; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; 
+            figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; 
         end
         
     end  % iteration loop
