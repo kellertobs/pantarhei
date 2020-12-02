@@ -2,10 +2,10 @@
 clear variables; close all;
 
 % set directory paths
-addpath('/Users/tokeller/Software/ternplot/');
+addpath('/Users/tokeller/Documents/Software/ternplot');
 
 % load custom colormap
-load ../ocean.mat
+load ../src/ocean.mat
 color = [0.0000  0.4470  0.7410 ; ...
          0.8500  0.3250  0.0980 ; ...
          0.9290  0.6940  0.1250 ; ...
@@ -25,8 +25,8 @@ LS = {'LineStyle','-','--','-.',':'};
 LC = {'Color',color};
 
 % prepare axes/borders dimensions
-axh = 9;
-axw = 9;
+axh = 8;
+axw = 8;
 ahs = 1.5;
 avs = 1.5;
 axb = 1.8;
@@ -64,17 +64,17 @@ phi               =  [phi1,phi2,phi3];
 phi(phi(:,3)<0,:) = nan;
 
 %*****  set pure phase properties  ****************************************
-eta0 = [ 1e18,  1e2, 1e-5];  % solid / liquid / gas phase viscosities
-d0   = [0.003,0.003,0.003];  % solid / liquid / gas phase granular size
+eta0 = [1e+18;1e+16;1e+1];  % pure-phase viscosities
+d0   = [2e-3 ;5e-3 ;1e-3];  % characteristic size
 kv   = eta0;           % set momentum diffusivity
 kf   = d0.^3./eta0;    % set volume diffusivity
 Mv   = kv./kv.';       % get momentum diffusivity contrasts
 Mf   = kf./kf.';       % get volume diffusivity contrasts
 
 % set fitting parameters
-A  =  [ 0.60, 0.30, 0.25; 0.30, 0.60, 0.25; 0.20, 0.20, 0.20; ];
-B  =  [ 0.40, 0.45, 0.15; 0.39, 0.35, 0.26; 0.48, 0.51, 0.01; ];
-C  =  [ 0.40, 0.20, 0.40; 0.20, 0.25, 0.25; 0.60, 0.20, 0.60; ];
+A  =  [ 0.60, 0.30, 0.25; 0.30, 0.60, 0.25; 0.20, 0.20, 0.20; ];  % permission slopes
+B  =  [ 0.40, 0.45, 0.15; 0.39, 0.35, 0.26; 0.48, 0.51, 0.01; ];  % permission step locations
+C  =  [ 0.40, 0.20, 0.40; 0.20, 0.25, 0.25; 0.60, 0.20, 0.60; ];  % permission step widths
 
 % calculate phase permission weights functions
 for i = 1:3
