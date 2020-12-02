@@ -108,10 +108,10 @@ end
 
 for n=1:NPHS
     axes(ax((n-1)*4+1)); 
-    imagesc(x,x,squeeze(qvzz(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{v,zz}^',num2str(n),'$ [Pa]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(qvzz(n,:,:)-f(n,:,:).*p(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{v,zz}^',num2str(n),'$ [Pa]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
     axes(ax((n-1)*4+2)); 
-    imagesc(x,x,squeeze(qfz (n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{f,z}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(qfz (n,:,:)-( f(n,im,:)+ f(n,ip,:))./2 .* w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{f,z}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
     axes(ax((n-1)*4+3)); 
     imagesc(x,x,squeeze(Gvz (n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_{v,z}^',num2str(n),'$ [Pa/m]' ],TX{:},FS{:});
@@ -151,6 +151,14 @@ end
 drawnow;
 
 figure(5); clf; colormap(ocean);
+for n=1:NPHS
+    for nn=1:NPHS
+        subplot(NPHS,NPHS,(n-1)*NPHS+nn); imagesc(x,x,squeeze(log10(delta(n,nn,:,:)))); axis xy equal tight; cb = colorbar; title(['log$_{10}$ $\delta_{s/c}^{',[num2str(n),num2str(nn)],'}$ [m]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+    end
+end
+drawnow;
+
+figure(6); clf; colormap(ocean);
 for n=1:NPHS
     subplot(NPHS,4,(n-1)*4+1); imagesc(x,x,squeeze(res_w(n,:,:).*dtau_w(n,:,:)./(norm(squeeze(w(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $w^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
     subplot(NPHS,4,(n-1)*4+2); imagesc(x,x,squeeze(res_u(n,:,:).*dtau_u(n,:,:)./(norm(squeeze(u(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $u^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
