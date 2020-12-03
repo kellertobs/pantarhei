@@ -137,17 +137,17 @@ while time <= tend  % keep stepping until final run time reached
             res_u(:,:,[1,end]) = 0; 
             res_w(:,[1,end],:) = 0;
         else
-            res_u = res_u-mean(res_u(:));
-            res_w = res_w-mean(res_w(:));
-            res_p = res_p-mean(res_p(:));
-            res_f = res_f-mean(res_f(:));
+            upd_u = res_u.*dtau_u-mean(res_u(:).*dtau_u(:));
+            upd_w = res_w.*dtau_w-mean(res_w(:).*dtau_w(:));
+            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));
+            upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
         end
 
         % update solution
-        u = ui - alpha.*res_u.*dtau_u + beta.*(ui-uii);
-        w = wi - alpha.*res_w.*dtau_w + beta.*(wi-wii);
-        p = pi - alpha.*res_p.*dtau_p + beta.*(pi-pii);
-        f = fi - alpha.*res_f.*dtau_f + beta.*(fi-fii);
+        u = ui - alpha.*upd_u + beta.*(ui-uii);
+        w = wi - alpha.*upd_w + beta.*(wi-wii);
+        p = pi - alpha.*upd_p + beta.*(pi-pii);
+        f = fi - alpha.*upd_f + beta.*(fi-fii);
         
         f = max(flim,min(1-flim,f)); f = f./sum(f,1);
 
