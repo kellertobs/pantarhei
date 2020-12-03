@@ -1,39 +1,39 @@
 % pantarhei run script 
-% calibrated for plagioclase + dacite + magmatic volatile phase
+% calibrated for plagioclase + dacitic melt + magmatic volatile phase
 
 % clear workspace
 clear; close all; clc;
 
 % set model parameters
 RunID  = 'plg60_dac20_mvp20';
-nop    = 10;                % plot and store output every [nop] time step
+nop    = 5;                 % plot and store output every [nop] time step
 svop   = 1;                 % save output and print figures
 
 NPHS   = 3;                 % number of phases
 N      = 100;               % number of grid points in each direction
-D      = 100;               % domain dimension in each direction [m]
+D      = 40;                % domain dimension in each direction [m]
 h      = D/N;               % grid spacing [m]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 tend   = 1e9;               % model run time [s]
-dt     = 1e5;               % initial time step [s]
+dt     = 1e2;               % initial time step [s]
 
-nupd   = 100;               % update residual and permissions every [nupd] iterations
-atol   = 1e-5;              % residual tolerance for convergence of iterative solver
-rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
+nupd   = 50;                % update residual and permissions every [nupd] iterations
+atol   = 1e-6;              % absolute residual tolerance for convergence of iterative solver
+rtol   = 1e-4;              % relative residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
-maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.99;              % first-order iterative step size (reduce if not converging)
-beta   = 0.90;              % second-order iterative step size (reduce if not converging)
-cfl    = 0.75;              % Courant number to limit physical time step size
+maxits = 3000;              % maximum iteration count for iterative solver
+alpha  = 0.50;              % first-order iterative step size (reduce if not converging)
+beta   = 0.50;              % second-order iterative step size (reduce if not converging)
+cfl    = 1.00;              % Courant number to limit physical time step size
 flim   = 1e-4;              % limit phase fractions in coefficient closures
 thtlim = 1e+4;              % limit phase-internal permission contrasts
-cfflim = 1e+9;              % limit inter-phase coefficient contrasts
+cfflim = 1e+4;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [0.60; 0.20; 0.20];  % initial background phase fractions (unity sum!)
-dfg  = [-0.04; 0.02; 0.02];  % initial guassian peak amplitude (unity sum!)
-dfr  = [0.00; 0.00; 0.00];  % initial random perturbation amplitude (unity sum!)
-smth = (D/40)^2/h^2;        % smoothing parameter for random perturbation field
+dfg  = [-0.00; 0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
+dfr  = [-0.04; 0.02; 0.02]; % initial random perturbation amplitude (unity sum!)
+smth = (D/30)^2/h^2;        % smoothing parameter for random perturbation field
 Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
 
 rho0 = [3000 ;2500; 200];   % pure-phase densities
