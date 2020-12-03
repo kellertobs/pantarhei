@@ -72,9 +72,17 @@ Mv   = kv./kv.';       % get momentum diffusivity contrasts
 Mf   = kf./kf.';       % get volume diffusivity contrasts
 
 % set fitting parameters
-A  =  [ 0.60, 0.30, 0.25; 0.30, 0.60, 0.25; 0.20, 0.20, 0.20; ];  % permission slopes
-B  =  [ 0.40, 0.45, 0.15; 0.39, 0.35, 0.26; 0.48, 0.51, 0.01; ];  % permission step locations
-C  =  [ 0.40, 0.20, 0.40; 0.20, 0.25, 0.25; 0.60, 0.20, 0.60; ];  % permission step widths
+A  =  [ 0.60, 0.30, 0.25; ...
+        0.60, 0.30, 0.25; ...
+        0.30, 0.25, 0.20; ];  % permission slopes
+    
+B  =  [ 0.45, 0.35, 0.20; ...
+        0.35, 0.30, 0.35; ...
+        0.45, 0.54, 0.01; ];  % permission step locations
+    
+C  =  [ 0.40, 0.40, 0.20; ...
+        0.40, 0.40, 0.20; ...
+        0.60, 0.20, 0.60; ];  % permission step widths
 
 % calculate phase permission weights functions
 for i = 1:3
