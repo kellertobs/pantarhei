@@ -36,17 +36,18 @@ rnd = rnd./max(abs(rnd(:)));
 gsn = exp(-X.^2./(D/8).^2).*exp(-Z.^2./(D/8).^2);
 
 % intialise solution, auxiliary, and residual fields
-u     = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
-w     = zeros(NPHS,N+1,N  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
-p     = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
-f     = f0 + dfr.*rnd + dfg.*gsn;                     
-f     = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
-rho   = rho0.*ones(size(f));
-qvxx  = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
-qfx   = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
-Gvx   = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
-Gf    = zeros(NPHS,N,N  );
-delta = zeros(NPHS,NPHS,N,N);
+u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
+w      = zeros(NPHS,N+1,N  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
+p      = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
+f      = f0 + dfr.*rnd + dfg.*gsn;                     
+f      = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
+rho    = rho0.*ones(size(f));
+qvxx   = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
+qfx    = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
+Gvx    = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
+Gf     = zeros(NPHS,N,N  );
+delta  = zeros(NPHS,NPHS,N,N);
+rhomix = mean(mean(sum(f.*rho,1)));
 
 % initialise coefficient and auxiliary fields
 up2date;
@@ -113,24 +114,24 @@ while time <= tend  % keep stepping until final run time reached
         if strcmp(BC,'closed'); qfx(:,:,[1,end]) = 0; qfz(:,[1,end],:) = 0; end
         
         % get momentum transfer fields
-        Gvx = (Cv(:,:,im)+Cv(:,:,ip))./2 .* (u-ustar) - pstar_Gfx;
-        Gvz = (Cv(:,im,:)+Cv(:,ip,:))./2 .* (w-wstar) - pstar_Gfz;
+        Gvx = - (Cv(:,:,im)+Cv(:,:,ip))./2 .* (u-ustar) + pstar_Gfx;
+        Gvz = - (Cv(:,im,:)+Cv(:,ip,:))./2 .* (w-wstar) + pstar_Gfz;
         
         %get volume transfer field
-        Gf  =             Cf             .* (p-pstar) - vstar_Gf - Gm./rhostar;
+        Gf  = -             Cf             .* (p-pstar) + vstar_Gf + Gm./rhostar;
                 
         % get momentum source fields
-        Qvx = - (f(:,:,im)+f(:,:,ip))./2.*((rho(:,:,im)+rho(:,:,ip))./2).*grav(2); Qvx = Qvx - mean(Qvx(:));
-        Qvz = - (f(:,im,:)+f(:,ip,:))./2.*((rho(:,im,:)+rho(:,ip,:))./2).*grav(1); Qvz = Qvz - mean(Qvz(:));
+        Qvx = (f(:,:,im)+f(:,:,ip))./2.*((rho(:,:,im)+rho(:,:,ip))./2-rhomix).*grav(2);
+        Qvz = (f(:,im,:)+f(:,ip,:))./2.*((rho(:,im,:)+rho(:,ip,:))./2-rhomix).*grav(1);
 
         % get physical time step
         dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./5e-3));  % [s]
 
         % get residual fields
-        res_u =             + diff(qvxx(:,:,ic),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
-        res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
-        res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h + Gf  + Gm./rho;
-        res_f =  (f-fo)./dt                                                 - Gf           ;
+        res_u =             + diff(qvxx(:,:,ic),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
+        res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
+        res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
+        res_f =  (f-fo)./dt                                                 + Gf           ;
 
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
