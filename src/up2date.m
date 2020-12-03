@@ -10,10 +10,10 @@ thtv = 1./(1./thtv + 1./(thtlim.^0.5*gmv)) + (gmv/thtlim.^0.5);
 thtf = 1./(1./thtf + 1./(thtlim.^0.5*gmf)) + (gmf/thtlim.^0.5);
 
 % get momentum and volume flux and transfer coefficients
-Kv = (flim+f).*eta0       .*thtv;
-Kf = (flim+f).*d0.^2./eta0.*thtf;
-Cv = (flim+1-f)./d0.^2.*Kv;
-Cf = (flim+1-f)./d0.^2.*Kf;
+Kv =    f .*eta0       .*thtv;
+Kf =    f .*d0.^2./eta0.*thtf;
+Cv = (1-f)./d0.^2.*Kv;
+Cf = (1-f)./d0.^2.*Kf;
 
 % apply cutoff to coefficients to safeguard numerical stability
 Kv = Kv + max(Kv,[],1)./cfflim;

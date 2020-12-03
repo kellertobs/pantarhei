@@ -149,7 +149,7 @@ while time <= tend  % keep stepping until final run time reached
         p = pi - alpha.*res_p.*dtau_p + beta.*(pi-pii);
         f = fi - alpha.*res_f.*dtau_f + beta.*(fi-fii);
         
-        f = max(1e-16,min(1-1e-16,f));
+        f = max(flim,min(1-flim,f)); f = f./sum(f,1);
 
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
