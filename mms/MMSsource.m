@@ -3,15 +3,13 @@ function varargout = MMSsource (varargin)
 [varargout{1:nargout}] = feval(varargin{:});
 end
 
-function [usrc, dqvx, qvxx, qvxz, dqvxxdx, dqvxzdz, Gvx, Qvx] = Calc_usrc (t, x, z, ...
-    d0,eta0,rho0,rhomix,grav,A,B,C,Gm,...
-    Tp,Xp,Zp,P0,dP0, Tf,Xf,Zf,f0,df0, Tu,Xu,Zu,U0,dU0, Tw,Xw,Zw,W0,dW0,...
-    thtlim, cfflim)
+function [usrc] = Calc_usrc (t, x, z, ...
+    d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
-[f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tf,Xf,Zf,f0,df0);
-[p, ~   , dpdx, ~                         ] = Calc_p(t,x,z,Tp,Xp,Zp,P0,dP0);
-[u, ~   , dudx, dudz, dudx2, dudz2, ~     ] = Calc_u(t,x,z,Tu,Xu,Zu,U0,dU0);
-[~, ~   , dwdx, dwdz, ~    , ~    , dwdxdz] = Calc_w(t,x,z,Tw,Xw,Zw,W0,dW0);
+[f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
+[p, ~   , dpdx, ~                         ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
+[u, ~   , dudx, dudz, dudx2, dudz2, ~     ] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
+[~, ~   , dwdx, dwdz, ~    , ~    , dwdxdz] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
 rho    = rho0.*ones(size(p)); 
 
@@ -28,9 +26,6 @@ pstar = sum(omCf.*p, 1);
 div_v    = dudx  + dwdz;
 d_divv_x = dudx2 + dwdxdz;
 
-qvxx = -Kv.*(dudx - 1./3*div_v) + f.*p;
-qvxz = -0.5*Kv.*(dudz + dwdx);
-
 % momentum flux
 dqvxxdx  = - Kv.*          (dudx2 - 1/3*d_divv_x) ...
            - dKv(:,:,:,2).*(dudx  - 1/3*div_v) + f.*dpdx + p.*dfdx;
@@ -38,7 +33,7 @@ dqvxzdz  = -0.5*Kv.*(dwdxdz + dudz2) - 0.5*dKv(:,:,:,3).*(dwdx + dudz);
 dqvx     = dqvxxdx + dqvxzdz;
 
 % momentum transfer
-Gvx   = - Cv.*(u-ustar) + pstar.*dfdx;
+Gvx  = - Cv.*(u-ustar) + pstar.*dfdx;
 
 % momentum source
 Qvx = f.*(rho-rhomix).*grav(2); 
@@ -48,14 +43,12 @@ usrc = + dqvx - Gvx - Qvx;
 end
 
 function [wsrc] = Calc_wsrc (t, x, z, ...
-    d0,eta0,rho0,rhomix,grav,A,B,C,Gm,...
-    Tp,Xp,Zp,P0,dP0, Tf,Xf,Zf,f0,df0, Tu,Xu,Zu,U0,dU0, Tw,Xw,Zw,W0,dW0,...
-    thtlim, cfflim)
+    d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
-[f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tf,Xf,Zf,f0,df0);
-[p, ~   , ~   , dpdz                      ] = Calc_p(t,x,z,Tp,Xp,Zp,P0,dP0);
-[~, ~   , dudx, dudz, ~    , ~    , dudxdz] = Calc_u(t,x,z,Tu,Xu,Zu,U0,dU0);
-[w, ~   , dwdx, dwdz, dwdx2, dwdz2, ~     ] = Calc_w(t,x,z,Tw,Xw,Zw,W0,dW0);
+[f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
+[p, ~   , ~   , dpdz                      ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
+[~, ~   , dudx, dudz, ~    , ~    , dudxdz] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
+[w, ~   , dwdx, dwdz, dwdx2, dwdz2, ~     ] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
 rho    = rho0.*ones(size(p)); 
 
@@ -69,11 +62,12 @@ wstar = sum(omCv.*w, 1);
 pstar = sum(omCf.*p, 1);
 
 % derivatives of momentum flux
-divv     = dudx   + dwdz;
+div_v    = dudx   + dwdz;
 d_divv_z = dudxdz + dwdz2;
+
 dqvxzdx = -0.5*Kv.*(dwdx2 + dudxdz) - 0.5*dKv(:,:,:,2).*(dwdx + dudz);
 dqvzzdz = -    Kv         .*(dwdz2 - 1/3.*d_divv_z) ...
-          -   dKv(:,:,:,3).*(dwdz  - 1/3.*divv) + f.*dpdz + p.*dfdz;
+          -   dKv(:,:,:,3).*(dwdz  - 1/3.*div_v) + f.*dpdz + p.*dfdz;
 dqvz = dqvxzdx + dqvzzdz;
 
 % momentum transfer
@@ -86,15 +80,13 @@ wsrc = + dqvz - Gvz - Qvz;
 
 end
 
-function [psrc, fsrc, dqfxdx, dqfzdz, Gf] = Calc_pfsrc (t, x, z, ...
-    d0,eta0,rho0,rhomix,grav,A,B,C,Gm,...
-    Tp,Xp,Zp,P0,dP0, Tf,Xf,Zf,f0,df0, Tu,Xu,Zu,U0,dU0, Tw,Xw,Zw,W0,dW0,...
-    thtlim, cfflim)
+function [psrc, fsrc] = Calc_pfsrc (t, x, z, ...
+    d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
-[f, dfdt, dfdx, dfdz                 ] = Calc_f(t,x,z,Tf,Xf,Zf,f0,df0);
-[p, ~   , dpdx, dpdz, dpdx2, dpdz2   ] = Calc_p(t,x,z,Tp,Xp,Zp,P0,dP0);
-[u, ~   , dudx, ~   , ~    , ~    , ~] = Calc_u(t,x,z,Tu,Xu,Zu,U0,dU0);
-[w, ~   , ~   , dwdz, ~    , ~    , ~] = Calc_w(t,x,z,Tw,Xw,Zw,W0,dW0);
+[f, dfdt, dfdx, dfdz                 ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
+[p, ~   , dpdx, dpdz, dpdx2, dpdz2   ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
+[u, ~   , dudx, ~   , ~    , ~    , ~] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
+[w, ~   , ~   , dwdz, ~    , ~    , ~] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
 rho = rho0.*ones(size(p)); 
 
@@ -112,9 +104,6 @@ dpdxstar  = sum(omKf.*dpdx, 1);
 dpdzstar  = sum(omKf.*dpdz, 1);
 dpdx2star = sum(omKf.*dpdx2 + domKf(:,:,:,2).*dpdx, 1);
 dpdz2star = sum(omKf.*dpdz2 + domKf(:,:,:,3).*dpdz, 1);
-
-% qfx = -Kf.*(dpdx - dpdxstar) + f.*u;
-% qfz = -Kf.*(dpdz - dpdzstar) + f.*w;
 
 dqfxdx = -Kf.*(dpdx2 - dpdx2star) - dKf(:,:,:,2).*(dpdx - dpdxstar) + f.*dudx + u.*dfdx;
 dqfzdz = -Kf.*(dpdz2 - dpdz2star) - dKf(:,:,:,3).*(dpdz - dpdzstar) + f.*dwdz + w.*dfdz;
@@ -244,20 +233,11 @@ end
 
 end
 
-function [X,Z] = MakeGrid (D,h, NPHS)
-% initialise coordinate arrays
-x     = -D/2+h/2 : h : D/2-h/2;
-[X,~] = meshgrid(x,x);
-X     = repmat(X,1,1,NPHS);
-Z     = permute(X,[3,2,1]);
-X     = permute(X,[3,1,2]);
-
-end
-
 function [f, dfdt, dfdx, dfdz] = Calc_f (t, x, z, T, X, Z, f0, df0)
 % calculate phase fractions (cosines)
 
-tfrac    = t./T;
+% tfrac    = t./T;
+tfrac    = 0;
 xfrac    = x./X;
 zfrac    = z./Z;
 f        = f0 + df0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
@@ -277,7 +257,8 @@ end
 function [p, dpdt, dpdx, dpdz, dpdx2, dpdz2] = Calc_p (t, x, z, T, X, Z, P0, dP0)
 % pressure (cosines)
 
-tfrac = t./T;
+% tfrac = t./T;
+tfrac = 0;
 xfrac = x./X;
 zfrac = z./Z;
 p     = P0 + dP0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
@@ -298,7 +279,8 @@ end
 function [u, dudt, dudx, dudz, dudx2, dudz2, dudxdz] = Calc_u (t, x, z, T, X, Z, U0, dU0)
 % horizontal velocity (cosines)
 
-tfrac = t./T;
+% tfrac = t./T;
+tfrac = 0;
 xfrac = x./X;
 zfrac = z./Z;
 u     = U0 + dU0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
@@ -320,7 +302,8 @@ end
 function [w, dwdt, dwdx, dwdz, dwdx2, dwdz2, dwdxdz] = Calc_w (t, x, z, T, X, Z, W0, dW0)
 % vertical velocity (cosines)
 
-tfrac = t./T;
+% tfrac = t./T;
+tfrac = 0;
 xfrac = x./X;
 zfrac = z./Z;
 w     = W0 + dW0.*cos(tfrac).*cos(xfrac).*cos(zfrac);

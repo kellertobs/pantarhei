@@ -7,7 +7,12 @@ fprintf(1,'****************************************************\n\n');
 
 % prepare workspace
 if   ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
+outdir = ['../out/',RunID];
 load('ocean.mat','ocean');
+
+% check if running verification using mms
+if ~exist('mms','var'), mms = false; end
+if (mms), addpath('../mms/'); fprintf(1, 'Running MMS...\n'); end
 
 % get diffusivity contrasts
 kv = eta0;          % momentum diffusivity
@@ -41,6 +46,7 @@ w      = zeros(NPHS,N+1,N  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w 
 p      = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
 f      = f0 + dfr.*rnd + dfg.*gsn;                     
 f      = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
+if (mms), mms_init_phasefrac; end
 rho    = rho0.*ones(size(f));
 qvxx   = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
 qfx    = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
@@ -61,7 +67,7 @@ step = 0;
 while time <= tend  % keep stepping until final run time reached
     
     % plot and store model output
-    if ~mod(step,nop); output; end
+%     if ~mod(step,nop); output; end
     
     tic;
     
@@ -123,7 +129,7 @@ while time <= tend  % keep stepping until final run time reached
         % get momentum source fields
         Qvx = (f(:,:,im)+f(:,:,ip))./2.*((rho(:,:,im)+rho(:,:,ip))./2-rhomix).*grav(2);
         Qvz = (f(:,im,:)+f(:,ip,:))./2.*((rho(:,im,:)+rho(:,ip,:))./2-rhomix).*grav(1);
-
+        
         % get physical time step
         dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./5e-3));  % [s]
 
@@ -132,6 +138,8 @@ while time <= tend  % keep stepping until final run time reached
         res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
         res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
         res_f =  (f-fo)./dt                                                 + Gf           ;
+        
+        if (mms), mms_calc_source; end
 
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
@@ -152,7 +160,7 @@ while time <= tend  % keep stepping until final run time reached
         f = max(flim,min(1-flim,f)); f = f./sum(f,1);
 
         % print iteration diagnostics
-        if ~mod(it,nupd) || it==1
+        if ~mod(it,npr) || it==1
             % get residual norm
             res = norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+1e-32) ...
                 + norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+1e-32) ...

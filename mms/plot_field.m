@@ -2,10 +2,9 @@ function [] = plot_field (v,plottitle,X,Z)
 
 phase = {'solid','liquid','gas'};
 Nplt  = size(v,1);
-vlims = [min(v(:)), max(v(:))];
 
 figure;
-set(gcf,'Position',[10,300,400*Nplt,300]);
+set(gcf,'Position',[600,500,600*Nplt,500]);
 for iplt = 1:Nplt
     subplot(1,Nplt,iplt); 
     
@@ -16,7 +15,6 @@ for iplt = 1:Nplt
     end
     
     colorbar;
-%     set(gca,'CLim',vlims); 
     vdiff = [min(v(iplt,:,:),[],'all'), max(v(iplt,:,:),[],'all')];
     if vdiff(2)/vdiff(1)>100, set(gca,'ZScale','log'); end
     

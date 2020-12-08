@@ -1,6 +1,3 @@
-addpath('../usr/');
-
-figure; plot(tev, cos(tev./Tf(1)), time, cos(time./Tf(1)), 'rx');
 
 %% print individual residuals
 
@@ -11,12 +8,11 @@ fprintf(1, '(res_p x dtau_p)/p = %4.4e.\n', norm(res_p(:).*dtau_p(:),2)./(norm(p
 fprintf(1, '(res_f x dtau_f)/f = %4.4e.\n', norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32));
 fprintf(1, '\n\n');
 
-%% generate manufactured solutions
-
-uTrue = MMSsource('Calc_u', time, XuGrid, ZuGrid, Tu, Xu, Zu, U0, dU0);
-wTrue = MMSsource('Calc_w', time, XwGrid, ZwGrid, Tw, Xw, Zw, W0, dW0);
-pTrue = MMSsource('Calc_p', time, X     , Z     , Tp, Xp, Zp, P0, dP0);
-fTrue = MMSsource('Calc_f', time, X     , Z     , Tf, Xf, Zf, f0, df0);
+% generate manufactured solutions
+fTrue = MMSsource('Calc_f', time, X     , Z     , Tmf(:,1), Xmf(:,1), Zmf(:,1), Amf(:,1), dmf(:,1));
+pTrue = MMSsource('Calc_p', time, X     , Z     , Tmf(:,2), Xmf(:,2), Zmf(:,2), Amf(:,2), dmf(:,2));
+uTrue = MMSsource('Calc_u', time, XuGrid, ZuGrid, Tmf(:,3), Xmf(:,3), Zmf(:,3), Amf(:,3), dmf(:,3));
+wTrue = MMSsource('Calc_w', time, XwGrid, ZwGrid, Tmf(:,4), Xmf(:,4), Zmf(:,4), Amf(:,4), dmf(:,4));
 
 fprintf(1, '\n\n');
 fprintf(1,'norm u error = %.4f.\n', norm(uTrue(:)-u(:),2)./norm(uTrue(:),2));
