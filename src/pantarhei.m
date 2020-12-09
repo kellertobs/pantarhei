@@ -47,12 +47,13 @@ p      = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p 
 f      = f0 + dfr.*rnd + dfg.*gsn;                     
 f      = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 if (mms), mms_init_phasefrac; end
-rho    = rho0.*ones(size(f));
 qvxx   = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
 qfx    = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
 Gvx    = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
 Gf     = zeros(NPHS,N,N  );
 delta  = zeros(NPHS,NPHS,N,N);
+rho    = rho0.*ones(size(f));
+rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
 
 % initialise coefficient and auxiliary fields
@@ -144,6 +145,10 @@ while time <= tend  % keep stepping until final run time reached
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
             res_w(:,[1,end],:) = 0;
+            upd_u = res_u.*dtau_u;
+            upd_w = res_w.*dtau_w;
+            upd_p = res_p.*dtau_p;
+            upd_f = res_f.*dtau_f;
         else
             upd_u = res_u.*dtau_u-mean(res_u(:).*dtau_u(:));
             upd_w = res_w.*dtau_w-mean(res_w(:).*dtau_w(:));
