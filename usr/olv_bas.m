@@ -18,6 +18,7 @@ tend   = 1e16;           % model run time [s]
 dt     = 1e0;            % initial time step [s]
 
 nupd   = 50;             % update residual and permissions every [nupd] iterations
+npr    = 1000;           % print iteration diagnostics every [npr] iterations
 atol   = 1e-6;           % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;           % residual tolerance for convergence of iterative solver
 minits = 500;            % minimum iteration count for iterative solver

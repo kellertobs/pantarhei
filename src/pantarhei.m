@@ -53,7 +53,6 @@ Gvx    = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
 Gf     = zeros(NPHS,N,N  );
 delta  = zeros(NPHS,NPHS,N,N);
 rho    = rho0.*ones(size(f));
-rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
 
 % initialise coefficient and auxiliary fields
@@ -172,9 +171,10 @@ while time <= tend  % keep stepping until final run time reached
                 + norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+1e-32) ...
                 + norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32);
             if res>=2*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
+            if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1 || res>res0; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-            figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; 
+%             figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; 
         end
         
     end  % iteration loop
