@@ -6,12 +6,12 @@ clear; close all; clc;
 
 % set model parameters
 RunID  = 'plg60_dac20_mvp20';
-nop    = 1;                 % plot and store output every [nop] time step
-svop   = 0;                 % save output and print figures
+nop    = 5;                 % plot and store output every [nop] time step
+svop   = 1;                 % save output and print figures
 
 NPHS   = 3;                 % number of phases
 N      = 100;               % number of grid points in each direction
-D      = 40;                % domain dimension in each direction [m]
+D      = 20;                % domain dimension in each direction [m]
 h      = D/N;               % grid spacing [m]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 tend   = 1e9;               % model run time [s]
@@ -21,13 +21,13 @@ nupd   = 50;                % update residual and permissions every [nupd] itera
 atol   = 1e-6;              % absolute residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % relative residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
-maxits = 3000;              % maximum iteration count for iterative solver
-alpha  = 0.90;              % first-order iterative step size (reduce if not converging)
+maxits = 5000;              % maximum iteration count for iterative solver
+alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.60;              % second-order iterative step size (reduce if not converging)
 cfl    = 1.00;              % Courant number to limit physical time step size
 flim   = 1e-6;              % limit phase fractions in coefficient closures
-thtlim = 1e+6;              % limit phase-internal permission contrasts
-cfflim = 1e+6;              % limit inter-phase coefficient contrasts
+thtlim = 1e+4;              % limit phase-internal permission contrasts
+cfflim = 1e+4;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [0.60; 0.20; 0.20];  % initial background phase fractions (unity sum!)
