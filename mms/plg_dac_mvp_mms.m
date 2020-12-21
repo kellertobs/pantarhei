@@ -15,7 +15,7 @@ NPHS   = 3;                 % number of phases
 N      = 20;               % number of grid points in each direction
 D      = 100;               % domain dimension in each direction [m]
 h      = D/N;               % grid spacing [m]
-BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
+BC     = 'closed';        % boundary conditions: 'open', 'closed', 'periodic'
 tend   = 0.99;               % model run time [s]
 dt     = 1;               % initial time step [s]
 
@@ -50,7 +50,7 @@ C = [ 0.20, 0.20, 0.20; 0.60, 0.60, 0.12; 0.20, 0.25, 0.50; ];  % permission ste
 
 %% manufactured solution
 
-run('mms_utils/mms_periodic_params');
+run('mms_utils/mms_params_periodicBC.m');
 
 %%
 

@@ -45,7 +45,7 @@ clear Nn ni beta NormErrOut MaxErrOut ans
 % load parameters used in solution to save together with errors
 plg_dac_mvp_params;
 alpha = alphaIn;
-run('mms_utils/mms_periodic_params');
+run('mms_utils/mms_params_periodicBC.m');
 
 FileNameDefault = '../out/plg60_dac20_mvp20_mms/NumConvTest';
 
@@ -79,7 +79,7 @@ beta  = betaIn;
 fprintf(1, '    N = %d, alpha = %.2f, beta = %.2f.', N, alpha, beta);
 
 % manufactured solution
-run('../mms/mms_periodic_params');
+run('mms_utils/mms_params_periodicBC.m');
 
 try
     % run model

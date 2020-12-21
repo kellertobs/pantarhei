@@ -40,7 +40,7 @@ clear Nn Nc ci ni beta NormErrOut MaxErrOut ans
 
 % load parameters used in solution to save together with errors
 plg_dac_mvp_params;
-run('mms_utils/mms_periodic_params');
+run('mms_utils/mms_params_periodicBC.m');
 
 FileNameDefault = '../out/plg60_dac20_mvp20_mms/TestCfflim';
 
@@ -77,7 +77,7 @@ beta = betaIn;
 fprintf(1, '    N = %d, beta = %.2f, cfflim = %.1e.\n', N, beta, cfflim);
 
 % manufactured solution
-run('mms_utils/mms_periodic_params');
+run('mms_utils/mms_params_periodicBC.m');
 
 try
     % run model

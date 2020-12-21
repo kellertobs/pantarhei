@@ -1,4 +1,4 @@
-% params for MMS
+% params for MMS for periodic boundary conditions
 % YQW, 8 Dec 2020
 
 mms = true;
