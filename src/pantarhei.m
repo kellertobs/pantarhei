@@ -14,7 +14,7 @@ load('ocean.mat','ocean');
 
 % check if running verification using mms
 if ~exist('mms','var'), mms = false; end
-if (mms), addpath('../mms/'); fprintf(1, 'Running MMS...\n'); end
+if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n'); end
 
 % get diffusivity contrasts
 kv = eta0;          % momentum diffusivity
