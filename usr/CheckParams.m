@@ -1,13 +1,15 @@
 
 % use this script to check that parameters applied make sense to problem.
 
+% check the segregation compaction length
+[dsc] = SegCompLength(f0, eta0, d0, A, B, C, thtlim, cfflim);
+fprintf(1, '    Largest delta_sc = %.4f meters.\n', max(dsc(:)));
 
 % check that initial dt is similar to timescale of variation in problem
+% (just runs one time step of the code)
 save vars.mat
-[dtOut] = CheckTimeStep('vars.mat')
-
-% check the segregation compaction length
-[dsc] = SegCompLength(f0, eta0, d0, A, B, C, thtlim, cfflim)
+[dtOut] = CheckTimeStep('vars.mat');
+fprintf(1, '\n    dt from Courant flow condition = %.1e seconds.\n', dtOut);
 
 
  
@@ -58,8 +60,9 @@ load(MatFileName);
 
 dt     = 1;
 tend   = 0.2;
-% minits = 20;
-% maxits = 20;
+nop    = 0;
+atol   = 1e-3;
+maxits = 4000;
 
 run('../src/pantarhei');
 
