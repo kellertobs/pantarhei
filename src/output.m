@@ -11,8 +11,8 @@ pcmpt =  f.*(p-pstar);
 
 % get flux, transfer magnitudes
 qvm   = sqrt((((qvxx(:,im,im)+qvxx(:,im,ip)+qvxx(:,ip,im)+qvxx(:,ip,ip))./4).^2 ...
-            + ((qvzz(:,im,im)+qvzz(:,im,ip)+qvzz(:,ip,im)+qvzz(:,ip,ip))./4).^2 ...
-            +   qvxz.^2 + qvxz.^2)./2);
+    + ((qvzz(:,im,im)+qvzz(:,im,ip)+qvzz(:,ip,im)+qvzz(:,ip,ip))./4).^2 ...
+    +   qvxz.^2 + qvxz.^2)./2);
 qfm   = sqrt(((qfx(:,im,:)+qfx(:,ip,:))./2).^2 + ((qfz(:,:,im)+qfz(:,:,ip))./2).^2);
 Gvm   = sqrt(((Gvx(:,im,:)+Gvx(:,ip,:))./2).^2 + ((Gvz(:,:,im)+Gvz(:,:,ip))./2).^2);
 Gfm   = sqrt(Gf.^2);
@@ -25,7 +25,7 @@ for i=1:NPHS
 end
 
 % prepare for plotting
-TX = {'Interpreter','Latex'}; FS = {'FontSize',18};  
+TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
 TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',14};
 UN = {'Units','Centimeters'};
 
@@ -49,9 +49,9 @@ for n=1:NPHS
     ax((n-1)*4+4) = axes(UN{:},'position',[axl+3*axw+3*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
 end
 
-figure(1); 
+figure(1);
 for n=1:NPHS
-    axes(ax((n-1)*4+1)); 
+    axes(ax((n-1)*4+1));
     imagesc(x,x,squeeze(w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
     axes(ax((n-1)*4+2));
@@ -79,16 +79,16 @@ for n=1:NPHS
 end
 
 for n=1:NPHS
-    axes(ax((n-1)*4+1)); 
+    axes(ax((n-1)*4+1));
     imagesc(x,x,squeeze(wsegr(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w_\Delta^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
-    axes(ax((n-1)*4+2)); 
+    axes(ax((n-1)*4+2));
     imagesc(x,x,squeeze(usegr(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u_\Delta^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+3)); 
+    axes(ax((n-1)*4+3));
     imagesc(x,x,squeeze(pcmpt(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p_\Delta^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+4)); 
+    axes(ax((n-1)*4+4));
     imagesc(x,x,squeeze((f(n,:,:)-fo(n,:,:))./dt)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\partial f^',num2str(n),'/\partial t$ [vol/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
@@ -107,16 +107,16 @@ for n=1:NPHS
 end
 
 for n=1:NPHS
-    axes(ax((n-1)*4+1)); 
+    axes(ax((n-1)*4+1));
     imagesc(x,x,squeeze(qvzz(n,:,:)-f(n,:,:).*p(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{v,zz}^',num2str(n),'$ [Pa]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
-    axes(ax((n-1)*4+2)); 
+    axes(ax((n-1)*4+2));
     imagesc(x,x,squeeze(qfz (n,:,:)-( f(n,im,:)+ f(n,ip,:))./2 .* w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{f,z}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+3)); 
+    axes(ax((n-1)*4+3));
     imagesc(x,x,squeeze(Gvz (n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_{v,z}^',num2str(n),'$ [Pa/m]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+4)); 
+    axes(ax((n-1)*4+4));
     imagesc(x,x,squeeze(Gf  (n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_f^',num2str(n),'$ [1/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
@@ -135,16 +135,16 @@ for n=1:NPHS
 end
 
 for n=1:NPHS
-    axes(ax((n-1)*4+1)); 
+    axes(ax((n-1)*4+1));
     imagesc(x,x,squeeze(log10(Kv(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$K_v^',num2str(n),'$ [Pas]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
-    axes(ax((n-1)*4+2)); 
+    axes(ax((n-1)*4+2));
     imagesc(x,x,squeeze(log10(Kf(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$K_f^',num2str(n),'$ [m$^2$/Pas]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+3)); 
+    axes(ax((n-1)*4+3));
     imagesc(x,x,squeeze(log10(Cv(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$C_v^',num2str(n),'$ [Pas/m$^2$]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    axes(ax((n-1)*4+4)); 
+    axes(ax((n-1)*4+4));
     imagesc(x,x,squeeze(log10(Cf(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$C_f^',num2str(n),'$ [1/Pas]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
@@ -176,7 +176,16 @@ if svop
     print(f3,'-dpdf','-r200','-opengl',name,'-loose');
     name = ['../out/',RunID,'/',RunID,'_coef_',num2str(step/nop)];
     print(f4,'-dpdf','-r200','-opengl',name,'-loose');
-    name = ['../out/',RunID,'/',RunID,'_',num2str(step/nop)];
     
-    save([name,'.mat'],'x','u','w','p','f','ustar','wstar','pstar','usegr','wsegr','pcmpt','qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf','Kv','Kf','Cv','Cf','delta');
+    if exist('f10','var')
+        figure(f10);
+        xlabel('Iterations'); ylabel('residual');
+        f10.PaperPositionMode = 'auto';
+        f10.PaperSize = [f10.PaperPosition(3) f10.PaperPosition(4)];
+        name = ['../out/',RunID,'/',RunID,'_itconv_',num2str(step/nop)];
+        print(f10,'-dpdf','-r200','-opengl',name,'-loose');
+    end
+    
+    name = ['../out/',RunID,'/',RunID,'_',num2str(step/nop)];
+    save([name,'.mat'],'time','x','u','w','p','f','ustar','wstar','pstar','usegr','wsegr','pcmpt','qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf','Kv','Kf','Cv','Cf','delta');
 end

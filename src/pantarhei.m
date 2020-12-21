@@ -8,6 +8,8 @@ fprintf(1,'****************************************************\n\n');
 % prepare workspace
 if   ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
 outdir = ['../out/',RunID];
+save([outdir '/',RunID,'_params.mat']);
+
 load('ocean.mat','ocean');
 
 % check if running verification using mms
@@ -67,7 +69,7 @@ step = 0;
 while time <= tend  % keep stepping until final run time reached
     
     % plot and store model output
-%     if ~mod(step,nop); output; end
+    if (nop) && ~mod(step,nop); output; end
     
     tic;
     
@@ -174,7 +176,7 @@ while time <= tend  % keep stepping until final run time reached
 %             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1 || res>res0; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-            figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; 
+            if (nop), f10 = figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; end
         end
         
     end  % iteration loop
