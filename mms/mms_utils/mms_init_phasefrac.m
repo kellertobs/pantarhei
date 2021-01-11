@@ -8,4 +8,4 @@ f = MMSsource('Calc_f', 0, X, Z, Tmf(:,1), Xmf(:,1), Zmf(:,1), Amf(:,1), dmf(:,1
 fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 
 % check segregation compaction length is on order of domain
-dsc = SegCompLength(f, eta0, d0, A, B, C, thtlim, cfflim);
+% dsc = SegCompLength(f, eta0, d0, A, B, C, thtlim, cfflim);
