@@ -1,5 +1,6 @@
 
 % use this script to check that parameters applied make sense to problem.
+close all;
 
 % check the segregation compaction length
 [dsc] = SegCompLength(f0, eta0, d0, A, B, C, thtlim, cfflim);
@@ -59,7 +60,7 @@ function [dtOut] = CheckTimeStep (MatFileName)
 load(MatFileName);
 
 dt     = 1;
-tend   = 0.2;
+NtMax  = 1;
 nop    = 0;
 atol   = 1e-3;
 maxits = 4000;
