@@ -6,9 +6,8 @@ fprintf(1,'****************************************************\n\n');
 
 
 % prepare workspace
-if   ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
-outdir = ['../out/',RunID];
-if svop, save([outdir '/',RunID,'_params.mat']); end
+if svop && ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
+if svop, save(['../out/',RunID,'/',RunID,'_params.mat']); end
 
 load('ocean.mat','ocean');
 
