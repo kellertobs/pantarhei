@@ -152,7 +152,7 @@ while time <= tend && step < NtMax  % keep stepping until final run time reached
         else
             upd_u = res_u.*dtau_u-mean(res_u(:).*dtau_u(:));
             upd_w = res_w.*dtau_w-mean(res_w(:).*dtau_w(:));
-            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));
+            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));sult
             upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
         end
 
@@ -173,15 +173,15 @@ while time <= tend && step < NtMax  % keep stepping until final run time reached
                 + norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32);
             if res>=2*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
-            if it==1 || res>res0; res0 = res; end
+            if it==1, res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
             if (nop), f10 = figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; end
         end
         
     end  % iteration loop
     
-%     YQW: check for non-converging solution needs improvement
-%     if it>=maxits && res>atol && res/res0>rtol, error('!!! solution at this time step did not converge to tolerance !!!'); end 
     fprintf(1,'    solver time: %4.2f min \n',toc/60);
     
 end  % time loop
+
+if (mms), mms_results; end

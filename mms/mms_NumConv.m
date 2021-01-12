@@ -84,7 +84,6 @@ run('mms_utils/mms_params_periodicBC.m');
 try
     % run model
     run('../src/pantarhei');
-    run('mms_utils/mms_results.m');
         
     % output 2norm and maximum errors
     NormErr = [fNormErr; pNormErr; uNormErr; wNormErr];
