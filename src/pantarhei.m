@@ -152,7 +152,7 @@ while time <= tend && step < NtMax  % keep stepping until final run time reached
         else
             upd_u = res_u.*dtau_u-mean(res_u(:).*dtau_u(:));
             upd_w = res_w.*dtau_w-mean(res_w(:).*dtau_w(:));
-            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));sult
+            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));
             upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
         end
 
