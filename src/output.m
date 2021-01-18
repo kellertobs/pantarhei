@@ -180,7 +180,8 @@ if svop
     if exist('f10','var')
         figure(f10);
         xlabel('Iterations'); ylabel('residual');
-        f10.PaperPositionMode = 'auto';
+        f10.PaperPositionMode = 'manual';
+        f10.PaperPosition = [0 0 f10.PaperPosition(3) f10.PaperPosition(4)];
         f10.PaperSize = [f10.PaperPosition(3) f10.PaperPosition(4)];
         name = ['../out/',RunID,'/',RunID,'_itconv_',num2str(step/nop)];
         print(f10,'-dpdf','-r200','-opengl',name,'-loose');

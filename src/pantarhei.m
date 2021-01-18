@@ -65,7 +65,7 @@ Gm = Gmg.*gsn;
 % initialise time stepping loop
 time = 0;
 step = 0;
-while time <= tend && step < NtMax  % keep stepping until final run time reached
+while time <= tend && step <= NtMax  % keep stepping until final run time reached
     
     % plot and store model output
     if (nop) && ~mod(step,nop); output; end
