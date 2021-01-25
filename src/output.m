@@ -33,7 +33,7 @@ axh = 6.00; axw = 7.50;
 ahs = 0.90; avs = 0.90;
 axb = 0.75; axt = 0.90;
 axl = 1.75; axr = 0.90;
-fh = axb + NPHS*axh + (NPHS-1)*avs + axt;
+fh = axb + (NPHS+1)*axh + NPHS*avs + axt;
 fw = axl + 4*axw + 3*ahs + axr;
 
 % initialize figure and axes
@@ -42,31 +42,45 @@ set(f1,UN{:},'Position',[2 2 fw fh]);
 set(f1,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
 set(f1,'Color','w','InvertHardcopy','off');
 set(f1,'Resize','off');
-for n=1:NPHS
-    ax((n-1)*4+1) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-    ax((n-1)*4+2) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-    ax((n-1)*4+3) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-    ax((n-1)*4+4) = axes(UN{:},'position',[axl+3*axw+3*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
+for n=1:NPHS+1
+    ax((n-1)*4+1) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+(NPHS+1-n)*axh+(NPHS+1-n)*avs axw axh]);
+    ax((n-1)*4+2) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+(NPHS+1-n)*axh+(NPHS+1-n)*avs axw axh]);
+    ax((n-1)*4+3) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+(NPHS+1-n)*axh+(NPHS+1-n)*avs axw axh]);
+    ax((n-1)*4+4) = axes(UN{:},'position',[axl+3*axw+3*ahs axb+(NPHS+1-n)*axh+(NPHS+1-n)*avs axw axh]);
 end
 
 figure(1);
-for n=1:NPHS
+axes(ax(1));
+imagesc(x,x,squeeze(wstar(1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^*$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]);
+axes(ax(2));
+imagesc(x,x,squeeze(ustar(1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^*$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+axes(ax(3));
+imagesc(x,x,squeeze(pstar(1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^*$ [Pa]' ],TX{:},FS{:});
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+axes(ax(4));
+imagesc(x,x,squeeze(sum(f.*rho,1))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\bar{\rho}$ [kg/m$^3$]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+for n=2:NPHS+1
     axes(ax((n-1)*4+1));
-    imagesc(x,x,squeeze(w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(w(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
     axes(ax((n-1)*4+2));
-    imagesc(x,x,squeeze(u(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(u(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^',num2str(n),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
     axes(ax((n-1)*4+3));
-    imagesc(x,x,squeeze(p(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
+    imagesc(x,x,squeeze(p(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
     axes(ax((n-1)*4+4));
-    imagesc(x,x,squeeze(f(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f^',num2str(n),'$ [vol]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(f(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f^',num2str(n),'$ [vol]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
 drawnow;
 
 f2 = figure(2); clf; colormap(ocean);
+fh = axb + NPHS*axh + (NPHS-1)*avs + axt;
+fw = axl + 4*axw + 3*ahs + axr;
 set(f2,UN{:},'Position',[4 4 fw fh]);
 set(f2,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
 set(f2,'Color','w','InvertHardcopy','off');
@@ -160,10 +174,10 @@ drawnow;
 
 figure(6); clf; colormap(ocean);
 for n=1:NPHS
-    subplot(NPHS,4,(n-1)*4+1); imagesc(x,x,squeeze(res_w(n,:,:).*dtau_w(n,:,:)./(norm(squeeze(w(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $w^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-    subplot(NPHS,4,(n-1)*4+2); imagesc(x,x,squeeze(res_u(n,:,:).*dtau_u(n,:,:)./(norm(squeeze(u(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $u^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-    subplot(NPHS,4,(n-1)*4+3); imagesc(x,x,squeeze(res_p(n,:,:).*dtau_p(n,:,:)./(norm(squeeze(p(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $p^',num2str(n),'$ [Pa]' ],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-    subplot(NPHS,4,(n-1)*4+4); imagesc(x,x,squeeze(res_f(n,:,:).*dtau_f(n,:,:)./(norm(squeeze(f(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $f^',num2str(n),'$ [vol]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+    subplot(NPHS,4,(n-1)*4+1); imagesc(x,x,squeeze(-res_w(n,:,:).*dtau_w(n,:,:)./(norm(squeeze(w(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $w^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+    subplot(NPHS,4,(n-1)*4+2); imagesc(x,x,squeeze(-res_u(n,:,:).*dtau_u(n,:,:)./(norm(squeeze(u(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $u^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+    subplot(NPHS,4,(n-1)*4+3); imagesc(x,x,squeeze(-res_p(n,:,:).*dtau_p(n,:,:)./(norm(squeeze(p(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $p^',num2str(n),'$ [Pa]' ],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+    subplot(NPHS,4,(n-1)*4+4); imagesc(x,x,squeeze(-res_f(n,:,:).*dtau_f(n,:,:)./(norm(squeeze(f(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $f^',num2str(n),'$ [vol]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
 end
 drawnow;
 
