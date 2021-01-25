@@ -40,4 +40,4 @@ vstar_Gf  = diff((f(:,:,im)+f(:,:,ip))./2.*ustar,1,3)./h ...
 dtau_u = min(1.0./((Kv(:,:,im)+Kv(:,:,ip))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,im)+Cv(:,:,ip))/2),[],1).*ones(size(u));  % [Pas/m2]
 dtau_w = min(1.0./((Kv(:,im,:)+Kv(:,ip,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,im,:)+Cv(:,ip,:))/2),[],1).*ones(size(w));  % [Pas/m2]
 dtau_p = min(1.0./( Kf                       ./(h/2)^2 + (1-omfc).* Cf                      ),[],1).*ones(size(p));  % [1/Pas]
-dtau_f = dt/nupd.*ones(size(f));  % [s]
+dtau_f = dt/10.*ones(size(f));  % [s]

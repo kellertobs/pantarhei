@@ -51,7 +51,7 @@ if (mms), mms_init_phasefrac; end
 qvxx   = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
 qfx    = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
 Gvx    = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
-Gf     = zeros(NPHS,N,N  );
+Gf     = zeros(NPHS,N,N  );  Gfo  = Gf;
 delta  = zeros(NPHS,NPHS,N,N);
 rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
@@ -80,7 +80,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
     
     % store phase fractions of previous step
-    fo = f;  dto = dt;
+    fo = f;  dto = dt; Gfo = Gf;
     
     % initialise non-linear iteration loop
     res  = 1e3;
@@ -132,16 +132,17 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         Qvz = (f(:,im,:)+f(:,ip,:))./2.*((rho(:,im,:)+rho(:,ip,:))./2-rhomix).*grav(1);
         
         % get physical time step
-        dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./5e-3));  % [s]
+        dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
 
         % get residual fields
         res_u =             + diff(qvxx(:,:,ic),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
         res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
         res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
-        res_f =  (f-fo)./dt                                                 + Gf           ;
+        res_f =  (f-fo)./dt                                                 +(Gf + Gfo)./2 ;
         
-        if (mms), mms_calc_source; end
-
+        if (mms); mms_calc_source; end
+        if step==1; res_f = 0.*res_f; end
+        
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
             res_w(:,[1,end],:) = 0;
@@ -160,7 +161,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         u = ui - alpha.*upd_u + beta.*(ui-uii);
         w = wi - alpha.*upd_w + beta.*(wi-wii);
         p = pi - alpha.*upd_p + beta.*(pi-pii);
-        f = fi - alpha.*upd_f + beta.*(fi-fii);
+        if ~mod(it,nupd); f = fi - alpha.*upd_f + beta.*(fi-fii); end
         
         f = max(flim,min(1-flim,f)); f = f./sum(f,1);
 
@@ -171,11 +172,11 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
                 + norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+1e-32) ...
                 + norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+1e-32) ...
                 + norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32);
-            if res>=2*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
+            if res>=10*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
-            if it==1, res0 = res; end
+            if it==1; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-            if (nop), f10 = figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; end
+            if (nop); f10 = figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; drawnow; end
         end
         
     end  % iteration loop
