@@ -6,7 +6,7 @@ clear; close all; clc;
 
 % set model parameters
 RunID  = 'plg60_dac20_mvp20';
-nop    = 0;                 % plot and store output every [nop] time step
+nop    = 1;                 % plot and store output every [nop] time step
 svop   = 0;                 % save output and print figures
 
 NPHS   = 3;                 % number of phases
@@ -30,9 +30,9 @@ cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [0.60; 0.20; 0.20];  % initial background phase fractions (unity sum!)
-dfg  = [-0.04; 0.02; 0.02]; % initial guassian peak amplitude (unity sum!)
-dfr  = [-0.00; 0.00; 0.00]; % initial random perturbation amplitude (unity sum!)
-smth = (D/30)^2/h^2;        % smoothing parameter for random perturbation field
+dfg  = [-0.05; 0.05; 0.00]; % initial guassian peak amplitude (unity sum!)
+dfr  = [-0.01; 0.01; 0.01]; % initial random perturbation amplitude (unity sum!)
+smth = (N/40)^2;            % smoothing parameter for random perturbation field
 Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
 
 rho0 = [3000 ;2500; 200];   % pure-phase densities
@@ -53,10 +53,6 @@ h  = D/N;
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
-
-% save input parameters and runtime options
-parfile = ['../out/',RunID,'/',RunID,'_par'];
-save(parfile);
 
 % run model
 run('../src/pantarhei');

@@ -32,7 +32,7 @@ grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.20; 0.20; 0.60]; % initial background phase fractions (unity sum!)
 dfg  = [ 0.00;-0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.02; 0.02; 0.00]; % initial random perturbation amplitude (unity sum!)
-smth = (D/40)^2/h^2;        % smoothing parameter for random perturbation field
+smth = (N/40)^2;            % smoothing parameter for random perturbation field
 Gmg  = [0;-0;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
 
 rho0 = [ 3200; 2400; 2700]; % pure-phase densities
@@ -61,10 +61,6 @@ h  = D/N;
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
-
-% save input parameters and runtime options
-parfile = ['../out/',RunID,'/',RunID,'_par'];
-save(parfile);
 
 % run model
 run('../src/pantarhei');

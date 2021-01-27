@@ -4,10 +4,9 @@ fprintf(1,'\n\n****************************************************\n');
 fprintf(1,'*****  pantarhei | multi-phase flow simulator  *****\n');
 fprintf(1,'****************************************************\n\n');
 
-
 % prepare workspace
 if svop && ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
-if svop, save(['../out/',RunID,'/',RunID,'_params.mat']); end
+if svop, save(['../out/',RunID,'/',RunID,'_par.mat']); end
 
 load('ocean.mat','ocean');
 

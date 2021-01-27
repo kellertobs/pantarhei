@@ -7,7 +7,7 @@ clear; close all; clc;
 % set model parameters
 RunID  = 'olv95_bas05';
 nop    = 1;                 % plot and store output every [nop] time step
-svop   = 1;                 % save output
+svop   = 0;                 % save output
 
 NPHS   = 2;                 % number of phases
 N      = 200;               % number of grid points in each direction
@@ -32,7 +32,7 @@ grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.95; 0.05];       % initial background phase fractions (unity sum!)
 dfg  = [-0.05; 0.05];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.01; 0.01];       % initial random perturbation amplitude (unity sum!)
-smth = (D/40)^2/h^2;        % smoothing parameter for random perturbation field
+smth = (N/40)^2;            % smoothing parameter for random perturbation field
 Gmg  = [1;-1].*0e-9;        % impose gaussian mass transfer rate (unity sum!)
 
 rho0 = [ 3200; 2700];       % pure-phase densities
@@ -53,10 +53,6 @@ h  = D/N;
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
-
-% save input parameters and runtime options
-parfile = ['../out/',RunID,'/',RunID,'_par'];
-save(parfile);
 
 % run model
 run('../src/pantarhei');
