@@ -1,12 +1,12 @@
 % pantarhei run script 
-% calibrated for plagioclase + dacitic melt + magmatic volatile phase
+% calibrated for plagioclase + dacitic melt + Fe-P-rich melt
 
 % clear workspace
 clear; close all; clc;
 
 % set model parameters
-RunID  = 'plg60_dac20_mvp20';
-nop    = 0;                 % plot and store output every [nop] time step
+RunID  = 'plg50_dac40_fep10';
+nop    = 1;                  % plot and store output every [nop] time step
 svop   = 0;                 % save output and print figures
 
 NPHS   = 3;                 % number of phases
@@ -29,15 +29,15 @@ thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [0.60; 0.20; 0.20];  % initial background phase fractions (unity sum!)
-dfg  = [-0.04; 0.02; 0.02]; % initial guassian peak amplitude (unity sum!)
-dfr  = [-0.00; 0.00; 0.00]; % initial random perturbation amplitude (unity sum!)
+f0   = [0.50; 0.40; 0.10];  % initial background phase fractions (unity sum!)
+dfg  = [ 0.00; 0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
+dfr  = [-0.01;-0.01; 0.02]; % initial random perturbation amplitude (unity sum!)
 smth = (D/30)^2/h^2;        % smoothing parameter for random perturbation field
 Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
 
-rho0 = [3000 ;2500; 200];   % pure-phase densities
-eta0 = [1e+16;1e+2;1e-3];   % pure-phase viscosities
-d0   = [5e-3 ;5e-3;5e-3];   % characteristic size of local-scale phase constituents
+rho0 = [3000 ;2500;4000];   % pure-phase densities
+eta0 = [1e+16;1e+3;1e+0];   % pure-phase viscosities
+d0   = [1e-2 ;1e-2;1e-2];   % characteristic size of local-scale phase constituents
 
 % set permission weight parameters for coefficient closure model
 A = [ 0.60, 0.25, 0.30; 0.20, 0.20, 0.20; 0.20, 0.20, 0.20; ];  % permission slopes
