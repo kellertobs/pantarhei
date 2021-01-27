@@ -64,16 +64,16 @@ imagesc(x,x,squeeze(sum(f.*rho,1))); axis xy equal tight; cb = colorbar; set(cb,
 set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 for n=2:NPHS+1
     axes(ax((n-1)*4+1));
-    imagesc(x,x,squeeze(w(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(w(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^',num2str(n-1),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]);
     axes(ax((n-1)*4+2));
-    imagesc(x,x,squeeze(u(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(u(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^',num2str(n-1),'$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
     axes(ax((n-1)*4+3));
-    imagesc(x,x,squeeze(p(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
+    imagesc(x,x,squeeze(p(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^',num2str(n-1),'$ [Pa]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
     axes(ax((n-1)*4+4));
-    imagesc(x,x,squeeze(f(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f^',num2str(n),'$ [vol]'],TX{:},FS{:});
+    imagesc(x,x,squeeze(f(n-1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f^',num2str(n-1),'$ [vol]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
 drawnow;
