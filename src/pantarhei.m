@@ -39,7 +39,7 @@ for i = 1:smth
     rnd = rnd + diff(rnd(:,ic,:),2,2)./8 + diff(rnd(:,:,ic),2,3)./8;
 end
 rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D/8).^2).*exp(-Z.^2./(D/8).^2);
+gsn = exp(-X.^2./(D/5).^2).*exp(-Z.^2./(D/5).^2);
 
 % intialise solution, auxiliary, and residual fields
 u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
