@@ -55,25 +55,18 @@ delta  = zeros(NPHS,NPHS,N,N);
 rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
 
-% initialise coefficient and auxiliary fields
-up2date;
-
-% get parameterised mass transfer fields
-Gm = Gmg.*gsn;
+% initialise coefficient closures and constitutive relations
+closures; constitutive;
 
 % initialise time stepping loop
 time = 0;
 step = 0;
 while time <= tend && step <= NtMax  % keep stepping until final run time reached
     
-    % plot and store model output
-    if (nop) && ~mod(step,nop); output; end
+    % update closures, constitutives, then plot and store model output
+    if (nop) && ~mod(step,nop); closures; constitutive; output; end
     
     tic;
-    
-    % update time and step count
-    time = time+dt;
-    step = step+1;
     
     % print time step diagnostics
     fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
@@ -90,58 +83,30 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % store solution of previous two iterations
         uii = ui;  ui = u;  wii = wi;  wi = w;  pii = pi;  pi = p;  fii = fi;  fi = f;
 
-        if ~mod(it,nupd); up2date; end
-        
         it = it+1;  % update iteration count
+
+        % update coefficient closures (only every 'nupd' iterations)
+        if ~mod(it,nupd); closures; end
         
-        % update reference and auxiliary fields
-        ustar     = sum(omvx.*u,1);
-        wstar     = sum(omvz.*w,1);
-        pstar     = sum(omfc.*p,1);
-        rhostar   = sum(omfc.*rho,1);
-        Gx_pstar  = sum(omfx.*diff(p(:,:,ic),1,3)./h,1);
-        Gz_pstar  = sum(omfz.*diff(p(:,ic,:),1,2)./h,1);
-        Div_v     = diff(u,1,3)./h + diff(w,1,2)./h;
-        pstar_Gfx = (pstar(:,:,im)+pstar(:,:,ip))./2.*diff(f(:,:,ic),1,3)./h;
-        pstar_Gfz = (pstar(:,im,:)+pstar(:,ip,:))./2.*diff(f(:,ic,:),1,2)./h;
+        % update constitutive relations
+        constitutive;
         
-        % get momentum flux fields
-        qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3) + f.*p;
-        qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3) + f.*p;
-        qvxz  = -(Kv(:,im,im)+Kv(:,ip,im)+Kv(:,im,ip)+Kv(:,ip,ip))./4 ...
-              .* (diff(u(:,ic,:),1,2)./h + diff(w(:,:,ic),1,3)./h)./2;
-        if strcmp(BC,'closed'); qvxz(:,[1,end],:) = 0; end
-        
-        % get volume flux fields
-        qfx = - (Kf(:,:,im)+Kf(:,:,ip))./2 .* (diff(p(:,:,ic),1,3)./h - Gx_pstar) ...
-              + ( f(:,:,im)+ f(:,:,ip))./2 .* u;
-        qfz = - (Kf(:,im,:)+Kf(:,ip,:))./2 .* (diff(p(:,ic,:),1,2)./h - Gz_pstar) ...
-              + ( f(:,im,:)+ f(:,ip,:))./2 .* w;
-        if strcmp(BC,'closed'); qfx(:,:,[1,end]) = 0; qfz(:,[1,end],:) = 0; end
-        
-        % get momentum transfer fields
-        Gvx = - (Cv(:,:,im)+Cv(:,:,ip))./2 .* (u-ustar) + pstar_Gfx;
-        Gvz = - (Cv(:,im,:)+Cv(:,ip,:))./2 .* (w-wstar) + pstar_Gfz;
-        
-        %get volume transfer field
-        Gf  = -             Cf             .* (p-pstar) + vstar_Gf + Gm./rhostar;
-                
-        % get momentum source fields
-        Qvx = (f(:,:,im)+f(:,:,ip))./2.*((rho(:,:,im)+rho(:,:,ip))./2-rhomix).*grav(2);
-        Qvz = (f(:,im,:)+f(:,ip,:))./2.*((rho(:,im,:)+rho(:,ip,:))./2-rhomix).*grav(1);
-        
-        % get physical time step
+        % update physical time step
         dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
 
-        % get residual fields
+        % update residual fields
         res_u =             + diff(qvxx(:,:,ic),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
         res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
         res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
         res_f =  (f-fo)./dt                                                 +(Gf + Gfo)./2 ;
         
+        % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end
-        if step==1; res_f = 0.*res_f; end
         
+        % do not update phase fractions during initial step
+        if step==0; res_f = 0.*res_f; end
+        
+        % prepare solution updates
         if strcmp(BC,'closed')
             res_u(:,:,[1,end]) = 0; 
             res_w(:,[1,end],:) = 0;
@@ -156,13 +121,13 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
         end
 
-        % update solution
+        % update velocity-pressure solution
         u = ui - alpha.*upd_u + beta.*(ui-uii);
         w = wi - alpha.*upd_w + beta.*(wi-wii);
         p = pi - alpha.*upd_p + beta.*(pi-pii);
-        if ~mod(it,nupd); f = fi - alpha.*upd_f + beta.*(fi-fii); end
         
-        f = max(flim,min(1-flim,f)); f = f./sum(f,1);
+        % update phase fractions (only every 'nupd' iterations)
+        if ~mod(it,nupd); f = fi - alpha.*upd_f; f = max(flim,min(1-flim,f)); end        
 
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
@@ -179,6 +144,10 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         end
         
     end  % iteration loop
+    
+    % update time and step count
+    time = time+dt;
+    step = step+1;
     
     fprintf(1,'    solver time: %4.2f min \n',toc/60);
     
