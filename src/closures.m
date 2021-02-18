@@ -9,17 +9,19 @@ thtf = squeeze(prod(Mf.^Xf,2));  gmf = geomean(geomean(thtf,3),2);
 thtv = 1./(1./thtv + 1./(thtlim.^0.5*gmv)) + (gmv/thtlim.^0.5);
 thtf = 1./(1./thtf + 1./(thtlim.^0.5*gmf)) + (gmf/thtlim.^0.5);
 
-% get momentum and volume flux and transfer coefficients
-Kv =    f .*eta0       .*thtv;
-Kf =    f .*d0.^2./eta0.*thtf;
-Cv = (1-f)./d0.^2.*Kv;
-Cf = (1-f)./d0.^2.*Kf;
+thtv = thtv + regk.*(diff(thtv(:,ic,:),2,2)./8 + diff(thtv(:,:,ic),2,3)./8);
+thtf = thtf + regk.*(diff(thtf(:,ic,:),2,2)./8 + diff(thtf(:,:,ic),2,3)./8);
 
-% apply cutoff to coefficients to safeguard numerical stability
-Kv = Kv + max(Kv,[],1)./cfflim;
-Kf = Kf + max(Kf,[],1)./cfflim;
-Cv = 1./(1./Cv + 1./(min(Cv,[],1).*cfflim));
-Cf = 1./(1./Cf + 1./(min(Cf,[],1).*cfflim));
+% get momentum and volume flux and transfer coefficients
+Kv =    f0 .*eta0       .*thtv;
+Kf =    f0 .*d0.^2./eta0.*thtf;
+Cv = (1-f0)./d0.^2.*Kv;
+Cf = (1-f0)./d0.^2.*Kf;
+
+Kv = Kv + max(geomean(geomean(Kv,3),2))./cfflim;
+Kf = Kf + max(geomean(geomean(Kf,3),2))./cfflim;
+Cv = 1./(1./Cv + 1./(min(geomean(geomean(Cv,3),2)).*cfflim));
+Cf = 1./(1./Cf + 1./(min(geomean(geomean(Cf,3),2)).*cfflim));
 
 % get coefficient-based weights
 omvc =  Cv./sum(Cv,1);
