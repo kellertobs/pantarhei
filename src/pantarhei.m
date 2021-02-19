@@ -44,9 +44,13 @@ gsn = exp(-X.^2./(D/5).^2).*exp(-Z.^2./(D/5).^2);
 u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
 w      = zeros(NPHS,N+1,N  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
 p      = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
-f      = f0 + dfr.*rnd + dfg.*gsn;                     
-f      = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
+
+if exist('fInit','var'),    addpath('./inits/'); f = fInit(Z);
+else,                       f = f0 + dfr.*rnd + dfg.*gsn;
+end
+f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 if (mms), mms_init_phasefrac; end
+
 qvxx   = zeros(NPHS,N,N  );  qvzz = zeros(NPHS,N,N  );  qvxz = zeros(NPHS,N+1,N+1);
 qfx    = zeros(NPHS,N,N+1);  qfz  = zeros(NPHS,N+1,N);
 Gvx    = zeros(NPHS,N,N+1);  Gvz  = zeros(NPHS,N+1,N);
