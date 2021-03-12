@@ -1,16 +1,17 @@
-function [f, c] = SolitaryWave (iphs, iconst, f0, A0, z0, Z)
+function [f, c] = SolitaryWave (X, Z, iphs, iconst, f0, A0, z0)
+% 
 % [f, c] = InitSolitaryWave (iphs, iconst, f0, A0, z0, zMat)
 % 
 % header function to generate solitary wave that is suitable for
 % application in pantarhei. 
 % 
 % INPUTS
+% Z         matrix of z values from meshgrid [NPHS x Nz x Nz]
 % iphs      which phase to use to calculate solitary wave [scalar]
 % iconst    which phases to keep at constant f0 [NPHS-2 x 1, can be empty]
 % f0        background phase fractions [NPHS x 1]
 % A0        amplitude of solitary wave above background phase fraction [scalar]
 % z0        location of solitary wave peak
-% z         matrix of z values from meshgrid [NPHS x Nz x Nz]
 % 
 % OUTPUTS
 % f         matrix of phase fractions [NPHS x Nz x Nz]
