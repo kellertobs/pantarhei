@@ -1,4 +1,4 @@
-% params for MMS for periodic boundary conditions
+% params for MMS with closed boundary conditions
 % YQW, 8 Dec 2020
 
 mms = true;
@@ -11,11 +11,8 @@ Zmf = 1/(2*pi)*D ./ones(NPHS,4);
 
 Amf = [f0, zeros(NPHS,3)];
 
-% sine wave amplitude
 dp  = 1e+1*sign(dfr);
 du  = 1e-4*sign(dfr);
 dw  = 1e-4*sign(dfr);
 dmf = [dfr, dp, du, dw];
-
-% dmf = [dfr, [1e2,1e-3,1e-3].*ones(NPHS,3)];
 

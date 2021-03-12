@@ -3,7 +3,14 @@ function varargout = MMSsource (varargin)
 [varargout{1:nargout}] = feval(varargin{:});
 end
 
-function [usrc] = Calc_usrc (t, x, z, ...
+
+
+
+% -------------------------------------------------------------------------
+% functions to calculate sources
+% (need separate functions because u, w, p/f are on different grids
+
+function [usrc, dqvx, Gvx, Qvx] = Calc_usrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
 [f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
@@ -13,10 +20,9 @@ function [usrc] = Calc_usrc (t, x, z, ...
 
 rho    = rho0.*ones(size(p)); 
 
-[Kv , Kf, Cv  , Cf  ] = CalcPermissions(f, eta0, d0, A, B, C, thtlim, cfflim);
-[dKv                ] = GetPermissionDerivs(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
-[dKv                ] = CutPermissionDerivs(Kv, dKv, cfflim);
-[~  , ~ , omCv, omCf] = CalcWeights(Kv, Kf, Cv, Cf);
+[Kv , Kf, Cv  , Cf  ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
+[dKv                ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
+[~  , ~ , omCv, omCf] = weights_mms(Kv, Kf, Cv, Cf);
 
 % calculate reference fields
 ustar = sum(omCv.*u, 1);
@@ -42,7 +48,8 @@ Qvx = f.*(rho-rhomix).*grav(2);
 usrc = + dqvx - Gvx - Qvx;
 end
 
-function [wsrc] = Calc_wsrc (t, x, z, ...
+
+function [wsrc, dqvz, Gvz, Qvz] = Calc_wsrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
 [f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
@@ -52,10 +59,9 @@ function [wsrc] = Calc_wsrc (t, x, z, ...
 
 rho    = rho0.*ones(size(p)); 
 
-[Kv , Kf, Cv  , Cf  ] = CalcPermissions(f, eta0, d0, A, B, C, thtlim, cfflim);
-[dKv                ] = GetPermissionDerivs(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
-[dKv                ] = CutPermissionDerivs(Kv, dKv, cfflim);
-[~  , ~ , omCv, omCf] = CalcWeights(Kv, Kf, Cv, Cf);
+[Kv , Kf, Cv  , Cf  ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
+[dKv                ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
+[~  , ~ , omCv, omCf] = weights_mms(Kv, Kf, Cv, Cf);
 
 % update reference fields
 wstar = sum(omCv.*w, 1);
@@ -80,7 +86,8 @@ wsrc = + dqvz - Gvz - Qvz;
 
 end
 
-function [psrc, fsrc] = Calc_pfsrc (t, x, z, ...
+
+function [psrc, fsrc, dqf, Gf] = Calc_pfsrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
 
 [f, dfdt, dfdx, dfdz                 ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
@@ -90,10 +97,9 @@ function [psrc, fsrc] = Calc_pfsrc (t, x, z, ...
 
 rho = rho0.*ones(size(p)); 
 
-[Kv , Kf  , Cv  , Cf         ] = CalcPermissions(f, eta0, d0, A, B, C, thtlim, cfflim);
-[~  , dKf                    ] = GetPermissionDerivs(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
-[dKf                         ] = CutPermissionDerivs(Kf, dKf, cfflim);
-[~  , omKf, omCv, omCf, domKf] = CalcWeights(Kv, Kf, Cv, Cf, dKf);
+[Kv , Kf  , Cv  , Cf         ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
+[~  , dKf                    ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
+[~  , omKf, omCv, omCf, domKf] = weights_mms(Kv, Kf, Cv, Cf, dKf);
 
 % reference fields
 ustar     = sum(omCv.*u   , 1);
@@ -107,15 +113,25 @@ dpdz2star = sum(omKf.*dpdz2 + domKf(:,:,:,3).*dpdz, 1);
 
 dqfxdx = -Kf.*(dpdx2 - dpdx2star) - dKf(:,:,:,2).*(dpdx - dpdxstar) + f.*dudx + u.*dfdx;
 dqfzdz = -Kf.*(dpdz2 - dpdz2star) - dKf(:,:,:,3).*(dpdz - dpdzstar) + f.*dwdz + w.*dfdz;
+dqf    = dqfxdx + dqfzdz;
 
 Gf = - Cf.*(p-pstar) + ustar.*dfdx + wstar.*dfdz + Gm./rhostar;
 
-psrc =       dqfxdx + dqfzdz - Gf - Gm./rho;
-fsrc = dfdt                  + Gf;
+psrc =       dqf - Gf - Gm./rho;
+fsrc = dfdt      + Gf;
 
 end
 
-function [omKv, omKf, omCv, omCf, domKf] = CalcWeights (Kv, Kf, Cv, Cf, dKf)
+
+
+
+
+
+
+% -------------------------------------------------------------------------
+% functions to calculate permissions and weights
+
+function [omKv, omKf, omCv, omCf, domKf] = weights_mms (Kv, Kf, Cv, Cf, dKf)
 
 omKv = Kv./sum(Kv,1);
 omKf = Kf./sum(Kf,1);
@@ -129,7 +145,8 @@ end
 
 end
 
-function [Kv, Kf, Cv, Cf] = CalcPermissions (f, eta0, d0, A, B, C, thtlim, cfflim)
+
+function [Kv, Kf, Cv, Cf, Kvcut, Kfcut] = closures_mms (f, eta0, d0, A, B, C, thtlim, cfflim)
 
 NPHS = length(eta0);
 
@@ -159,32 +176,32 @@ Kf =    f .*d0.^2./eta0.*thtf;
 Cv = (1-f)./d0.^2.*Kv;
 Cf = (1-f)./d0.^2.*Kf;
 
+% calculate cutoffs
+Kvcut = max(geomean(Kv,[2,3]))./cfflim;
+Kfcut = max(geomean(Kf,[2,3]))./cfflim;
+
 % apply cutoff to coefficients to safeguard numerical stability
-Kv = Kv + max(Kv,[],1)./cfflim;
-Kf = Kf + max(Kf,[],1)./cfflim;
-Cv = 1./(1./Cv + 1./(min(Cv,[],1).*cfflim));
-Cf = 1./(1./Cf + 1./(min(Cf,[],1).*cfflim));
+Kv = Kv + Kvcut;
+Kf = Kf + Kfcut;
+Cv = 1./(1./Cv + 1./(min(geomean(Cv,[2,3])).*cfflim));
+Cf = 1./(1./Cf + 1./(min(geomean(Cf,[2,3])).*cfflim));
 end
 
-function [dKout] = CutPermissionDerivs (K, dKin, cfflim)
 
-[~, ind] = max(K,[],1,'linear');
 
-dKout = dKin;
-for i = 1:3
-    tmp = dKin(:,:,:,i);
-    dKout(:,:,:,i) = tmp + tmp(ind)./cfflim;
-end
 
-end
 
-function [dKv, dKf] = GetPermissionDerivs (f, dfdt, dfdx, dfdz, d0, eta0, A, B, C)
+
+% -------------------------------------------------------------------------
+% functions to calculate permissions derivatives
+
+function [dKv, dKf] = closurederivs_mms (f, dfdt, dfdx, dfdz, d0, eta0, A, B, C)
 
 f1    = f(1,:,:);   f2    = f(2,:,:);   f3    = f(3,:,:);
 d01   = d0(1);      d02   = d0(2);      d03   = d0(3);
 eta01 = eta0(1);    eta02 = eta0(2);    eta03 = eta0(3);
 
-% fitting parameters for phase permissions---------------------------------
+% fitting parameters for phase permissions
 A1_1 = A(1,1);      A1_2 = A(1,2);      A1_3 = A(1,3);
 A2_1 = A(2,1);      A2_2 = A(2,2);      A2_3 = A(2,3);
 A3_1 = A(3,1);      A3_2 = A(3,2);      A3_3 = A(3,3);
@@ -197,7 +214,7 @@ C1_1 = C(1,1);      C1_2 = C(1,2);      C1_3 = C(1,3);
 C2_1 = C(2,1);      C2_2 = C(2,2);      C2_3 = C(2,3);
 C3_1 = C(3,1);      C3_2 = C(3,2);      C3_3 = C(3,3);
 
-% get derivatives for flux and transfer coeffs-----------------------------
+% get derivatives for flux and transfer coeffs
 if nargout == 1
     
     [dKvdf1,dKvdf2,dKvdf3] = coeff_derivs(...
@@ -233,6 +250,19 @@ end
 
 end
 
+
+
+
+
+
+
+
+
+
+
+% -------------------------------------------------------------------------
+% mms source function initialisations
+
 function [f, dfdt, dfdx, dfdz] = Calc_f (t, x, z, T, X, Z, f0, df0)
 % calculate phase fractions (cosines)
 
@@ -241,18 +271,19 @@ tfrac    = 0;
 xfrac    = x./X;
 zfrac    = z./Z;
 f        = f0 + df0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
-f(2,:,:) = 1 - f(1,:,:) - f(3,:,:);
+f(end,:,:) = 1 - sum(f(1:end-1,:,:),1);
 
 if nargout>1
     dfdt = -1./T.*df0.*sin(tfrac).*cos(xfrac).*cos(zfrac);
     dfdx = -1./X.*df0.*cos(tfrac).*sin(xfrac).*cos(zfrac);
     dfdz = -1./Z.*df0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
     
-    dfdt(2,:,:) = - dfdt(1,:,:) - dfdt(3,:,:);
-    dfdx(2,:,:) = - dfdx(1,:,:) - dfdx(3,:,:);
-    dfdz(2,:,:) = - dfdz(1,:,:) - dfdz(3,:,:);
+    dfdt(end,:,:) = - sum(dfdt(1:end-1,:,:),1);
+    dfdx(end,:,:) = - sum(dfdx(1:end-1,:,:),1);
+    dfdz(end,:,:) = - sum(dfdz(1:end-1,:,:),1);
 end
 end
+
 
 function [p, dpdt, dpdx, dpdz, dpdx2, dpdz2] = Calc_p (t, x, z, T, X, Z, P0, dP0)
 % pressure (cosines)
@@ -276,6 +307,7 @@ end
 
 end
 
+
 function [u, dudt, dudx, dudz, dudx2, dudz2, dudxdz] = Calc_u (t, x, z, T, X, Z, U0, dU0)
 % horizontal velocity (cosines)
 
@@ -298,6 +330,7 @@ if nargout>4
 end
 
 end
+
 
 function [w, dwdt, dwdx, dwdz, dwdx2, dwdz2, dwdxdz] = Calc_w (t, x, z, T, X, Z, W0, dW0)
 % vertical velocity (cosines)

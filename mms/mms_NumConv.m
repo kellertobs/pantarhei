@@ -5,7 +5,12 @@
 
 clear all; close all
 
-Nvec = [10,15,20,25,30,40,50,60,80,100];
+mpScript = 'olv_plg_bas_params';
+
+f0   = [ 0.20; 0.20; 0.60]; % initial background phase fractions (unity sum!)
+dfr  = [ 0.01; 0.01;-0.02]; % initial random perturbation amplitude (unity sum!)
+
+Nvec = [20,40,80,100,150,200,400];
 Nn   = length(Nvec);
 
 % initialize output matrices
@@ -15,25 +20,20 @@ betaOut = nan(1, Nn);
 flag    = nan(1, Nn);
 Nit     = nan(1, Nn);
 
-% choose one fixed alpha
-alphaIn = 0.90;
-
 % loop over N to get error between true and num solution
 for ni = 1:Nn
-    beta = alphaIn - 0.1;
+    beta = 0.80;
     
     % loop to adjust beta to achieve convergence
     while flag(1,ni)~=1 && beta>0.4
         
         [NormErrOut, MaxErrOut, Nit(ni), flag(ni)] = ...
-            RunSolver(Nvec(ni), alphaIn, beta);
+            RunSolver(mpScript, Nvec(ni), f0, dfr, beta);
         
         NormErr(:,ni) = NormErrOut;
         MaxErr (:,ni) = MaxErrOut ;
         betaOut(1,ni) = beta;
-        
-        if flag(ni)==2, keyboard; end
-        
+                
         beta = beta - 0.1;
     end
 end
@@ -43,11 +43,20 @@ end
 clear Nn ni beta NormErrOut MaxErrOut ans
 
 % load parameters used in solution to save together with errors
-plg_dac_mvp_params;
-alpha = alphaIn;
+run(mpScript);
+solver_params;
+
+phsName = strjoin(strcat(PHS(:),num2str(f0*100, '%.0f'))', '_');
+
+% check problem scales (returns delta0, w0)
+run('../usr/scales.m');
+
+% reset domain depth to multiple of max segr-comp-length
+D    = D.*max(delta0(:));
+
 run('mms_utils/mms_params_periodicBC.m');
 
-FileNameDefault = '../out/plg60_dac20_mvp20_mms/NumConvTest';
+FileNameDefault = ['../out/' phsName '_mms_NumConvTest'];
 
 % if file exists, adjust final number of file to avoid overwriting
 NfInDir = length(dir([FileNameDefault '*.mat']))+1;
@@ -58,28 +67,43 @@ save(FileName);
 
 %% function that runs the solver for given N, alpha
 
-function [NormErr, MaxErr, it, flag] = RunSolver (Nin, alphaIn, betaIn)
+function [NormErr, MaxErr, it, flag] = RunSolver (mpScript, Nin, f0, dfr, betaIn)
 
 % initialize output error vectors
 NormErr = nan(4,1);
 MaxErr  = nan(4,1);
 flag    = nan;
 
-% load parameters
-plg_dac_mvp_params;
+% load phase parameters
+run(mpScript);
 
-% reassign number of grid points and grid spacing
+% load solver params and reassign based on inputs
+solver_params;
 N = Nin;
-h = D/N;
+beta = betaIn;
 
-% reassign convergence params
-alpha = alphaIn;
-beta  = betaIn;
+% check problem scales (returns delta0, w0)
+run('../usr/scales.m');
 
-fprintf(1, '    N = %d, alpha = %.2f, beta = %.2f.', N, alpha, beta);
+% reset domain depth to multiple of max segr-comp-length
+D    = D.*max(delta0(:));
+h    = D/N;
+smth = (N/40)^2;            % smoothing parameter for random perturbation field
+
+% set appropriate initial time step size
+dt = cfl.*h/2/max(w0(:));
 
 % manufactured solution
-run('mms_utils/mms_params_periodicBC.m');
+switch BC
+    case 'periodic'
+        run('mms_utils/mms_params_periodicBC.m');
+        
+    case 'closed'
+        % this is not tested yet
+        run('mms_utils/mms_params_closedBC.m');
+end
+
+fprintf(1, '    N = %d, beta = %.2f.', N, beta);
 
 try
     % run model
