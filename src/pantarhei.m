@@ -96,13 +96,13 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         constitutive;
         
         % update physical time step
-        dt  = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
-
+        dt   = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
+        
         % update residual fields
         res_u =             + diff(qvxx(:,:,ic),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
         res_w =             + diff(qvzz(:,ic,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
         res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
-        res_f =  (f-fo)./dt                                                 +(Gf + Gfo)./2 ;
+        res_f = (f-fo)./dt                                                  +(Gf + Gfo)./2 ;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end
