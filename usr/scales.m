@@ -22,10 +22,10 @@ Cv = (1-f0)./d0.^2.*Kv;
 Cf = (1-f0)./d0.^2.*Kf;
 
 % apply cutoff to coefficients to safeguard numerical stability
-Kv = Kv + max(Kv,[],1)./cfflim;
-Kf = Kf + max(Kf,[],1)./cfflim;
-Cv = 1./(1./Cv + 1./(min(Cv,[],1).*cfflim));
-Cf = 1./(1./Cf + 1./(min(Cf,[],1).*cfflim));
+Kv = Kv + max(geomean(geomean(Kv,3),2))./cfflim;
+Kf = Kf + max(geomean(geomean(Kf,3),2))./cfflim;
+Cv = 1./(1./Cv + 1./(min(geomean(geomean(Cv,3),2)).*cfflim));
+Cf = 1./(1./Cf + 1./(min(geomean(geomean(Cf,3),2)).*cfflim));
 
 % get segregtaion-compaction length scales
 delta0 = f0.*f0.'./sqrt(Cv.*Cf.');
