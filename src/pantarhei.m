@@ -45,7 +45,7 @@ u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u 
 w      = zeros(NPHS,N+1,N  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
 p      = zeros(NPHS,N  ,N  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
 
-if exist('fInit','var'),    addpath('./inits/'); f = fInit(Z);
+if exist('fInit','var'),    addpath('./inits/'); f = fInit(X, Z);
 else,                       f = f0 + dfr.*rnd + dfg.*gsn;
 end
 f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
