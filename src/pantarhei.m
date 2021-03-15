@@ -66,10 +66,7 @@ closures; constitutive;
 time = 0;
 step = 0;
 while time <= tend && step <= NtMax  % keep stepping until final run time reached
-    
-    % update closures, constitutives, then plot and store model output
-    if (nop) && ~mod(step,nop); closures; constitutive; output; end
-    
+
     tic;
     
     % print time step diagnostics
@@ -148,6 +145,9 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         end
         
     end  % iteration loop
+        
+    % update closures, constitutives, then plot and store model output
+    if (nop) && ~mod(step,nop); closures; constitutive; output; end
     
     % update time and step count
     time = time+dt;
