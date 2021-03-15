@@ -1,18 +1,18 @@
 
 
 
-nop    = 0;                 % plot and store output every [nop] time step
+nop    = 1;                 % plot and store output every [nop] time step
 svop   = 0;                 % save output and print figures
 
 N      = 100;               % number of grid points in each direction
-D      = 10;                % domain dimension in each direction [m]
+D      = 20;                % domain dimension in each direction [m]
 h      = D/N;               % grid spacing [m]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 tend   = 1;                 % model run time [s]
 NtMax  = 0;                 % max number of time steps
 
 nupd   = 100;               % update residual and permissions every [nupd] iterations
-atol   = 1e-6;              % absolute residual tolerance for convergence of iterative solver
+atol   = 1e-5;              % absolute residual tolerance for convergence of iterative solver
 rtol   = 1e-10;             % relative residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 1e5;               % maximum iteration count for iterative solver

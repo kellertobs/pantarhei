@@ -1,4 +1,7 @@
 
+
+outfolder = '../mms_out/olv_plg_bas/';
+
 PHS  = {'olv','plg','bas'};
 NPHS = length(PHS);
 

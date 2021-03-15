@@ -10,7 +10,8 @@ mpScript = 'olv_plg_bas_params';
 f0   = [ 0.20; 0.20; 0.60]; % initial background phase fractions (unity sum!)
 dfr  = [ 0.01; 0.01;-0.02]; % initial random perturbation amplitude (unity sum!)
 
-Nvec = [20,40,80,100,150,200,400];
+Nvec = [25,40,50,60,80,100,120,150,200];
+% Nvec = 130;
 Nn   = length(Nvec);
 
 % initialize output matrices
@@ -25,7 +26,7 @@ for ni = 1:Nn
     beta = 0.80;
     
     % loop to adjust beta to achieve convergence
-    while flag(1,ni)~=1 && beta>0.4
+    while flag(1,ni)~=1 && beta>0.3
         
         [NormErrOut, MaxErrOut, Nit(ni), flag(ni)] = ...
             RunSolver(mpScript, Nvec(ni), f0, dfr, beta);
@@ -56,7 +57,8 @@ D    = D.*max(delta0(:));
 
 run('mms_utils/mms_params_periodicBC.m');
 
-FileNameDefault = ['../out/' phsName '_mms_NumConvTest'];
+if ~exist(outfolder,'dir'); mkdir(outfolder); end
+FileNameDefault = [outfolder phsName '_mms_NumConvTest'];
 
 % if file exists, adjust final number of file to avoid overwriting
 NfInDir = length(dir([FileNameDefault '*.mat']))+1;
@@ -79,7 +81,7 @@ run(mpScript);
 
 % load solver params and reassign based on inputs
 solver_params;
-N = Nin;
+N    = Nin;
 beta = betaIn;
 
 % check problem scales (returns delta0, w0)

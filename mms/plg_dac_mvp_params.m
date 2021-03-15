@@ -1,5 +1,7 @@
 
 
+outfolder = '../mms_out/plg_dac_mvp/';
+
 PHS  = {'plg','dac','mvp'};
 NPHS = length(PHS);
 
