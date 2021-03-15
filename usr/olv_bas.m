@@ -54,5 +54,12 @@ h  = D/N;
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
 
+% additional functions to calculate initial f
+% fInit = @(X,Z) SolitaryWave(X,Z,2,[],f0,0.05,0);
+% fInit = @(X,Z) PermBarrier(X, Z, BC, f0, dfr, [0.45,0.55], 0.1);
+% fInit = @(X,Z) PeriodicInit(X, Z, D, f0, dfr, 2);
+% fInit = @(X,Z) NGaussians(X, Z, D, f0, [0.05].*[-1;1], 0.025);
+% fInit = @(X,Z) Gaussian1D(X, Z, D, f0, 0.03*[-1;1], 0.03);
+
 % run model
 run('../src/pantarhei');
