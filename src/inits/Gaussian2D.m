@@ -1,8 +1,8 @@
-function [f] = NGaussians (X, Z, D, f0, df, gw)
+function [f] = Gaussian2D (X, Z, D, f0, df, gw)
 % 
-% [f] = NGaussians (X, Z, D, f0, df, zfrac, smopt)
+% [f] = Gaussian2D (X, Z, D, f0, df, zfrac, smopt)
 % 
-% this function makes an initial condition multiple Gaussians, with the
+% this function makes an initial condition multiple 2D Gaussians, with the
 % number of Gaussians defined by df
 % All the Gaussians are centered at z=0 at regular x intervals
 % 

@@ -19,10 +19,14 @@ function [f] = Gaussian1D (X, Z, D, f0, df, gw)
 
 
 Ng = size(df,2);                    % number of Gaussian peaks
+z0 = Z(1) + (1:2:(2*Ng))*0.5*D/Ng;  % centroids of the Gaussians
+
+if length(gw)==1, gw = gw.*ones(Ng,1); end
+
 f  = f0.*ones(size(X));             % initialize phase fractions
 
 for gi = 1:Ng
-    gsn = exp(-Z.^2./(gw*D).^2);
+    gsn = exp(-(Z-z0(gi)).^2./(gw(gi)*D).^2);
     f = f + df(:,gi).*gsn;
 end
 
