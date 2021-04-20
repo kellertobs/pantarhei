@@ -28,7 +28,8 @@ Cv = 1./(1./Cv + 1./(min(geomean(geomean(Cv,3),2)).*cfflim));
 Cf = 1./(1./Cf + 1./(min(geomean(geomean(Cf,3),2)).*cfflim));
 
 % get segregtaion-compaction length scales
-delta0 = f0.*f0.'./sqrt(Cv.*Cf.');
+% Cv of segregating phase, Cf of compacting phase
+delta0 = f0.'.*f0./sqrt(Cv.'.*Cf);
 delta0 = delta0 - diag(diag(delta0));
 
 % get Darcy speed scales
