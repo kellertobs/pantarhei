@@ -24,16 +24,16 @@ for i=1:NPHS
     end
 end
 
-if svop % save
+if nop<0 && svop % save
     name = ['../out/',RunID,'/',RunID,'_',num2str(step/abs(nop))];
-    save([name,'.mat'],'time','x','u','w','p','f',...
+    save([name,'.mat'],'it','time','x','u','w','p','f',...
         'ustar','wstar','pstar','usegr','wsegr','pcmpt',...
         'qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf',...
         'Kv','Kf','Cv','Cf','delta');
 end
 
-
 if (nop>0) %plot
+    
     % prepare for plotting
     TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
     TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',14};
@@ -182,13 +182,13 @@ if (nop>0) %plot
     end
     %drawnow;
     
-    figure(6); clf; colormap(ocean);
-    for n=1:NPHS
-        subplot(NPHS,4,(n-1)*4+1); imagesc(x,x,squeeze(-res_w(n,:,:).*dtau_w(n,:,:)./(norm(squeeze(w(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $w^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-        subplot(NPHS,4,(n-1)*4+2); imagesc(x,x,squeeze(-res_u(n,:,:).*dtau_u(n,:,:)./(norm(squeeze(u(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $u^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-        subplot(NPHS,4,(n-1)*4+3); imagesc(x,x,squeeze(-res_p(n,:,:).*dtau_p(n,:,:)./(norm(squeeze(p(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $p^',num2str(n),'$ [Pa]' ],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-        subplot(NPHS,4,(n-1)*4+4); imagesc(x,x,squeeze(-res_f(n,:,:).*dtau_f(n,:,:)./(norm(squeeze(f(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $f^',num2str(n),'$ [vol]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
-    end
+%     figure(6); clf; colormap(ocean);
+%     for n=1:NPHS
+%         subplot(NPHS,4,(n-1)*4+1); imagesc(x,x,squeeze(-res_w(n,:,:).*dtau_w(n,:,:)./(norm(squeeze(w(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $w^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+%         subplot(NPHS,4,(n-1)*4+2); imagesc(x,x,squeeze(-res_u(n,:,:).*dtau_u(n,:,:)./(norm(squeeze(u(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $u^',num2str(n),'$ [m/s]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+%         subplot(NPHS,4,(n-1)*4+3); imagesc(x,x,squeeze(-res_p(n,:,:).*dtau_p(n,:,:)./(norm(squeeze(p(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $p^',num2str(n),'$ [Pa]' ],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+%         subplot(NPHS,4,(n-1)*4+4); imagesc(x,x,squeeze(-res_f(n,:,:).*dtau_f(n,:,:)./(norm(squeeze(f(n,:,:)),2)./N+1e-32))); axis xy equal tight; cb = colorbar; title(['upd. $f^',num2str(n),'$ [vol]'],TX{:},FS{:}); set(gca,TL{:},TS{:}); set(cb,TL{:},TS{:});
+%     end
     %drawnow;
     
     if svop % save
