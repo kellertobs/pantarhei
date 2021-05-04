@@ -60,8 +60,7 @@ if (nop>0) %plot
     axpos = zeros((NPHS+1)*4, 4);
     for nrow = 1:NPHS+1
         for ncol = 1:4
-            iplt = (nrow-1)*4 + ncol;
-            axpos(iplt,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS+1-nrow)*axh+(NPHS+1-nrow)*avs axw axh];
+            axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS+1-nrow)*axh+(NPHS+1-nrow)*avs axw axh];
         end
     end
      
@@ -106,8 +105,7 @@ if (nop>0) %plot
     axpos = zeros(NPHS*4, 4);
     for nrow = 1:NPHS
         for ncol = 1:4
-            iplt = (nrow-1)*4 + ncol;
-            axpos(iplt,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS+1-nrow)*axh+(NPHS+1-nrow)*avs axw axh];
+            axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS-nrow)*axh+(NPHS-nrow)*avs axw axh];
         end
     end
     
