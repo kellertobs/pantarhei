@@ -10,20 +10,27 @@ if     strcmp(BC,'periodic'); ic = [N,1:N,1]; im = [N,1:N]; ip = [1:N,1];
 elseif strcmp(BC,'open') || strcmp(BC,'closed'); ic = [1,1:N,N]; im = [1,1:N]; ip = [1:N,N]; end
 
 nop = abs(nop);
-to  = 0;
+dt  = 1;
 
 rho = rho0.* ones(NPHS,N,N);
-fo  = zeros(NPHS,N,N);
 
 for fi = 1:length(fn)
     step = (fi-1)*nop;
-    
-    if fi>1, dt = time-to; fo = f; end
-    
+        
     load(fn{fi});
+    
+    if fi==1
+        fo = f; 
+    else
+        dt = time-to;
+    end
 
     run('../src/closures.m');
     run('../src/output');
+    
+    to = time;
+    fo = f;
+    
 end
 
 
