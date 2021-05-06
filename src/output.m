@@ -24,13 +24,14 @@ for i=1:NPHS
     end
 end
 
-if nop<0 && svop % save
+if svop % save
     name = ['../out/',RunID,'/',RunID,'_',num2str(step/abs(nop))];
     save([name,'.mat'],'res','time','x','u','w','p','f',...
         'ustar','wstar','pstar','usegr','wsegr','pcmpt',...
         'qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf',...
         'Kv','Kf','Cv','Cf','delta');
 end
+
 
 if (nop>0) %plot
     
@@ -208,5 +209,9 @@ if (nop>0) %plot
             print(f10,'-dpdf','-r200','-opengl',name,'-loose');
         end
     end
-    close all;
 end
+
+
+close all;
+
+
