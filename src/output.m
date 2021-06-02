@@ -26,7 +26,7 @@ end
 
 if svop % save
     name = ['../out/',RunID,'/',RunID,'_',num2str(step/abs(nop))];
-    save([name,'.mat'],'res','time','x','u','w','p','f',...
+    save([name,'.mat'],'res','res0','time','x','u','w','p','f',...
         'ustar','wstar','pstar','usegr','wsegr','pcmpt',...
         'qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf',...
         'Kv','Kf','Cv','Cf','delta');
@@ -200,11 +200,6 @@ if (nop>0) %plot
         print(f4,'-dpdf','-r200','-opengl',name,'-loose');
         
         if exist('f10','var')
-            figure(f10);
-            xlabel('Iterations'); ylabel('residual');
-            f10.PaperPositionMode = 'manual';
-            f10.PaperPosition = [0 0 f10.PaperPosition(3) f10.PaperPosition(4)];
-            f10.PaperSize = [f10.PaperPosition(3) f10.PaperPosition(4)];
             name = ['../out/',RunID,'/',RunID,'_itconv_',num2str(step/nop)];
             print(f10,'-dpdf','-r200','-opengl',name,'-loose');
         end

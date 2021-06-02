@@ -79,6 +79,9 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     res  = 1e3;
     res0 = res;
     it   = 0;
+    
+    if (nop>0) && ~mod(step,abs(nop)), f10 = figure(10);  f10.Visible = 'off'; end
+
     while res >= atol && res/res0 >= rtol && it <= maxits || it < minits  % keep stepping until residual norm below tolerance
                 
         % store solution of previous two iterations
@@ -141,7 +144,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-%             if (nop>0), f10 = figure(10); if it==1; clf; end; semilogy(it,res,'r.','MarkerSize',10); axis tight; box on; hold on; drawnow; end
+            if (nop>0) && ~mod(step,abs(nop)), semilogy(it,res,'r.','MarkerSize',10); axis tight; hold on; end
         end
         
     end  % iteration loop
