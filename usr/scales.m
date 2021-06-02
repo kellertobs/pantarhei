@@ -34,4 +34,4 @@ delta0 = delta0 - diag(diag(delta0));
 
 % get Darcy speed scales
 DeltaRho0 = abs(rho0 - rho0.');
-w0        = DeltaRho0.*max(abs(grav)).*f0.^2./Cv;
+w0        = DeltaRho0.*max(abs(grav)).*f0.'.^2./Cv.';
