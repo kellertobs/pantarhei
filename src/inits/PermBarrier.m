@@ -19,33 +19,27 @@ function [f] = PermBarrier (X, Z, BC, f0, df, zfrac, smopt)
 % f         phase fraction field [NPHS x Nz x Nz]
 
 % initialize
-N = size(Z,2);
+[NPHS, N] = size(Z,[1,2]);
 
-% check what kind of BCs
-switch BC
-    case 'closed'
-        % just one step
-        zInd = round(zfrac(1)*N):N;
-    case 'periodic'
-        % has to go up and back down to maintain periodic bc
-        zInd = round(zfrac(1)*N):round(zfrac(2)*N);
-end
+% where the step occurs
+zInd = zfrac*N;
 
-
-% check smoothing
+% smooth the result?
 if smopt == 0   
     % no smoothing
     f           = f0.*ones(1,N,N);
     f(:,zInd,:) = f(:,zInd,:) + df;
 else
-    
     % smoothing over smopt cells
-    Nmat = permute(repmat(1:N,N,1),[3,2,1]);
+    Nmat = permute(repmat(1:N,N,1,NPHS),[3,2,1]);
+    
     f = f0 + df./(1+exp(-smopt*(Nmat - zInd(1))));
     
     if strcmp(BC, 'periodic')
-        f = f  - df./(1+exp(-smopt*(Nmat - zInd(end))));
+        f = f  - df./(1+exp(-smopt*(Nmat - zInd(2))));
     end
+    
+
 end
 
 
