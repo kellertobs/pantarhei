@@ -38,7 +38,7 @@ for i = 1:smth
     rnd = rnd + diff(rnd(:,ic,:),2,2)./8 + diff(rnd(:,:,ic),2,3)./8;
 end
 rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D/10).^2).*exp(-Z.^2./(D/10).^2);
+gsn = exp(-X.^2./(D/8).^2).*exp(-Z.^2./(D/8).^2);
 
 % intialise solution, auxiliary, and residual fields
 u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
@@ -65,6 +65,14 @@ closures; constitutive;
 % initialise time stepping loop
 time = 0;
 step = 0;
+
+% restart run?
+if restart>0
+    load(['../out/',RunID,'/',RunID,'_',num2str(restart),'.mat']);
+    fprintf(1,'Loaded %s.\n', [RunID,'_',num2str(restart),'.mat']);
+    step = rsstep + 1;
+end
+
 while time <= tend && step <= NtMax  % keep stepping until final run time reached
 
     tic;
