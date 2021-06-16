@@ -6,7 +6,7 @@ fprintf(1,'****************************************************\n\n');
 
 % prepare workspace
 if svop && ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
-if svop, save(['../out/',RunID,'/',RunID,'_par.mat']); end
+if svop && restart==0, save(['../out/',RunID,'/',RunID,'_par.mat']); end
 
 load('ocean.mat','ocean');
 
@@ -68,8 +68,8 @@ step = 0;
 
 % restart run?
 if restart>0
-    load(['../out/',RunID,'/',RunID,'_',num2str(restart),'.mat']);
-    fprintf(1,'Loaded %s.\n', [RunID,'_',num2str(restart),'.mat']);
+    fname = ['../out/',RunID,'/',RunID,'_',num2str(restart),'.mat'];
+    load(fname); fprintf(1,'Loaded %s.\n', fname);
     step = rsstep + 1;
 end
 
