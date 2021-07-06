@@ -38,7 +38,7 @@ for i = 1:smth
     rnd = rnd + diff(rnd(:,ic,:),2,2)./8 + diff(rnd(:,:,ic),2,3)./8;
 end
 rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D/8).^2).*exp(-Z.^2./(D/8).^2);
+gsn = exp(-X.^2./(D/12).^2).*exp(-Z.^2./(D/12).^2);
 
 % intialise solution, auxiliary, and residual fields
 u      = zeros(NPHS,N  ,N+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
@@ -59,9 +59,6 @@ delta  = zeros(NPHS,NPHS,N,N);
 rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
 
-% initialise coefficient closures and constitutive relations
-closures; constitutive;
-
 % initialise time stepping loop
 time = 0;
 step = 0;
@@ -72,6 +69,9 @@ if restart>0
     load(fname); fprintf(1,'Loaded %s.\n', fname);
     step = rsstep + 1;
 end
+
+% initialise coefficient closures and constitutive relations
+closures; constitutive;
 
 while time <= tend && step <= NtMax  % keep stepping until final run time reached
 
