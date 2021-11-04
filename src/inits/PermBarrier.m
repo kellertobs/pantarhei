@@ -19,19 +19,19 @@ function [f] = PermBarrier (X, Z, BC, f0, df, zfrac, smopt)
 % f         phase fraction field [NPHS x Nz x Nz]
 
 % initialize
-[NPHS, N] = size(Z,[1,2]);
+[NPHS, Nz, Nx] = size(Z);
 
 % where the step occurs
-zInd = zfrac*N;
+zInd = zfrac*Nz;
 
 % smooth the result?
 if smopt == 0   
     % no smoothing
-    f           = f0.*ones(1,N,N);
+    f           = f0.*ones(1,Nz,Nx);
     f(:,zInd,:) = f(:,zInd,:) + df;
 else
     % smoothing over smopt cells
-    Nmat = permute(repmat(1:N,N,1,NPHS),[3,2,1]);
+    Nmat = permute(repmat(1:Nz,Nx,1,NPHS),[3,2,1]);
     
     f = f0 + df./(1+exp(-smopt*(Nmat - zInd(1))));
     

@@ -29,11 +29,11 @@ X     = permute(X,[3,1,2]);
 
 % check if we are using a 1D or square domain
 if all([dfg;dfr]==0) % uniform fraction, 1D domain
-    Nz = N; Nx = 2; 
-    Z = Z(1,:,1:2); X = X(1,:,(floor(0.5*N)+[0,1])); 
+    Nz = N; Nx = 2;
+    Z = Z(1,:,1:2); X = X(1,:,(floor(0.5*N)+[0,1]));
     z = x; x = 0.5*[x(1),x(end)];
 else % square domain
-    Nz = N; Nx = N; z = x; 
+    Nz = N; Nx = N; z = x;
 end
 
 % initialise indexing for boundary condition stencils
@@ -41,8 +41,8 @@ if strcmp(BC,'periodic')
     icz = [Nz,1:Nz,1]; imz = [Nz,1:Nz]; ipz = [1:Nz,1];
     icx = [Nx,1:Nx,1]; imx = [Nx,1:Nx]; ipx = [1:Nx,1];
 elseif strcmp(BC,'open') || strcmp(BC,'closed')
-    icz = [1,1:Nz,Nz]; imz = [1,1:Nz]; ipz = [1:Nz,Nz]; 
-    icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx]; 
+    icz = [1,1:Nz,Nz]; imz = [1,1:Nz]; ipz = [1:Nz,Nz];
+    icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx];
 end
 
 % initialise smoothed random and gaussian perturbation fields
@@ -88,7 +88,7 @@ end
 closures; constitutive;
 
 while time <= tend && step <= NtMax  % keep stepping until final run time reached
-
+    
     tic;
     
     % print time step diagnostics
@@ -102,15 +102,22 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     res0 = res;
     it   = 0;
     
+    if step == 0 % require more stringent convergence criterion for first step
+        conv_crit = @(resc,res0c,itc) (resc >= atol && itc <= 10*maxits);
+    else
+        conv_crit = @(resc,res0c,itc) (resc >= atol && resc/res0c >= rtol && itc <= maxits || itc < minits);
+    end
+    
+    
     if (nop>0) && ~mod(step,abs(nop)), f10 = figure(10);  f10.Visible = 'off'; end
-
-    while res >= atol && res/res0 >= rtol && it <= maxits || it < minits  % keep stepping until residual norm below tolerance
-                
+    
+    while  conv_crit(res,res0,it) > 0 % keep stepping until convergence criterion reached
+        
         % store solution of previous two iterations
         uii = ui;  ui = u;  wii = wi;  wi = w;  pii = pi;  pi = p;  fii = fi;  fi = f;
-
+        
         it = it+1;  % update iteration count
-
+        
         % update coefficient closures (only every 'nupd' iterations)
         if ~mod(it,nupd); closures; end
         
@@ -123,8 +130,8 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % update residual fields
         res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
         res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
-        res_p =             + diff(qfx         ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
-        res_f = (f-fo)./dt                                                  +(Gf + Gfo)./2 ;
+        res_p =             + diff(qfx          ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
+        res_f = (f-fo)./dt                                                   +(Gf + Gfo)./2 ;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end
@@ -134,7 +141,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         
         % prepare solution updates
         if strcmp(BC,'closed')
-            res_u(:,:,[1,end]) = 0; 
+            res_u(:,:,[1,end]) = 0;
             res_w(:,[1,end],:) = 0;
             upd_u = res_u.*dtau_u;
             upd_w = res_w.*dtau_w;
@@ -146,15 +153,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));
             upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
         end
-
+        
         % update velocity-pressure solution
         u = ui - alpha.*upd_u + beta.*(ui-uii);
         w = wi - alpha.*upd_w + beta.*(wi-wii);
         p = pi - alpha.*upd_p + beta.*(pi-pii);
         
         % update phase fractions (only every 'nupd' iterations)
-        if ~mod(it,nupd); f = fi - alpha.*upd_f; f = max(flim,min(1-flim,f)); end        
-
+        if ~mod(it,nupd); f = fi - alpha.*upd_f; f = max(flim,min(1-flim,f)); end
+        
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
@@ -170,13 +177,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         end
         
     end  % iteration loop
-        
+    
+    
     % update closures, constitutives, then plot and store model output
     if (nop~=0) && ~mod(step,abs(nop)); closures; constitutive; output; end
     
     % update time and step count
     time = time+dt;
     step = step+1;
+    
     
     fprintf(1,'    solver time: %4.2f min \n',toc/60);
     
