@@ -6,8 +6,9 @@ clear; close all; clc;
 
 % set model parameters
 RunID  = 'plgdacfep';
-nop    = 10;                  % plot and store output every [nop] time step
-svop   = 1;                 % save output and print figures
+outdir = '../out/';         % directory to save output files
+nop    = 1;                 % plot and store output every [nop] time step
+svop   = 0;                 % save output and print figures
 restart= 0;
 
 NPHS   = 3;                 % number of phases

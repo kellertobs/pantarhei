@@ -5,8 +5,8 @@ fprintf(1,'*****  pantarhei | multi-phase flow simulator  *****\n');
 fprintf(1,'****************************************************\n\n');
 
 % prepare workspace
-if svop && ~exist(['../out/',RunID],'dir'); mkdir(['../out/',RunID]); end
-if svop && restart==0, save(['../out/',RunID,'/',RunID,'_par.mat']); end
+if svop && ~exist([outdir RunID],'dir'); mkdir([outdir RunID]); end
+if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
 
 load('ocean.mat','ocean');
 
@@ -79,7 +79,7 @@ step = 0;
 
 % restart run?
 if restart>0
-    fname = ['../out/',RunID,'/',RunID,'_',num2str(restart),'.mat'];
+    fname = [outdir RunID,'/',RunID,'_',num2str(restart),'.mat'];
     load(fname); fprintf(1,'Loaded %s.\n', fname);
     step = rsstep + 1;
 end
@@ -108,7 +108,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         conv_crit = @(resc,res0c,itc) (resc >= atol && resc/res0c >= rtol && itc <= maxits || itc < minits);
     end
     
-    
+    % make iterative convergence plot
     if (nop>0) && ~mod(step,abs(nop)), f10 = figure(10);  f10.Visible = 'off'; end
     
     while  conv_crit(res,res0,it) > 0 % keep stepping until convergence criterion reached

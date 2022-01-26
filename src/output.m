@@ -25,7 +25,7 @@ for i=1:NPHS
 end
 
 if svop % save
-    name = ['../out/',RunID,'/',RunID,'_',num2str(step/abs(nop))];
+    name = [outdir,RunID,'/',RunID,'_',num2str(step/abs(nop))];
     save([name,'.mat'],'res','res0','time','z','x','u','w','p','f',...
         'ustar','wstar','pstar','usegr','wsegr','pcmpt',...
         'qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf',...
@@ -190,17 +190,21 @@ if (nop>0) %plot
     %drawnow;
     
     if svop % save
-        name = ['../out/',RunID,'/',RunID,'_sltn_',num2str(step/nop)];
+        name = [outdir,RunID,'/',RunID,'_sltn_',num2str(step/nop)];
         print(f1,'-dpdf','-r200','-opengl',name,'-loose');
-        name = ['../out/',RunID,'/',RunID,'_sgcp_',num2str(step/nop)];
+        name = [outdir,RunID,'/',RunID,'_sgcp_',num2str(step/nop)];
         print(f2,'-dpdf','-r200','-opengl',name,'-loose');
-        name = ['../out/',RunID,'/',RunID,'_fltr_',num2str(step/nop)];
+        name = [outdir,RunID,'/',RunID,'_fltr_',num2str(step/nop)];
         print(f3,'-dpdf','-r200','-opengl',name,'-loose');
-        name = ['../out/',RunID,'/',RunID,'_coef_',num2str(step/nop)];
+        name = [outdir,RunID,'/',RunID,'_coef_',num2str(step/nop)];
         print(f4,'-dpdf','-r200','-opengl',name,'-loose');
         
         if exist('f10','var')
-            name = ['../out/',RunID,'/',RunID,'_itconv_',num2str(step/nop)];
+            fig_pos               = f10.PaperPosition;
+            f10.PaperPositionMode = 'manual';
+            f10.PaperPosition     = [0 0 fig_pos(3) fig_pos(4)];
+            f10.PaperSize         = [fig_pos(3) fig_pos(4)];
+            name = [outdir,RunID,'/',RunID,'_itconv_',num2str(step/nop)];
             print(f10,'-dpdf','-r200','-opengl',name,'-loose');
         end
     end

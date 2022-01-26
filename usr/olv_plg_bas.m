@@ -6,8 +6,10 @@ clear; close all; clc;
 
 % set model parameters
 RunID  = 'olv20_plg20_bas60';
+outdir = '../out/';         % directory to save output files
 nop    = 1;                 % plot and store output every [nop] time step
 svop   = 0;                 % save output and print figures
+restart= 0;
 
 NPHS   = 3;                 % number of phases
 N      = 200;               % number of grid points in each direction
