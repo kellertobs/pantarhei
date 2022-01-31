@@ -71,6 +71,7 @@ if (nop>0) %plot
     axes(UN{:},'position',axpos(2,:));
     imagesc(x,z,squeeze(ustar(1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^*$ [m/s]'],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+    text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
     axes(UN{:},'position',axpos(3,:));
     imagesc(x,z,squeeze(pstar(1,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p^*$ [Pa]' ],TX{:},FS{:});
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
@@ -117,6 +118,7 @@ if (nop>0) %plot
         axes(UN{:},'position',axpos(4*(n-1)+2,:));
         imagesc(x,z,squeeze(usegr(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u_\Delta^',num2str(n),'$ [m/s]'],TX{:},FS{:});
         set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+        if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
         axes(UN{:},'position',axpos(4*(n-1)+3,:));
         imagesc(x,z,squeeze(pcmpt(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p_\Delta^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
         set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
@@ -139,6 +141,7 @@ if (nop>0) %plot
         set(gca,'XTickLabel',[]);
         axes(UN{:},'position',axpos(4*(n-1)+2,:));
         imagesc(x,z,squeeze(qfz (n,:,:)-(f(n,imz,:)+f(n,ipz,:))./2.*w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$q_{f,z}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
+        if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
         set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
         axes(UN{:},'position',axpos(4*(n-1)+3,:));
         imagesc(x,z,squeeze(Gvz (n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$\Gamma_{v,z}^',num2str(n),'$ [Pa/m]' ],TX{:},FS{:});
@@ -163,6 +166,7 @@ if (nop>0) %plot
         axes(UN{:},'position',axpos(4*(n-1)+2,:));
         imagesc(x,z,squeeze(log10(Kf(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$K_f^',num2str(n),'$ [m$^2$/Pas]'],TX{:},FS{:});
         set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+        if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
         axes(UN{:},'position',axpos(4*(n-1)+3,:));
         imagesc(x,z,squeeze(log10(Cv(n,:,:)))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$C_v^',num2str(n),'$ [Pas/m$^2$]' ],TX{:},FS{:});
         set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
@@ -207,6 +211,7 @@ if (nop>0) %plot
             name = [outdir,RunID,'/',RunID,'_itconv_',num2str(step/nop)];
             print(f10,'-dpdf','-r200','-opengl',name,'-loose');
         end
+
     end
 end
 

@@ -8,6 +8,13 @@ fprintf(1,'****************************************************\n\n');
 if svop && ~exist([outdir RunID],'dir'); mkdir([outdir RunID]); end
 if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
 
+% make a log file
+if svop
+    logfile = [outdir,'/',RunID,'/',RunID,'.log'];
+    if exist(logfile,'file'); delete(logfile); end
+    diary(logfile)
+end
+
 load('ocean.mat','ocean');
 
 % check if running verification using mms
