@@ -1,6 +1,6 @@
 
 clear all;
-load ../mms_out/olv_plg_bas/olv20_plg20_bas60_mms_NumConvTest_1.mat
+load ../mms_out/olv_bas/olv10_bas90_mms_NumConvTest_3.mat
 
 N2 = Nvec.^2;
 h = D./Nvec;

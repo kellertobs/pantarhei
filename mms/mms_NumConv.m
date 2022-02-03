@@ -1,18 +1,19 @@
 % pantarhei run script to verify code using MMS with a numerical
 % convergence test for different grid sizes.
-% calibrated for plagioclase + dacitic melt + magmatic volatile phase
+% calibrated for olivine rich rock and basaltic melt
 % YQW, 9 Dec 2020
 
 clear all; close all
 
-mpScript = 'olv_plg_bas_params';
+mpScript = 'olv_bas_params';
 
-f0   = [ 0.20; 0.20; 0.60]; % initial background phase fractions (unity sum!)
-dfr  = [ 0.01; 0.01;-0.02]; % initial random perturbation amplitude (unity sum!)
+f0   = [ 0.95; 0.05];   % initial background phase fractions (unity sum!)
+dfr  = [ 0.01;-0.01];   % initial random perturbation amplitude (unity sum!)
 
-Nvec = [25,40,50,60,80,100,120,150,200];
-% Nvec = 130;
+% Nvec = [25,40,50,60,80,100,120,150,200];
+Nvec = [100,200,300,400];
 Nn   = length(Nvec);
+Din  = 40;
 
 % initialize output matrices
 NormErr = nan(4, Nn);
@@ -23,13 +24,13 @@ Nit     = nan(1, Nn);
 
 % loop over N to get error between true and num solution
 for ni = 1:Nn
-    beta = 0.80;
+    beta = 0.60;
     
     % loop to adjust beta to achieve convergence
     while flag(1,ni)~=1 && beta>0.3
         
         [NormErrOut, MaxErrOut, Nit(ni), flag(ni)] = ...
-            RunSolver(mpScript, Nvec(ni), f0, dfr, beta);
+            RunSolver(mpScript, Din, Nvec(ni), f0, dfr, beta);
         
         NormErr(:,ni) = NormErrOut;
         MaxErr (:,ni) = MaxErrOut ;
@@ -69,7 +70,7 @@ save(FileName);
 
 %% function that runs the solver for given N, alpha
 
-function [NormErr, MaxErr, it, flag] = RunSolver (mpScript, Nin, f0, dfr, betaIn)
+function [NormErr, MaxErr, it, flag] = RunSolver (mpScript, Din, Nin, f0, dfr, betaIn)
 
 % initialize output error vectors
 NormErr = nan(4,1);
@@ -78,6 +79,8 @@ flag    = nan;
 
 % load phase parameters
 run(mpScript);
+RunID = [strjoin(strcat(PHS(:),num2str(round(f0*100), '%02d'))', '_') '_mms_N' num2str(Nin)];
+
 
 % load solver params and reassign based on inputs
 solver_params;
@@ -88,7 +91,7 @@ beta = betaIn;
 run('../usr/scales.m');
 
 % reset domain depth to multiple of max segr-comp-length
-D    = D.*max(delta0(:));
+D    = Din.*max(delta0(:));
 h    = D/N;
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
 

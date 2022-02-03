@@ -18,7 +18,7 @@ function [usrc, dqvx, Gvx, Qvx] = Calc_usrc (t, x, z, ...
 [u, ~   , dudx, dudz, dudx2, dudz2, ~     ] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
 [~, ~   , dwdx, dwdz, ~    , ~    , dwdxdz] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
-rho    = rho0.*ones(size(p)); 
+rho    = rho0.*ones(size(p));
 
 [Kv , Kf, Cv  , Cf  ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
 [dKv                ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
@@ -34,7 +34,7 @@ d_divv_x = dudx2 + dwdxdz;
 
 % momentum flux
 dqvxxdx  = - Kv.*          (dudx2 - 1/3*d_divv_x) ...
-           - dKv(:,:,:,2).*(dudx  - 1/3*div_v) + f.*dpdx + p.*dfdx;
+    - dKv(:,:,:,2).*(dudx  - 1/3*div_v) + f.*dpdx + p.*dfdx;
 dqvxzdz  = -0.5*Kv.*(dwdxdz + dudz2) - 0.5*dKv(:,:,:,3).*(dwdx + dudz);
 dqvx     = dqvxxdx + dqvxzdz;
 
@@ -42,7 +42,7 @@ dqvx     = dqvxxdx + dqvxzdz;
 Gvx  = - Cv.*(u-ustar) + pstar.*dfdx;
 
 % momentum source
-Qvx = f.*(rho-rhomix).*grav(2); 
+Qvx = f.*(rho-rhomix).*grav(2);
 
 % sum it all
 usrc = + dqvx - Gvx - Qvx;
@@ -57,7 +57,7 @@ function [wsrc, dqvz, Gvz, Qvz] = Calc_wsrc (t, x, z, ...
 [~, ~   , dudx, dudz, ~    , ~    , dudxdz] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
 [w, ~   , dwdx, dwdz, dwdx2, dwdz2, ~     ] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
-rho    = rho0.*ones(size(p)); 
+rho    = rho0.*ones(size(p));
 
 [Kv , Kf, Cv  , Cf  ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
 [dKv                ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
@@ -73,14 +73,14 @@ d_divv_z = dudxdz + dwdz2;
 
 dqvxzdx = -0.5*Kv.*(dwdx2 + dudxdz) - 0.5*dKv(:,:,:,2).*(dwdx + dudz);
 dqvzzdz = -    Kv         .*(dwdz2 - 1/3.*d_divv_z) ...
-          -   dKv(:,:,:,3).*(dwdz  - 1/3.*div_v) + f.*dpdz + p.*dfdz;
+    -   dKv(:,:,:,3).*(dwdz  - 1/3.*div_v) + f.*dpdz + p.*dfdz;
 dqvz = dqvxzdx + dqvzzdz;
 
 % momentum transfer
 Gvz = - Cv.*(w-wstar) + pstar.*dfdz;
 
 % momentum source
-Qvz = f.*(rho-rhomix).*grav(1); 
+Qvz = f.*(rho-rhomix).*grav(1);
 
 wsrc = + dqvz - Gvz - Qvz;
 
@@ -95,7 +95,7 @@ function [psrc, fsrc, dqf, Gf] = Calc_pfsrc (t, x, z, ...
 [u, ~   , dudx, ~   , ~    , ~    , ~] = Calc_u(t,x,z,Tmf(:,3),Xmf(:,3),Zmf(:,3),Amf(:,3),dmf(:,3));
 [w, ~   , ~   , dwdz, ~    , ~    , ~] = Calc_w(t,x,z,Tmf(:,4),Xmf(:,4),Zmf(:,4),Amf(:,4),dmf(:,4));
 
-rho = rho0.*ones(size(p)); 
+rho = rho0.*ones(size(p));
 
 [Kv , Kf  , Cv  , Cf         ] = closures_mms(f, eta0, d0, A, B, C, thtlim, cfflim);
 [~  , dKf                    ] = closurederivs_mms(f, dfdt, dfdx, dfdz, d0, eta0, A, B, C);
@@ -197,55 +197,99 @@ end
 
 function [dKv, dKf] = closurederivs_mms (f, dfdt, dfdx, dfdz, d0, eta0, A, B, C)
 
-f1    = f(1,:,:);   f2    = f(2,:,:);   f3    = f(3,:,:);
-d01   = d0(1);      d02   = d0(2);      d03   = d0(3);
-eta01 = eta0(1);    eta02 = eta0(2);    eta03 = eta0(3);
+NPHS = size(f,1);
+
+f1    = f(1,:,:);   f2    = f(2,:,:);
+d01   = d0(1);      d02   = d0(2);
+eta01 = eta0(1);    eta02 = eta0(2); 
 
 % fitting parameters for phase permissions
-A1_1 = A(1,1);      A1_2 = A(1,2);      A1_3 = A(1,3);
-A2_1 = A(2,1);      A2_2 = A(2,2);      A2_3 = A(2,3);
-A3_1 = A(3,1);      A3_2 = A(3,2);      A3_3 = A(3,3);
+A1_1 = A(1,1);      A1_2 = A(1,2);      
+A2_1 = A(2,1);      A2_2 = A(2,2);      
 
-B1_1 = B(1,1);      B1_2 = B(1,2);      B1_3 = B(1,3);
-B2_1 = B(2,1);      B2_2 = B(2,2);      B2_3 = B(2,3);
-B3_1 = B(3,1);      B3_2 = B(3,2);      B3_3 = B(3,3);
+B1_1 = B(1,1);      B1_2 = B(1,2);
+B2_1 = B(2,1);      B2_2 = B(2,2);
 
-C1_1 = C(1,1);      C1_2 = C(1,2);      C1_3 = C(1,3);
-C2_1 = C(2,1);      C2_2 = C(2,2);      C2_3 = C(2,3);
-C3_1 = C(3,1);      C3_2 = C(3,2);      C3_3 = C(3,3);
+C1_1 = C(1,1);      C1_2 = C(1,2);   
+C2_1 = C(2,1);      C2_2 = C(2,2);     
 
-% get derivatives for flux and transfer coeffs
-if nargout == 1
+if NPHS==2
     
-    [dKvdf1,dKvdf2,dKvdf3] = coeff_derivs(...
-        f1,f2,f3,d01,d02,d03,eta01,eta02,eta03,...
-        A1_1,A1_2,A1_3,A2_1,A2_2,A2_3,A3_1,A3_2,A3_3,...
-        B1_1,B1_2,B1_3,B2_1,B2_2,B2_3,B3_1,B3_2,B3_3,...
-        C1_1,C1_2,C1_3,C2_1,C2_2,C2_3,C3_1,C3_2,C3_3);
+    if nargout == 1
+        
+        [dKvdf1,dKvdf2] = coeff_derivs_twophase(...
+            f1,f2,d01,d02,eta01,eta02,...
+            A1_1,A1_2,A2_1,A2_2,B1_1,B1_2,B2_1,B2_2,C1_1,C1_2,C2_1,C2_2);
+        
+        % change to derivs wrt t, x, z
+        dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:);
+        dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:);
+        dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:);
+        dKv   = cat(4, dKvdt, dKvdx, dKvdz);
+    else
+        
+        [dKvdf1,dKvdf2,dKfdf1,dKfdf2] = coeff_derivs_twophase(...
+            f1,f2,d01,d02,eta01,eta02,...
+            A1_1,A1_2,A2_1,A2_2,B1_1,B1_2,B2_1,B2_2,C1_1,C1_2,C2_1,C2_2);
+        
+        % change to derivs wrt t, x, z
+        dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:);
+        dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:);
+        dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:);
+        dKv   = cat(4, dKvdt, dKvdx, dKvdz);
+        
+        dKfdt = dKfdf1.*dfdt(1,:,:) + dKfdf2.*dfdt(2,:,:);
+        dKfdx = dKfdf1.*dfdx(1,:,:) + dKfdf2.*dfdx(2,:,:);
+        dKfdz = dKfdf1.*dfdz(1,:,:) + dKfdf2.*dfdz(2,:,:);
+        dKf   = cat(4, dKfdt, dKfdx, dKfdz);
+    end
     
-    % change to derivs wrt t, x, z
-    dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:) + dKvdf3.*dfdt(3,:,:);
-    dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:) + dKvdf3.*dfdx(3,:,:);
-    dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:) + dKvdf3.*dfdz(3,:,:);
-    dKv   = cat(4, dKvdt, dKvdx, dKvdz);
-else
+elseif NPHS==3
     
-    [dKvdf1,dKvdf2,dKvdf3,dKfdf1,dKfdf2,dKfdf3] = coeff_derivs(...
-        f1,f2,f3,d01,d02,d03,eta01,eta02,eta03,...
-        A1_1,A1_2,A1_3,A2_1,A2_2,A2_3,A3_1,A3_2,A3_3,...
-        B1_1,B1_2,B1_3,B2_1,B2_2,B2_3,B3_1,B3_2,B3_3,...
-        C1_1,C1_2,C1_3,C2_1,C2_2,C2_3,C3_1,C3_2,C3_3);
+    f3    = f(3,:,:);   d03   = d0(3);      eta03 = eta0(3);
     
-    % change to derivs wrt t, x, z
-    dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:) + dKvdf3.*dfdt(3,:,:);
-    dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:) + dKvdf3.*dfdx(3,:,:);
-    dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:) + dKvdf3.*dfdz(3,:,:);
-    dKv   = cat(4, dKvdt, dKvdx, dKvdz);
+    A1_3  = A(1,3);     A2_3  = A(2,3);  
+    A3_1  = A(3,1);     A3_2  = A(3,2);     A3_3  = A(3,3);
+
+    B1_3  = B(1,3);     B2_3  = B(2,3);
+    B3_1  = B(3,1);     B3_2  = B(3,2);     B3_3  = B(3,3);
     
-    dKfdt = dKfdf1.*dfdt(1,:,:) + dKfdf2.*dfdt(2,:,:) + dKfdf3.*dfdt(3,:,:);
-    dKfdx = dKfdf1.*dfdx(1,:,:) + dKfdf2.*dfdx(2,:,:) + dKfdf3.*dfdx(3,:,:);
-    dKfdz = dKfdf1.*dfdz(1,:,:) + dKfdf2.*dfdz(2,:,:) + dKfdf3.*dfdz(3,:,:);
-    dKf   = cat(4, dKfdt, dKfdx, dKfdz);
+    C1_3  = C(1,3);     C2_3  = C(2,3);
+    C3_1  = C(3,1);     C3_2  = C(3,2);     C3_3  = C(3,3);
+    
+    % get derivatives for flux and transfer coeffs
+    if nargout == 1
+        
+        [dKvdf1,dKvdf2,dKvdf3] = coeff_derivs_threephase(...
+            f1,f2,f3,d01,d02,d03,eta01,eta02,eta03,...
+            A1_1,A1_2,A1_3,A2_1,A2_2,A2_3,A3_1,A3_2,A3_3,...
+            B1_1,B1_2,B1_3,B2_1,B2_2,B2_3,B3_1,B3_2,B3_3,...
+            C1_1,C1_2,C1_3,C2_1,C2_2,C2_3,C3_1,C3_2,C3_3);
+        
+        % change to derivs wrt t, x, z
+        dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:) + dKvdf3.*dfdt(3,:,:);
+        dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:) + dKvdf3.*dfdx(3,:,:);
+        dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:) + dKvdf3.*dfdz(3,:,:);
+        dKv   = cat(4, dKvdt, dKvdx, dKvdz);
+    else
+        
+        [dKvdf1,dKvdf2,dKvdf3,dKfdf1,dKfdf2,dKfdf3] = coeff_derivs_threephase(...
+            f1,f2,f3,d01,d02,d03,eta01,eta02,eta03,...
+            A1_1,A1_2,A1_3,A2_1,A2_2,A2_3,A3_1,A3_2,A3_3,...
+            B1_1,B1_2,B1_3,B2_1,B2_2,B2_3,B3_1,B3_2,B3_3,...
+            C1_1,C1_2,C1_3,C2_1,C2_2,C2_3,C3_1,C3_2,C3_3);
+        
+        % change to derivs wrt t, x, z
+        dKvdt = dKvdf1.*dfdt(1,:,:) + dKvdf2.*dfdt(2,:,:) + dKvdf3.*dfdt(3,:,:);
+        dKvdx = dKvdf1.*dfdx(1,:,:) + dKvdf2.*dfdx(2,:,:) + dKvdf3.*dfdx(3,:,:);
+        dKvdz = dKvdf1.*dfdz(1,:,:) + dKvdf2.*dfdz(2,:,:) + dKvdf3.*dfdz(3,:,:);
+        dKv   = cat(4, dKvdt, dKvdx, dKvdz);
+        
+        dKfdt = dKfdf1.*dfdt(1,:,:) + dKfdf2.*dfdt(2,:,:) + dKfdf3.*dfdt(3,:,:);
+        dKfdx = dKfdf1.*dfdx(1,:,:) + dKfdf2.*dfdx(2,:,:) + dKfdf3.*dfdx(3,:,:);
+        dKfdz = dKfdf1.*dfdz(1,:,:) + dKfdf2.*dfdz(2,:,:) + dKfdf3.*dfdz(3,:,:);
+        dKf   = cat(4, dKfdt, dKfdx, dKfdz);
+    end
 end
 
 end

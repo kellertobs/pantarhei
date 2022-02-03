@@ -7,8 +7,10 @@ clear; close all; clc;
 
 % set model parameters
 RunID  = 'olvbas_mms';
+outdir = '../out/';         % directory to save output files
 nop    = 1;                 % plot and store output every [nop] time step
-svop   = 0;                 % save output
+svop   = 1;                 % save output
+restart= 0;                 
 
 NPHS   = 2;                 % number of phases
 N      = 200;               % number of grid points in each direction

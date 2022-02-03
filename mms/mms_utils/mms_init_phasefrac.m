@@ -1,4 +1,11 @@
 
+switch BC
+    case 'periodic'
+        mms_params_periodicBC;
+    case 'closed'
+        mms_params_closedBC;
+end
+
 % define x and z positions of field variables
 XuGrid = cat(3,X-h/2,X(:,:,end)+h/2);   ZuGrid = cat(3,Z,Z(:,:,end));
 XwGrid = cat(2,X,X(:,end,:));           ZwGrid = cat(2,Z-h/2,Z(:,end,:)+h/2);
