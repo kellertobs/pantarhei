@@ -14,8 +14,8 @@ Zmf = 0.25/(2*piterm)*D ./ones(NPHS,4);
 
 % sine wave amplitude
 dp  = 1e+0*sign(dfr);
-du  = 1e-5*sign(dfr);
-dw  = 1e-5*sign(dfr);
+du  = 1e-4*sign(dfr);
+dw  = 1e-4*sign(dfr);
 dmf = [dfr, dp, du, dw];
 
 % dmf = [dfr, [1e2,1e-3,1e-3].*ones(NPHS,3)];

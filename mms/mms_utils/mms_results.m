@@ -8,16 +8,17 @@ uTrue = MMSsource('Calc_u', time, XuGrid, ZuGrid, Tmf(:,3), Xmf(:,3), Zmf(:,3), 
 wTrue = MMSsource('Calc_w', time, XwGrid, ZwGrid, Tmf(:,4), Xmf(:,4), Zmf(:,4), Amf(:,4), dmf(:,4));
 
 % 2-norm error
-fNormErr = 100*norm(f(:)-fTrue(:),2)./norm(fTrue(:),2);
-pNormErr = 100*norm(p(:)-pTrue(:),2)./norm(pTrue(:),2);
-uNormErr = 100*norm(u(:)-uTrue(:),2)./norm(uTrue(:),2);
-wNormErr = 100*norm(w(:)-wTrue(:),2)./norm(wTrue(:),2);
+fNormErr = 100*norm(f(:)-fTrue(:),2)./(norm(fTrue(:),2)+1e-32);
+pNormErr = 100*norm(p(:)-pTrue(:),2)./(norm(pTrue(:),2)+1e-32);
+uNormErr = 100*norm(u(:)-uTrue(:),2)./(norm(uTrue(:),2)+1e-32);
+wNormErr = 100*norm(w(:)-wTrue(:),2)./(norm(wTrue(:),2)+1e-32);
+
 
 % maximum error
-fMaxErr = 100*norm(f(:)-fTrue(:),inf)./norm(fTrue(:),inf);
-pMaxErr = 100*norm(p(:)-pTrue(:),inf)./norm(pTrue(:),inf);
-uMaxErr = 100*norm(u(:)-uTrue(:),inf)./norm(uTrue(:),inf);
-wMaxErr = 100*norm(w(:)-wTrue(:),inf)./norm(wTrue(:),inf);
+fMaxErr = 100*norm(f(:)-fTrue(:),inf)./(norm(fTrue(:),inf)+1e-32);
+pMaxErr = 100*norm(p(:)-pTrue(:),inf)./(norm(pTrue(:),inf)+1e-32);
+uMaxErr = 100*norm(u(:)-uTrue(:),inf)./(norm(uTrue(:),inf)+1e-32);
+wMaxErr = 100*norm(w(:)-wTrue(:),inf)./(norm(wTrue(:),inf)+1e-32);
 
 fprintf(1, '\n\n');
 fprintf(1,'2-norm [f,p,u,w] percent error: \n%.6e, %.6f, %.6f, %.6f.\n\n', ...

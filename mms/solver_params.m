@@ -14,11 +14,11 @@ tend   = 1;                 % model run time [s]
 NtMax  = 0;                 % max number of time steps
 
 nupd   = 100;               % update residual and permissions every [nupd] iterations
-atol   = 1e-5;              % absolute residual tolerance for convergence of iterative solver
+atol   = 1e-6;              % absolute residual tolerance for convergence of iterative solver
 rtol   = 1e-10;             % relative residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 1e5;               % maximum iteration count for iterative solver
-alpha  = 0.90;              % first-order iterative step size (reduce if not converging)
+alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.60;            % second-order iterative step size (reduce if not converging)
 cfl    = 0.99;              % Courant number to limit physical time step size
 flim   = 1e-16;             % limit phase fractions in coefficient closures

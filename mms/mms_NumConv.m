@@ -7,11 +7,11 @@ clear all; close all
 
 mpScript = 'olv_bas_params';
 
-f0   = [ 0.95; 0.05];   % initial background phase fractions (unity sum!)
+f0   = [ 0.10; 0.90];   % initial background phase fractions (unity sum!)
 dfr  = [ 0.01;-0.01];   % initial random perturbation amplitude (unity sum!)
 
-% Nvec = [25,40,50,60,80,100,120,150,200];
-Nvec = [100,200,300,400];
+Nvec = [25,40,50,60,80,100,120,150,200,400];
+Nvec = [300];
 Nn   = length(Nvec);
 Din  = 40;
 
@@ -24,10 +24,10 @@ Nit     = nan(1, Nn);
 
 % loop over N to get error between true and num solution
 for ni = 1:Nn
-    beta = 0.60;
+    beta = 0.80;
     
     % loop to adjust beta to achieve convergence
-    while flag(1,ni)~=1 && beta>0.3
+    while flag(1,ni)~=1 && beta>0
         
         [NormErrOut, MaxErrOut, Nit(ni), flag(ni)] = ...
             RunSolver(mpScript, Din, Nvec(ni), f0, dfr, beta);

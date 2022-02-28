@@ -1,11 +1,7 @@
 
-clear all;
-load ../mms_out/olv_bas/olv10_bas90_mms_NumConvTest_3.mat
 
-N2 = Nvec.^2;
-h = D./Nvec;
 
-Color = lines(3);
+
 
 %% convergence plots using grid spacing
 
