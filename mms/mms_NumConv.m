@@ -11,7 +11,6 @@ f0   = [ 0.10; 0.90];   % initial background phase fractions (unity sum!)
 dfr  = [ 0.01;-0.01];   % initial random perturbation amplitude (unity sum!)
 
 Nvec = [25,40,50,60,80,100,120,150,200,400];
-Nvec = [300];
 Nn   = length(Nvec);
 Din  = 40;
 
@@ -39,33 +38,6 @@ for ni = 1:Nn
         beta = beta - 0.1;
     end
 end
-
-%% save outputs
-
-clear Nn ni beta NormErrOut MaxErrOut ans
-
-% load parameters used in solution to save together with errors
-run(mpScript);
-solver_params;
-
-phsName = strjoin(strcat(PHS(:),num2str(f0*100, '%.0f'))', '_');
-
-% check problem scales (returns delta0, w0)
-run('../usr/scales.m');
-
-% reset domain depth to multiple of max segr-comp-length
-D    = D.*max(delta0(:));
-
-run('mms_utils/mms_params_periodicBC.m');
-
-if ~exist(outfolder,'dir'); mkdir(outfolder); end
-FileNameDefault = [outfolder phsName '_mms_NumConvTest'];
-
-% if file exists, adjust final number of file to avoid overwriting
-NfInDir = length(dir([FileNameDefault '*.mat']))+1;
-FileName = [FileNameDefault '_' num2str(NfInDir) '.mat'];
-
-save(FileName);
 
 
 %% function that runs the solver for given N, alpha
@@ -98,14 +70,14 @@ smth = (N/40)^2;            % smoothing parameter for random perturbation field
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
 
-% manufactured solution
+% get properties for manufactured solution
 switch BC
     case 'periodic'
-        run('mms_utils/mms_params_periodicBC.m');
+        run('../mms/mms_utils/mms_params_periodicBC.m');
         
     case 'closed'
         % this is not tested yet
-        run('mms_utils/mms_params_closedBC.m');
+        run('../mms/mms_utils/mms_params_closedBC.m');
 end
 
 fprintf(1, '    N = %d, beta = %.2f.', N, beta);

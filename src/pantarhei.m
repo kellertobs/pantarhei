@@ -88,7 +88,8 @@ step = 0;
 if restart>0
     fname = [outdir RunID,'/',RunID,'_',num2str(restart),'.mat'];
     load(fname); fprintf(1,'Loaded %s.\n', fname);
-    step = rsstep + 1;
+    rsstep = restart*nop;  % current step
+    step   = rsstep + 1;
 end
 
 % initialise coefficient closures and constitutive relations
