@@ -28,20 +28,15 @@ Mv = kv.'./kv;      % momentum diffusivity ratios
 Mf = kf.'./kf;      % volume diffusivity ratios
 
 % initialise coordinate arrays
-x     = -D/2+h/2:h:D/2-h/2;
-[X,~] = meshgrid(x,x);
-X     = repmat(X,1,1,NPHS);
-Z     = permute(X,[3,2,1]);
-X     = permute(X,[3,1,2]);
-
-% check if we are using a 1D or square domain
-if all([dfg;dfr]==0) % uniform fraction, 1D domain
-    Nz = N; Nx = 1;
-    Z = Z(1,:,1); X = X(1,:,(floor(0.5*N)));
-    z = x; x = 0;
-else % square domain
-    Nz = N; Nx = N; z = x;
-end
+if length(D)==1, D = [D,D]; end
+z     = -D(1)/2+h/2 : h : D(1)/2-h/2;
+x     = -D(2)/2+h/2 : h : D(2)/2-h/2;
+if all([dfg;dfr]==0), x = 0; end % use 1D domain if no phase frac variations
+[Z,X] = meshgrid(z,x);
+Z     = permute(repmat(Z,1,1,NPHS),[3,2,1]);
+X     = permute(repmat(X,1,1,NPHS),[3,2,1]);
+Nz    = length(z);
+Nx    = length(x);
 
 % initialise indexing for boundary condition stencils (order: {zBC, xBC})
 if ~iscell(BC), BC = {BC, BC}; end
@@ -68,7 +63,7 @@ for i = 1:smth
     rnd = rnd + diff(rnd(:,icz,:),2,2)./8 + diff(rnd(:,:,icx),2,3)./8;
 end
 rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D/12).^2).*exp(-Z.^2./(D/12).^2);
+gsn = exp(-X.^2./(D(2)/12).^2).*exp(-Z.^2./(D(1)/12).^2);
 
 % intialise solution, auxiliary, and residual fields
 u      = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
@@ -169,7 +164,6 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             upd_w = res_w.*dtau_w - mean(res_w(:).*dtau_w(:));
             upd_p = res_p.*dtau_p - mean(res_p(:).*dtau_p(:));
             upd_f = res_f.*dtau_f - mean(res_f(:).*dtau_f(:));
-            
         end
         
         % update velocity-pressure solution
