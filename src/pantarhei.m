@@ -43,14 +43,23 @@ else % square domain
     Nz = N; Nx = N; z = x;
 end
 
-% initialise indexing for boundary condition stencils
-if strcmp(BC,'periodic')
+% initialise indexing for boundary condition stencils (order: {zBC, xBC})
+if ~iscell(BC), BC = {BC, BC}; end
+
+% first, z direction
+if strcmp(BC{1},'periodic')
     icz = [Nz,1:Nz,1]; imz = [Nz,1:Nz]; ipz = [1:Nz,1];
-    icx = [Nx,1:Nx,1]; imx = [Nx,1:Nx]; ipx = [1:Nx,1];
-elseif strcmp(BC,'open') || strcmp(BC,'closed')
+elseif strcmp(BC{1},'open') || strcmp(BC{1},'closed')
     icz = [1,1:Nz,Nz]; imz = [1,1:Nz]; ipz = [1:Nz,Nz];
+end
+
+% now x direction
+if strcmp(BC{2},'periodic')
+    icx = [Nx,1:Nx,1]; imx = [Nx,1:Nx]; ipx = [1:Nx,1];
+elseif strcmp(BC{2},'open') || strcmp(BC{2},'closed')
     icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx];
 end
+
 
 % initialise smoothed random and gaussian perturbation fields
 rng(15);
@@ -148,18 +157,19 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         if step==0; res_f = 0.*res_f; end
         
         % prepare solution updates
-        if strcmp(BC,'closed')
-            res_u(:,:,[1,end]) = 0;
-            res_w(:,[1,end],:) = 0;
+        if any( strcmp(BC,'closed') )
+            if strcmp(BC{1},'closed'), res_w(:,[1,end],:) = 0; end
+            if strcmp(BC{2},'closed'), res_u(:,:,[1,end]) = 0; end
             upd_u = res_u.*dtau_u;
             upd_w = res_w.*dtau_w;
             upd_p = res_p.*dtau_p;
             upd_f = res_f.*dtau_f;
         else
-            upd_u = res_u.*dtau_u-mean(res_u(:).*dtau_u(:));
-            upd_w = res_w.*dtau_w-mean(res_w(:).*dtau_w(:));
-            upd_p = res_p.*dtau_p-mean(res_p(:).*dtau_p(:));
-            upd_f = res_f.*dtau_f-mean(res_f(:).*dtau_f(:));
+            upd_u = res_u.*dtau_u - mean(res_u(:).*dtau_u(:));
+            upd_w = res_w.*dtau_w - mean(res_w(:).*dtau_w(:));
+            upd_p = res_p.*dtau_p - mean(res_p(:).*dtau_p(:));
+            upd_f = res_f.*dtau_f - mean(res_f(:).*dtau_f(:));
+            
         end
         
         % update velocity-pressure solution

@@ -21,7 +21,8 @@ qfx = - (Kf(:,:,imx)+Kf(:,:,ipx))./2 .* (diff(p(:,:,icx),1,3)./h - Gx_pstar) ...
       + ( f(:,:,imx)+ f(:,:,ipx))./2 .* u;
 qfz = - (Kf(:,imz,:)+Kf(:,ipz,:))./2 .* (diff(p(:,icz,:),1,2)./h - Gz_pstar) ...
       + ( f(:,imz,:)+ f(:,ipz,:))./2 .* w;
-if strcmp(BC,'closed'); qfx(:,:,[1,end]) = 0; qfz(:,[1,end],:) = 0; end
+if strcmp(BC{1},'closed'); qfz(:,[1,end],:) = 0; end
+if strcmp(BC{2},'closed'); qfx(:,:,[1,end]) = 0; end
 
 % get parameterised mass transfer fields
 Gm  = Gmg.*gsn;
