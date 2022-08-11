@@ -36,9 +36,9 @@ X     = permute(X,[3,1,2]);
 
 % check if we are using a 1D or square domain
 if all([dfg;dfr]==0) % uniform fraction, 1D domain
-    Nz = N; Nx = 2;
-    Z = Z(1,:,1:2); X = X(1,:,(floor(0.5*N)+[0,1]));
-    z = x; x = 0.5*[x(1),x(end)];
+    Nz = N; Nx = 1;
+    Z = Z(1,:,1); X = X(1,:,(floor(0.5*N)));
+    z = x; x = 0;
 else % square domain
     Nz = N; Nx = N; z = x;
 end
