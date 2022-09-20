@@ -6,17 +6,17 @@
 clear; close all; clc;
 
 % load parameters file
-RunIDin = 'olv10bas90_dfg05dfr04';
+RunIDin = 'conv100_1lamb';
 load(['../out/' RunIDin '/' RunIDin '_par.mat']);
 
 
 % reassign some variables
 RunID   = RunIDin;      % RunID (sometimes I change it after)
 
-restart = 100;          % restart file index
+restart = 300;          % restart file index
 rsstep  = restart*nop;  % current step
 
-NtMax   = 2000;         % max time steps
+NtMax   = 3000;         % max time steps
 
 % run model
 run('../src/pantarhei');

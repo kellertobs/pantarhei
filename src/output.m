@@ -58,6 +58,11 @@ if (nop>0) %plot
         name = [outdir,RunID,'/',RunID,'_coef_',num2str(step/nop)];
         print(f4,'-dpdf','-r200','-opengl',name,'-loose');
         
+        if exist('f5','var')
+            name = [outdir,RunID,'/',RunID,'_vshr_',num2str(step/nop)];
+            print(f5,'-dpdf','-r200','-opengl',name,'-loose');
+        end
+        
         if exist('f10','var')
             fig_pos               = f10.PaperPosition;
             f10.PaperPositionMode = 'manual';

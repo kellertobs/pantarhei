@@ -60,10 +60,10 @@ end
 rng(15);
 rnd = randn(NPHS,Nz,Nx);
 for i = 1:smth
-    rnd = rnd + diff(rnd(:,icz,:),2,2)./8 + diff(rnd(:,:,icx),2,3)./8;
+    rnd = rnd + diff(rnd(:,icz,:),2,2)./12 + diff(rnd(:,:,icx),2,3)./12;
 end
 rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D(2)/12).^2).*exp(-Z.^2./(D(1)/12).^2);
+gsn = exp(-X.^2./(D(2)/8).^2).*exp(-Z.^2./(D(1)/8).^2);
 
 % intialise solution, auxiliary, and residual fields
 u      = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
@@ -75,6 +75,10 @@ else,                       f = f0 + dfr.*rnd + dfg.*gsn;
 end
 f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 if (mms), mms_init_phasefrac; end
+
+% shearing velocities
+ushr   = z'*Si + [x-h/2,x(end)+h/2] *Pu;    ushr = permute(ushr,[3,1,2]);
+wshr   = x *Si - [z-h/2,z(end)+h/2]'*Pu;    wshr = permute(wshr,[3,1,2]);
 
 qvxx   = zeros(NPHS,Nz,Nx  );  qvzz = zeros(NPHS,Nz,Nx  );  qvxz = zeros(NPHS,Nz+1,Nx+1);
 qfx    = zeros(NPHS,Nz,Nx+1);  qfz  = zeros(NPHS,Nz+1,Nx);
@@ -103,7 +107,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     
     tic;
     
-    % print time step diagnostics
+    % print time step diagnostic
     fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
     
     % store phase fractions of previous step
