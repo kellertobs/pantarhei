@@ -76,10 +76,14 @@ end
 f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 if (mms), mms_init_phasefrac; end
 
+% shearing velocities
+ushr   = z'*Si - x *Pu;    ushr = permute(ushr,[3,1,2]);
+wshr   = x *Si + z'*Pu;    wshr = permute(wshr,[3,1,2]);
+
 qvxx   = zeros(NPHS,Nz,Nx  );  qvzz = zeros(NPHS,Nz,Nx  );  qvxz = zeros(NPHS,Nz+1,Nx+1);
 qfx    = zeros(NPHS,Nz,Nx+1);  qfz  = zeros(NPHS,Nz+1,Nx);
 Gvx    = zeros(NPHS,Nz,Nx+1);  Gvz  = zeros(NPHS,Nz+1,Nx);
-Gf     = zeros(NPHS,Nz,Nx  );  Gfo  = Gf;
+Gf     = zeros(NPHS,Nz,Nx  );  Gfo  = Gf; 
 delta  = zeros(NPHS,NPHS,Nz,Nx);
 rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
@@ -135,7 +139,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         
         % update constitutive relations
         constitutive;
-       
+        
+        % update phase advection term when shear velocities are included
+        %fadv =  diff((f(:,:,imx)+f(:,:,ipx))./2.*(ushr),1,3)./h ...
+        %     + diff((f(:,imz,:)+f(:,ipz,:))./2.*(wshr),1,2)./h ...
+        %     - f.*(diff(ushr,1,3)./h + diff(wshr,1,2)./h);
+        % pure upwinding
+        fadv = max(ushr,0).*diff(f(:,:,imx),1,3)./h + min(ushr,0).*diff(f(:,:,ipx),1,3)./h + ...
+               max(wshr,0).*diff(f(:,imz,:),1,2)./h + min(wshr,0).*diff(f(:,ipz,:),1,2)./h;
+           
         % update physical time step
         dt   = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
         
@@ -143,7 +155,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
         res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
         res_p =             + diff(qfx          ,1,3)./h + diff(qfz ,1,2)./h + Gf  + Gm./rho;
-        res_f = (f-fo)./dt                                                   -(Gf + Gfo)./2 ;
+        res_f = (f-fo)./dt                                                   -(Gf + Gfo)./2 + fadv;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end

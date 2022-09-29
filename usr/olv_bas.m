@@ -12,8 +12,8 @@ svop   = 1;                 % save output
 restart= 0;
 
 NPHS   = 2;                 % number of phases
-N      = 400;               % number of grid points in each direction
-D      = 80;                % domain dimension in each direction [delta0]
+N      = 200;               % number of grid points in each direction
+D      = 40;                % domain dimension in each direction [delta0]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = nop*500;           % maximum number of time steps
 tend   = 1e16;              % model run time [s]
@@ -34,8 +34,10 @@ grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.90; 0.10];       % initial background phase fractions (unity sum!)
 dfg  = [-0.00;+0.00];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.01;+0.01];       % initial random perturbation amplitude (unity sum!)
-smth = (N/40)^2;            % smoothing parameter for random perturbation field
+smth = (N/20)^2;            % smoothing parameter for random perturbation field
 Gmg  = [1;-1].*0e-9;        % impose gaussian mass transfer rate (unity sum!)
+Pu   = 2;                   % pure shear strain rate [/s]
+Si   = 0;                   % simple shear strain rate [/s]
 
 rho0 = [ 3200; 2700];       % pure-phase densities
 eta0 = [1e+18;1e+02];       % pure-phase viscosities
@@ -52,6 +54,12 @@ scales;
 % reset domain depth to multiple of max segr-comp-length
 D  = D.*max(delta0(:));
 h  = D/N;
+
+% reset shear rate to multiple of max segr velocity scale
+[w0max,tmp] = max(abs(w0(:)));
+[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
+Pu = Pu * w0max / f0(iphs) / D(1);
+Si = Si * w0max / f0(iphs) / D(1);
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));

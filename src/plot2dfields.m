@@ -135,3 +135,37 @@ for n=1:NPHS
     set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 end
 
+
+fh = axb + 2*axh + 1*avs + axt;
+fw = axl + 2*axw + 1*ahs + axr;
+
+%%
+f5 = figure(5); f5.Visible = figvis;
+clf; colormap(ocean);
+set(f5,UN{:},'Position',[10 10 fw fh]);
+set(f5,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
+set(f5,'Color','w','InvertHardcopy','off');
+set(f5,'Resize','off');
+
+% predefine axis positions
+axpos = zeros(4, 4);
+for nrow = 1:2
+    for ncol = 1:2
+        axpos((nrow-1)*2 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(2-nrow)*axh+(2-nrow)*avs axw axh];
+    end
+end
+
+axes(UN{:},'position',axpos(1,:));
+imagesc(x,z,squeeze(wshr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^{shr}$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]);
+axes(UN{:},'position',axpos(2,:));
+imagesc(x,z,squeeze(ushr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^{shr}$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
+axes(UN{:},'position',axpos(3,:));
+imagesc(x,z,squeeze((wstar(1,1:end-1,:)+wstar(1,2:end,:))/2+wshr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^* + w^{shr}$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]); 
+axes(UN{:},'position',axpos(4,:))
+imagesc(x,z,squeeze((ustar(1,:,1:end-1)+ustar(1,:,2:end))/2+ushr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^* + u^{shr}$ [m/s]'],TX{:},FS{:});
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+
