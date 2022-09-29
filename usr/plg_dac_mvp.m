@@ -5,7 +5,7 @@
 clear; close all; clc;
 
 % set model parameters
-RunID  = 'pdm_conv100';
+RunID  = 'plgdacmvp';
 outdir = '../out/';         % directory to save output files
 nop    = 5;                 % plot and store output every [nop] time step
 svop   = 1;                 % save output and print figures
@@ -32,12 +32,10 @@ cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.10; 0.85; 0.05]; % initial background phase fractions (unity sum!)
-dfg  = [-0.09; 0.09; 0.00]; % initial guassian peak amplitude (unity sum!)
+dfg  = [-0.01; 0.01; 0.00]; % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.00; 0.00; 0.00]; % initial random perturbation amplitude (unity sum!)
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
 Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
-Pu   = 0;                   % pure shear strain rate [/s]
-Si   = 0;                   % simple shear strain rate [/s]
 
 rho0 = [3000 ;2500; 200];   % pure-phase densities
 eta0 = [1e+16;1e+2;1e-3];   % pure-phase viscosities
@@ -58,36 +56,5 @@ h  = D(1)/N;
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
 
-fInit = @(X,Z) initcond(X, Z, f0, dfg, dfr, D, h, 0.5, 2, smth);
-
 % run model
 run('../src/pantarhei');
-
-
-%% initial condition function
-
-function [f] = initcond (X, Z, f0, dfg, dfr, D, h, lambda, dA, smth)
-
-% initialize
-[NPHS, Nz, Nx] = size(Z);
-
-% make a sine wave 
-x = permute(X(1,1,:),[1,3,2]);
-zboundary = repmat( cos(2*pi.*x./(lambda*D(2)))*dA*h, Nz, 1);
-
-inds     = squeeze(Z(1,:,:)) > (0.4*D(1) + zboundary);
-df       = dfr(1)*randn(1,Nz,Nx);   % random noise
-df(inds) = df(inds) + dfg(1);       % add the top/bottom phase fraction diff
-
-% smooth out the random noise
-rng(15);
-icz = [1,1:Nz,Nz];
-icx = [1,1:Nx,Nx];
-
-for i = 1:smth
-    df = df + diff(df(:,icz,:),2,2)./8 + diff(df(:,:,icx),2,3)./8;
-end
-df(df<-f0(1)) = -f0(1);
-f = f0 + [df;-df;zeros(size(df))];
-
-end

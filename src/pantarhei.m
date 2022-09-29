@@ -76,10 +76,6 @@ end
 f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
 if (mms), mms_init_phasefrac; end
 
-% shearing velocities
-ushr   = z'*Si + [x-h/2,x(end)+h/2] *Pu;    ushr = permute(ushr,[3,1,2]);
-wshr   = x *Si - [z-h/2,z(end)+h/2]'*Pu;    wshr = permute(wshr,[3,1,2]);
-
 qvxx   = zeros(NPHS,Nz,Nx  );  qvzz = zeros(NPHS,Nz,Nx  );  qvxz = zeros(NPHS,Nz+1,Nx+1);
 qfx    = zeros(NPHS,Nz,Nx+1);  qfz  = zeros(NPHS,Nz+1,Nx);
 Gvx    = zeros(NPHS,Nz,Nx+1);  Gvz  = zeros(NPHS,Nz+1,Nx);
@@ -139,15 +135,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         
         % update constitutive relations
         constitutive;
-        
+       
         % update physical time step
         dt   = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
         
         % update residual fields
-        res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h - Gvx - Qvx    ;
-        res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h - Gvz - Qvz    ;
-        res_p =             + diff(qfx          ,1,3)./h + diff(qfz ,1,2)./h - Gf  - Gm./rho;
-        res_f = (f-fo)./dt                                                   +(Gf + Gfo)./2 ;
+        res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
+        res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
+        res_p =             + diff(qfx          ,1,3)./h + diff(qfz ,1,2)./h + Gf  + Gm./rho;
+        res_f = (f-fo)./dt                                                   -(Gf + Gfo)./2 ;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end

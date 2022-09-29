@@ -5,7 +5,7 @@
 clear; close all; clc;
 
 % set model parameters
-RunID  = 'olv20_plg20_bas60';
+RunID  = 'olvplgbas';
 outdir = '../out/';         % directory to save output files
 nop    = 1;                 % plot and store output every [nop] time step
 svop   = 0;                 % save output and print figures
