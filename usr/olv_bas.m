@@ -36,8 +36,8 @@ dfg  = [-0.00;+0.00];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.01;+0.01];       % initial random perturbation amplitude (unity sum!)
 smth = (N/20)^2;            % smoothing parameter for random perturbation field
 Gmg  = [1;-1].*0e-9;        % impose gaussian mass transfer rate (unity sum!)
-Pu   = 2;                   % pure shear strain rate [/s]
-Si   = 0;                   % simple shear strain rate [/s]
+Pu   = 0;                   %   pure shear strain rate [multiple of max segr speed]
+Si   = 0;                   % simple shear strain rate [multiple of max segr speed]
 
 rho0 = [ 3200; 2700];       % pure-phase densities
 eta0 = [1e+18;1e+02];       % pure-phase viscosities

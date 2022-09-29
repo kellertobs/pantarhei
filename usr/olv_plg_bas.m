@@ -36,6 +36,8 @@ dfg  = [ 0.00;-0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.02; 0.02; 0.00]; % initial random perturbation amplitude (unity sum!)
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
 Gmg  = [0;-0;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
+Pu   = 0;                   %   pure shear strain rate [multiple of max segr speed]
+Si   = 0;                   % simple shear strain rate [multiple of max segr speed]
 
 rho0 = [ 3200; 2400; 2700]; % pure-phase densities
 eta0 = [1e+18;1e+15;1e+01]; % pure-phase viscosities
@@ -45,11 +47,9 @@ d0   = [ 5e-3; 5e-3; 5e-3]; % characteristic size of local-scale phase constitue
 A  =  [ 0.60, 0.30, 0.25; ...
         0.40, 0.25, 0.20; ...
         0.30, 0.25, 0.20; ];  % permission slopes
-    
 B  =  [ 0.45, 0.35, 0.20; ...
         0.35, 0.30, 0.35; ...
         0.45, 0.54, 0.01; ];  % permission step locations
-    
 C  =  [ 0.40, 0.40, 0.20; ...
         0.40, 0.40, 0.20; ...
         0.60, 0.20, 0.60; ];  % permission step widths
@@ -60,6 +60,12 @@ scales;
 % reset domain depth to multiple of max segr-comp-length
 D  = D.*max(delta0(:));
 h  = D/N;
+
+% reset shear rate to multiple of max segr velocity scale
+[w0max,tmp] = max(abs(w0(:)));
+[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
+Pu = Pu * w0max / f0(iphs) / D(1);
+Si = Si * w0max / f0(iphs) / D(1);
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
