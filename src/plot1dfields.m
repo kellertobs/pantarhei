@@ -36,9 +36,9 @@ set(gca,TL{:},TS{:}); set(gca,'YTickLabel',[]);
 xlabel('$p$ [Pa]',TX{:},FS{:}); legend([strcat('$p^',num2str((1:NPHS)'),'$');'$p^*$'],'Location','southoutside');
 
 axes(UN{:},'position',axpos(4,:));
-plot(squeeze(f),z,0,0); ylim(0.5*[-D(1),D(1)]);
+plot(squeeze(f-f0),z,0,0); ylim(0.5*[-D(1),D(1)]);
 set(gca,TL{:},TS{:}); set(gca,'YTickLabel',[]);
-xlabel('$f$',TX{:},FS{:}); legend([strcat('$f^',num2str((1:NPHS)'),'$');'N/A  '],'Location','southoutside');
+xlabel('$f-f_0$',TX{:},FS{:}); legend([strcat('$f^',num2str((1:NPHS)'),'$');'N/A  '],'Location','southoutside');
 
 annotation('textbox','String',['time = ',num2str(time,'%.1e'),' [s]'],'Position',[0.5,0.9,0.1,0.1],'LineStyle','none','HorizontalAlignment','center',TX{:},FS{:});
 

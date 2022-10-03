@@ -144,13 +144,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         %fadv =  diff((f(:,:,imx)+f(:,:,ipx))./2.*(ushr),1,3)./h ...
         %     + diff((f(:,imz,:)+f(:,ipz,:))./2.*(wshr),1,2)./h ...
         %     - f.*(diff(ushr,1,3)./h + diff(wshr,1,2)./h);
-        % pure upwinding
+        % pure upwinding (1st order)
         fadv = max(ushr,0).*diff(f(:,:,imx),1,3)./h + min(ushr,0).*diff(f(:,:,ipx),1,3)./h + ...
                max(wshr,0).*diff(f(:,imz,:),1,2)./h + min(wshr,0).*diff(f(:,ipz,:),1,2)./h;
            
-        % update physical time step
-        dt   = min(2*dto,cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2));  % [s]
-        
+        % update physical time step [s]
+        dt   = min([ 2*dto; 
+                     cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2); 
+                     cfl*0.5*h./max(abs([ushr(:);wshr(:)]) + 1e-16) ]);  
+
         % update residual fields
         res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
         res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
