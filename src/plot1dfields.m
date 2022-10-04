@@ -21,17 +21,17 @@ set(f1,'Resize','off');
 axpos = [axl*ones(4,1) + (0:3)'*axw+(0:3)'*ahs axb*ones(4,1) axw*ones(4,1) axh*ones(4,1)];
 
 axes(UN{:},'position',axpos(1,:));
-plot(squeeze(w),[z-h/2,z(end)+h/2],squeeze(wstar),[z-h/2,z(end)+h/2]); ylim(0.5*[-D(1),D(1)]);
+plot(squeeze(w),[z-h/2,z(end)+h/2],squeeze(wstar),[z-h/2,z(end)+h/2],':'); ylim(0.5*[-D(1),D(1)]);
 ylabel('depth [m]'); set(gca,TL{:},TS{:}); 
 xlabel('$w$ [m/s]',TX{:},FS{:}); legend([strcat('$w^',num2str((1:NPHS)'),'$');'$w^*$'],'Location','southoutside');
 
 axes(UN{:},'position',axpos(2,:));
-plot(squeeze(u(:,:,1)),z,squeeze(ustar(1,:,1)),z); ylim(0.5*[-D(1),D(1)]);
+plot(squeeze(u(:,:,1)),z,squeeze(ustar(1,:,1)),z,':'); ylim(0.5*[-D(1),D(1)]);
 set(gca,TL{:},TS{:}); set(gca,'YTickLabel',[]);
 xlabel('$u$ [m/s]',TX{:},FS{:}); legend([strcat('$u^',num2str((1:NPHS)'),'$');'$u^*$'],'Location','southoutside');
 
 axes(UN{:},'position',axpos(3,:));
-plot(squeeze(p),z,squeeze(pstar),z); ylim(0.5*[-D(1),D(1)]);
+plot(squeeze(p),z,squeeze(pstar),z,':'); ylim(0.5*[-D(1),D(1)]);
 set(gca,TL{:},TS{:}); set(gca,'YTickLabel',[]);
 xlabel('$p$ [Pa]',TX{:},FS{:}); legend([strcat('$p^',num2str((1:NPHS)'),'$');'$p^*$'],'Location','southoutside');
 

@@ -13,7 +13,7 @@ pstar_Gfz = (pstar(:,imz,:)+pstar(:,ipz,:))./2.*diff(f(:,icz,:),1,2)./h;
 qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3 - Pu) + f.*p;
 qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3 + Pu) + f.*p;
 qvxz  = -(Kv(:,imz,imx)+Kv(:,ipz,imx)+Kv(:,imz,ipx)+Kv(:,ipz,ipx))./4 ...
-    .* (diff(u(:,icz,:),1,2)./h + diff(w(:,:,icx),1,3)./h + Si)./2;
+    .* (diff(u(:,icz,:),1,2)./h + diff(w(:,:,icx),1,3)./h + 2*Si)./2;
 % if strcmp(BC,'closed'); qvxz(:,[1,end],:) = 0; end
 
 % get volume flux fields
