@@ -25,7 +25,7 @@ if strcmp(BC{1},'closed'); qfz(:,[1,end],:) = 0; end
 if strcmp(BC{2},'closed'); qfx(:,:,[1,end]) = 0; end
 
 % get parameterised mass transfer fields
-Gm  = Gmg.*gsn;
+Gm  = Gmg.*ones(size(f));
 
 % get momentum transfer fields
 Gvx = (Cv(:,:,imx)+Cv(:,:,ipx))./2 .* (u-ustar) - pstar_Gfx;

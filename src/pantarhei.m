@@ -55,31 +55,32 @@ elseif strcmp(BC{2},'open') || strcmp(BC{2},'closed')
     icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx];
 end
 
-
-% initialise smoothed random and gaussian perturbation fields
-rng(15);
-rnd = randn(NPHS,Nz,Nx);
-for i = 1:smth
-    rnd = rnd + diff(rnd(:,icz,:),2,2)./12 + diff(rnd(:,:,icx),2,3)./12;
+% intialise solution and residual fields. First phase fraction.
+if exist('fInit','var')  
+    f = fInit(X, Z);
+else
+    % initialise smoothed random and gaussian perturbation fields
+    rng(15);
+    rnd = randn(NPHS,Nz,Nx);
+    for i = 1:smth
+        rnd = rnd + diff(rnd(:,icz,:),2,2)./12 + diff(rnd(:,:,icx),2,3)./12;
+    end
+    rnd = rnd./max(abs(rnd(:)));
+    gsn = exp(-X.^2./(D(2)/8).^2).*exp(-Z.^2./(D(1)/8).^2);
+    f   = f0 + dfr.*rnd + dfg.*gsn;
 end
-rnd = rnd./max(abs(rnd(:)));
-gsn = exp(-X.^2./(D(2)/8).^2).*exp(-Z.^2./(D(1)/8).^2);
 
-% intialise solution, auxiliary, and residual fields
-u      = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
-w      = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
-p      = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
-
-if exist('fInit','var'),    addpath('./inits/'); f = fInit(X, Z);
-else,                       f = f0 + dfr.*rnd + dfg.*gsn;
-end
-f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;  res_f = 0*f;  dtau_f = res_f;
+f = max(1e-16,min(1-1e-16,f));  f = f./sum(f,1);  fo = f;  fi = f;     res_f = 0*f;  dtau_f = res_f;
+u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
+w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
+p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
 if (mms), mms_init_phasefrac; end
 
 % shearing velocities
 ushr   = z'*Si - x *Pu;    ushr = permute(ushr,[3,1,2]);
 wshr   = x *Si + z'*Pu;    wshr = permute(wshr,[3,1,2]);
 
+% initialise auxiliary fields
 qvxx   = zeros(NPHS,Nz,Nx  );  qvzz = zeros(NPHS,Nz,Nx  );  qvxz = zeros(NPHS,Nz+1,Nx+1);
 qfx    = zeros(NPHS,Nz,Nx+1);  qfz  = zeros(NPHS,Nz+1,Nx);
 Gvx    = zeros(NPHS,Nz,Nx+1);  Gvz  = zeros(NPHS,Nz+1,Nx);
