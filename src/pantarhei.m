@@ -76,15 +76,16 @@ w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0
 p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
 if (mms), mms_init_phasefrac; end
 
-% shearing velocities
-ushr   = z'*Si - x *Pu;    ushr = permute(ushr,[3,1,2]);
-wshr   = x *Si + z'*Pu;    wshr = permute(wshr,[3,1,2]);
+% shearing velocities on the staggered grid
+ushr   = z'*Si - [x-0.5*h,x(end)+0.5*h] *Pu;    ushr = permute(ushr,[3,1,2]);
+wshr   = x *Si + [z-0.5*h,z(end)+0.5*h]'*Pu;    wshr = permute(wshr,[3,1,2]);
 
 % initialise auxiliary fields
 qvxx   = zeros(NPHS,Nz,Nx  );  qvzz = zeros(NPHS,Nz,Nx  );  qvxz = zeros(NPHS,Nz+1,Nx+1);
 qfx    = zeros(NPHS,Nz,Nx+1);  qfz  = zeros(NPHS,Nz+1,Nx);
 Gvx    = zeros(NPHS,Nz,Nx+1);  Gvz  = zeros(NPHS,Nz+1,Nx);
 Gf     = zeros(NPHS,Nz,Nx  );  Gfo  = Gf; 
+fadv   = zeros(NPHS,Nz,Nx  );  fadvo= fadv;
 delta  = zeros(NPHS,NPHS,Nz,Nx);
 rho    = rho0.*ones(size(f));
 rhomix = mean(mean(sum(f.*rho,1)));
@@ -112,7 +113,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
     
     % store phase fractions of previous step
-    fo = f;  dto = dt; Gfo = Gf;
+    fo = f;  dto = dt; Gfo = Gf; fadvo = fadv;
     
     % initialise non-linear iteration loop
     res  = 1e3;
@@ -142,12 +143,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         constitutive;
         
         % update phase advection term when shear velocities are included
-        %fadv =  diff((f(:,:,imx)+f(:,:,ipx))./2.*(ushr),1,3)./h ...
-        %     + diff((f(:,imz,:)+f(:,ipz,:))./2.*(wshr),1,2)./h ...
-        %     - f.*(diff(ushr,1,3)./h + diff(wshr,1,2)./h);
-        % pure upwinding (1st order)
-        fadv = max(ushr,0).*diff(f(:,:,imx),1,3)./h + min(ushr,0).*diff(f(:,:,ipx),1,3)./h + ...
-               max(wshr,0).*diff(f(:,imz,:),1,2)./h + min(wshr,0).*diff(f(:,ipz,:),1,2)./h;
+        fadv = advect(f, ushr, wshr, h, {advn, 'vdf'}, [2,3], BC);
            
         % update physical time step [s]
         dt   = min([ 2*dto; 
@@ -158,7 +154,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
         res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
         res_p =             + diff(qfx          ,1,3)./h + diff(qfz ,1,2)./h + Gf  + Gm./rho;
-        res_f = (f-fo)./dt                                                   -(Gf + Gfo)./2 + fadv;
+        res_f = (f-fo)./dt                                                   -(Gf + Gfo)./2 + (fadv+fadvo)./2;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end
@@ -192,10 +188,11 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            res = norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+1e-32) ...
-                + norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+1e-32) ...
-                + norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+1e-32) ...
-                + norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32);
+            resflds = [ norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+1e-32); 
+                        norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+1e-32);
+                        norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+1e-32);
+                        norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32)];
+            res = sum(resflds);
             if res>=10*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end

@@ -163,9 +163,9 @@ imagesc(x,z,squeeze(ushr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{
 set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
 axes(UN{:},'position',axpos(3,:));
-imagesc(x,z,squeeze((wstar(1,1:end-1,:)+wstar(1,2:end,:))/2+wshr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^* + w^{shr}$ [m/s]'],TX{:},FS{:});
+imagesc(x,z,squeeze(wstar+wshr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w^* + w^{shr}$ [m/s]'],TX{:},FS{:});
 set(gca,'XTickLabel',[]); 
 axes(UN{:},'position',axpos(4,:))
-imagesc(x,z,squeeze((ustar(1,:,1:end-1)+ustar(1,:,2:end))/2+ushr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^* + u^{shr}$ [m/s]'],TX{:},FS{:});
+imagesc(x,z,squeeze(ustar+ushr)); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u^* + u^{shr}$ [m/s]'],TX{:},FS{:});
 set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
 
