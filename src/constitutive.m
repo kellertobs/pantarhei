@@ -21,9 +21,10 @@ qfx = - (Kf(:,:,imx)+Kf(:,:,ipx))./2 .* (diff(p(:,:,icx),1,3)./h - Gx_pstar); %.
 %       + ( f(:,:,imx)+ f(:,:,ipx))./2 .* u;
 qfz = - (Kf(:,imz,:)+Kf(:,ipz,:))./2 .* (diff(p(:,icz,:),1,2)./h - Gz_pstar);% ...
 %       + ( f(:,imz,:)+ f(:,ipz,:))./2 .* w;
-fv  = advect(f, u, w, h, {advn, ''}, [2,3], BC);
+[Div_fv,advscl] = advect(f, u, w, h, {advn, ''}, [2,3], BC);
 if strcmp(BC{1},'closed'); qfz(:,[1,end],:) = 0; end
 if strcmp(BC{2},'closed'); qfx(:,:,[1,end]) = 0; end
+dqf = diff(qfx,1,3)./h + diff(qfz ,1,2)./h + Div_fv;
 
 % get parameterised mass transfer fields
 Gm  = Gmg.*ones(size(f));
@@ -33,8 +34,7 @@ Gvx = (Cv(:,:,imx)+Cv(:,:,ipx))./2 .* (u-ustar) - pstar_Gfx;
 Gvz = (Cv(:,imz,:)+Cv(:,ipz,:))./2 .* (w-wstar) - pstar_Gfz;
 
 %get volume transfer fields
-% Gf  =               Cf             .* (p-pstar) - vstar_Gf - Gm./rhostar;
-Gf  =               Cf             .* (p-pstar) - vstar_Gf - Gm./rhostar + fv;
+Gf  =               Cf             .* (p-pstar) - vstar_Gf - Gm./rhostar;
 
 % get momentum source fields
 Qvx = -(f(:,:,imx)+f(:,:,ipx))./2.*((rho(:,:,imx)+rho(:,:,ipx))./2-rhomix).*grav(2);

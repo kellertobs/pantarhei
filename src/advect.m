@@ -1,4 +1,4 @@
-function [adv] = advect (f, u, w, h, scheme, dim, BC)
+function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 %
 % [adv] = advect (f, u, w, h, scheme, dim, BC)
 %
@@ -28,121 +28,119 @@ function [adv] = advect (f, u, w, h, scheme, dim, BC)
 
 
 % collect information on the dimensions and BCs corresponding to (z,x)
-zdim = dim(1); xdim = dim(2);
-zBC  = BC{1};  xBC  = BC{2};
+zdim = dim(1);  zBC = BC{1};
+xdim = dim(2);  xBC = BC{2};
 
 fcc = f;
 fdv = f.*(diff(u,1,xdim)./h + diff(w,1,zdim)./h);   % f x div(v)
 
+% collect velocities on - (m) and + (p) faces
+[umpos, umneg, uppos, upneg] = facevels(u, xdim);
+[wmpos, wmneg, wppos, wpneg] = facevels(w, zdim);
 
+
+% in this switch, define phase fractions at the cell faces, split into
+% positive and negative flux components
 switch scheme{1}
     case 'centr'        
         % centered differences, prone to num dispersion
-        [um , up ] = facevels(u, xdim);
-        [wm , wp ] = facevels(w, zdim);
+        [fxm, fxp] = makestencil(f, xdim, xBC);
+        [fzm, fzp] = makestencil(f, zdim, zBC);
         
-        [fmx, fpx] = makestencil(f, xdim, xBC);
-        [fmz, fpz] = makestencil(f, zdim, zBC);
+        fxppos = (fcc+fxp)./2;      fxpneg = (fcc+fxp)./2;
+        fxmpos = (fcc+fxm)./2;      fxmneg = (fcc+fxm)./2;
+        fzppos = (fcc+fzp)./2;      fzpneg = (fcc+fzp)./2;
+        fzmpos = (fcc+fzm)./2;      fzmneg = (fcc+fzm)./2;
         
-        adv = ( up.*(fcc+fpx)./2 - um.*(fcc+fmx)./2 )./h + ...
-              ( wp.*(fcc+fpz)./2 - wm.*(fcc+fmz)./2 )./h;
-      
     case 'upwd1'
         % upwind differences, prone to num diffusion
-        % NB upwind designed for v x grad(f), so we add f x div(v) here
-        uc = centervels(u, xdim);
-        wc = centervels(w, zdim);
+        % flux conservative approach, split velocities into + and -
+        [fxm, fxp] = makestencil(f, xdim, xBC);
+        [fzm, fzp] = makestencil(f, zdim, zBC);
         
-        [fmx, fpx] = makestencil(f, xdim, xBC);
-        [fmz, fpz] = makestencil(f, zdim, zBC);
-        
-        adv = max(uc,0).*(fcc-fmx)./h + min(uc,0).*(-fcc+fpx)./h + ...
-              max(wc,0).*(fcc-fmz)./h + min(wc,0).*(-fcc+fpz)./h + fdv;
-          
+        fxppos = fcc;      fxpneg = fxp;
+        fxmpos = fxm;      fxmneg = fcc;
+        fzppos = fcc;      fzpneg = fzp;
+        fzmpos = fzm;      fzmneg = fcc;
+
     case 'quick'
         % quick scheme == 3rd order upwind
-        uc = centervels(u, xdim);
-        wc = centervels(w, zdim);
+        % flux conservative approach, split velocities into + and -
+        [fxm, fxp, fmmx, fppx] = makestencil(f, xdim, xBC);
+        [fzm, fzp, fmmz, fppz] = makestencil(f, zdim, zBC);
         
-        [fmx, fpx, fmmx, fppx] = makestencil(f, xdim, xBC);
-        [fmz, fpz, fmmz, fppz] = makestencil(f, zdim, zBC);
+        fxppos = (2*fxp + 5*fcc - fxm )./6;      fxpneg = (2*fcc + 5*fxp - fppx)./6;
+        fxmpos = (2*fcc + 5*fxm - fmmx)./6;      fxmneg = (2*fxm + 5*fcc - fxp )./6;
+        fzppos = (2*fzp + 5*fcc - fzm )./6;      fzpneg = (2*fcc + 5*fzp - fppz)./6;
+        fzmpos = (2*fcc + 5*fzm - fmmz)./6;      fzmneg = (2*fzm + 5*fcc - fzp )./6;
 
-        adv = max(uc,0).*( 2*fpx + 3*fcc - 6*fmx + fmmx)./6./h + ...
-              min(uc,0).*(-2*fmx - 3*fcc + 6*fpx - fppx)./6./h + ...
-              max(wc,0).*( 2*fpz + 3*fcc - 6*fmz + fmmz)./6./h + ...
-              min(wc,0).*(-2*fmz - 3*fcc + 6*fpz - fppz)./6./h + fdv;
-        
-          
-          
           
     % the schemes below here definitely work for periodic BCs, 
     % still not sure about closed BCs
     case 'fromm'
-        % Fromm scheme that reduces oscillations
-        [um, up] = facevels(u, xdim);
-        [wm, wp] = facevels(w, zdim);
+        % Fromm scheme
+        [fxm, fxp, fmmx, fppx] = makestencil(f, xdim, xBC);
+        [fzm, fzp, fmmz, fppz] = makestencil(f, zdim, zBC);
         
-        [fmx, fpx, fmmx, fppx] = makestencil(f, xdim, xBC);
-        [fmz, fpz, fmmz, fppz] = makestencil(f, zdim, zBC);
+        fxppos = fcc + (fxp-fxm )./4;      fxpneg = fxp + (fcc-fppx)./4;
+        fxmpos = fxm + (fcc-fmmx)./4;      fxmneg = fcc + (fxm-fxp )./4;
+        fzppos = fcc + (fzp-fzm )./4 ;     fzpneg = fzp + (fcc-fppz)./4;
+        fzmpos = fzm + (fcc-fmmz)./4;      fzmneg = fcc + (fzm-fzp )./4;
         
-        adv = +     up .*( -(fppx-fpx)./8 + (fpx+fcc)./2 + (fcc-fmx )./8 )./h ...
-              - abs(up).*( -(fppx-fpx)./8 + (fpx-fcc)./4 - (fcc-fmx )./8 )./h ...
-              -     um .*( -(fpx -fcc)./8 + (fcc+fmx)./2 + (fmx-fmmx)./8 )./h ...
-              + abs(um).*( -(fpx -fcc)./8 + (fcc-fmx)./4 - (fmx-fmmx)./8 )./h ...
-              +     wp .*( -(fppz-fpz)./8 + (fpz+fcc)./2 + (fcc-fmz )./8 )./h ...
-              - abs(wp).*( -(fppz-fpz)./8 + (fpz-fcc)./4 - (fcc-fmz )./8 )./h ...
-              -     wm .*( -(fpz -fcc)./8 + (fcc+fmz)./2 + (fmz-fmmz)./8 )./h ...
-              + abs(wm).*( -(fpz -fcc)./8 + (fcc-fmz)./4 - (fmz-fmmz)./8 )./h;
-          
+    case 'weno3'
+        % 3rd order WENO from Jiang & Shu 1996, J Comp Physics
+        [fxppos, fxpneg, fxmpos, fxmneg] = weno3(fcc, xdim, xBC);
+        [fzppos, fzpneg, fzmpos, fzmneg] = weno3(fcc, zdim, zBC);
+        
     case 'weno5'
-        % 5th order WENO (slow) from Jiang & Shu 1996, J Comp Physics
-        % TODO: figure out a more elegant way to make use of staggered grid
-        [um, up] = facevels(u, xdim);
-        [wm, wp] = facevels(w, zdim);
-        
-        xdflux = weno5(f, up, xdim, xBC);
-        zdflux = weno5(f, wp, zdim, zBC);
-        
-        adv    = 1/h*(xdflux + zdflux);
+        % 5th order WENO from Jiang & Shu 1996, J Comp Physics
+        [fxppos, fxpneg, fxmpos, fxmneg] = weno5(fcc, xdim, xBC);
+        [fzppos, fzpneg, fzmpos, fzmneg] = weno5(fcc, zdim, zBC);
         
     case 'tvdim'
         % total variation diminishing approach from Sramek et al. 2010, GJI
-        % TODO: figure out a more elegant way to make use of staggered grid
-        [um, up] = facevels(u, xdim);
-        [wm, wp] = facevels(w, zdim);
-        
-        xdflux = tvd(f, up, xdim, xBC);
-        zdflux = tvd(f, wp, zdim, zBC);
-        
-        adv    = 1/h*(xdflux + zdflux);
-        
+        [fxppos, fxpneg, fxmpos, fxmneg] = tvd(fcc, uppos, upneg, xdim, xBC);
+        [fzppos, fzpneg, fzmpos, fzmneg] = tvd(fcc, wppos, wpneg, zdim, zBC);
 end
 
+
+% now calculate div(v x f)
+adv =  (uppos.*fxppos + upneg.*fxpneg - umpos.*fxmpos - umneg.*fxmneg + ...
+        wppos.*fzppos + wpneg.*fzpneg - wmpos.*fzmpos - wmneg.*fzmneg)./h;
+
+    
+    
 if strcmp(scheme{2}, 'vdf')
     % v x grad(f) = div (v x f) - f x div(v)
-    adv = adv - fdv;    
+    adv = adv - fdv;
 end
 
+if nargout>1
+    % return advection scale for calculating time step
+    [~, up] = facevels(u, xdim);
+    [~, wp] = facevels(w, zdim);
+    advscl = max(abs([f.*up; f.*wp]), [], 'all');
+end
 end
 
 
 
 %%  utility functions used for many schemes
 
-function [vm, vp] = facevels (v, dim)
-% return cell face velocities upwind (vm) and downwind (vp) of cell center
+function [vmpos, vmneg, vppos, vpneg] = facevels (v, dim)
+% return cell face velocities - (vm) and + (vp) of cell center
+
 if     dim==1, vm = v(1:end-1,:,:);    vp = v(2:end,:,:);
 elseif dim==2, vm = v(:,1:end-1,:);    vp = v(:,2:end,:);
 elseif dim==3, vm = v(:,:,1:end-1);    vp = v(:,:,2:end);
 end
-end
 
-function [vc] = centervels (v, dim)
-% return cell-centered velocities by taking averages
-if     dim==1, vc = 0.5*( v(1:end-1,:,:) + v(2:end,:,:) );
-elseif dim==2, vc = 0.5*( v(:,1:end-1,:) + v(:,2:end,:) );
-elseif dim==3, vc = 0.5*( v(:,:,1:end-1) + v(:,:,2:end) );
-end
+% now split the velocities into positive and negative
+vmpos = 0.5*(vm + abs(vm));    % positive velocity
+vmneg = 0.5*(vm - abs(vm));    % negative velocity
+
+vppos = 0.5*(vp + abs(vp));    % positive velocity
+vpneg = 0.5*(vp - abs(vp));    % negative velocity
 end
 
 function [flux] = shiftflux (flux, shift, dim, BC)
@@ -174,11 +172,8 @@ function [fm, fp, fmm, fpp, fppp] = makestencil (f, dim, BC)
 % makes stencil for calculate differences
 % use circshift which is faster than slicing
 % 
-% fmm  (i-2)
-% fm   (i-1)
-% fcc  ( i )
-% fp   (i+1)
-% fpp  (i+2)
+%  fmm    fm    fcc   fp     fpp   fpppp
+% (i-2)  (i-1)  (i)  (i+1)  (i+2)  (i+3)
 
 shift = circshift([1, 0, 0], [0, dim-1]);
 sten5 = (nargout>3) ;
@@ -202,70 +197,88 @@ if strcmp(BC,'closed')
         fp(end,:,:) = f(end,:,:);
         
         if (sten5)
-            fmm (    1:2  ,:,:) = f([  1,1  ],:,:);
-            fpp (end-1:end,:,:) = f([end,end],:,:);
-            fppp(end-2:end,:,:) = f(end-2:end,:,:);
+            fmm (    1:2  ,:,:) = repmat(f( 1 ,:,:),2,1,1);
+            fpp (end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
+            fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
         end
     elseif dim==2
         fm(:, 1 ,:) = f(:, 1 ,:);
         fp(:,end,:) = f(:,end,:);
         
         if (sten5)
-            fmm (:,    1:2  ,:) = f(:,[  1,1  ],:);
-            fpp (:,end-1:end,:) = f(:,[end,end],:);
-            fppp(:,end-2:end,:) = f(:,end-2:end,:);
+            fmm (:,    1:2  ,:) = repmat(f(:, 1 ,:),1,2,1);
+            fpp (:,end-1:end,:) = repmat(f(:,end,:),1,2,1);
+            fppp(:,end-2:end,:) = repmat(f(:,end,:),1,3,1);
         end
     elseif dim==3
         fm(:,:, 1 ) = f(:,:, 1 );
         fp(:,:,end) = f(:,:,end);
         
         if (sten5)
-            fmm (:,:,    1:2  ) = f(:,:,[  1,1  ]);
-            fpp (:,:,end-1:end) = f(:,:,[end,end]);
-            fppp(:,:,end-2:end) = f(:,:,end-2:end);
+            fmm (:,:,    1:2  ) = repmat(f(:,:, 1 ),1,1,2);
+            fpp (:,:,end-1:end) = repmat(f(:,:,end),1,1,2);
+            fppp(:,:,end-2:end) = repmat(f(:,:,end),1,1,3);
         end
     end
     
 end
 end
 
-%% weno5 functions
-function [dflux] = weno5 (f, v, dim, BC)
-% calculate the flux difference through the cells
+%% weno3 functions
+
+function [fppos, fpneg, fmpos, fmneg] = weno3 (f, dim, BC)
 
 % define shifting dimension 
 shift = circshift([1, 0, 0], [0, dim-1]);
 
-% % Lax-Friedrichs flux splitting to ensure upwind-bias
-% amp  = max(abs(v));
-% fpos = 0.5*(f.*v + f.*amp);
-% fneg = shiftflux(0.5*(f.*v - f.*amp), -shift, dim, BC);
-% 
-% % get positive fluxes
-% [fm, fp, fmm, fpp] = makestencil(fpos, dim, BC);
-% fluxpos = makeweno5poly(fmm, fm, fpos, fp, fpp);
-% 
-% % get negative fluxes
-% % just change the upwind direction to use the same function
-% [fm, fp, fmm, fpp] = makestencil(fneg, dim, BC);
-% fluxneg = makeweno5poly(fpp, fp, fneg, fm, fmm);
-% 
-% dflux = fluxpos - shiftflux(fluxpos, shift, dim, BC) + ...
-%         fluxneg - shiftflux(fluxneg, shift, dim, BC);
+% smaller stencil than weno 5
+[fm, fp, ~, fpp, ~] = makestencil(f, dim, BC);
+fppos = makeweno3poly( fm, f, fp);   %  left upwind polynomials
+fpneg = makeweno3poly(fpp, fp, f);   % right upwind polynomials
 
-vpos = 0.5*(v + abs(v));    % positive velocity
-vneg = 0.5*(v - abs(v));    % negative velocity
+% get the fractions for left cell face 
+% (cheat, just set boundaries to 0 for closed BCs)
+fmpos = shiftflux(fppos, shift, dim, BC);
+fmneg = shiftflux(fpneg, shift, dim, BC);
 
-[fm, fp, fmm, fpp] = makestencil(f, dim, BC);
-fpos    = makeweno5poly(fmm, fm, f, fp, fpp);
-fluxpos = vpos.*fpos;
+end
 
-[fm, fp, ~, fpp, fppp] = makestencil(f, dim, BC);
-fneg    = makeweno5poly(fppp, fpp, fp, f, fm);
-fluxneg = vneg.*fneg;
+function [fhalf] = makeweno3poly (fw, fc, fe)
+% 3rd order polynomials, also defined in Jiang & Shu, 1996, J Comp Physics
 
-dflux = fluxpos - shiftflux(fluxpos, shift, dim, BC) + ...
-        fluxneg - shiftflux(fluxneg, shift, dim, BC);
+% linear polynomials
+p1 = 0.5*(  fc + fe);
+p2 = 0.5*(3*fc - fw);
+
+% smoothness measure
+b1 = (p1 - fc).^2;
+b2 = (p2 - fc).^2;
+
+% weights
+g   = [1/3, 2/3]; 
+eps = 1e-16;    %stabiliser
+wp1 = g(1)./(b1.^2 + eps);
+wp2 = g(2)./(b2.^2 + eps);
+
+fhalf = ( wp1.*p1 + wp2.*p2 ) ./ (wp1 + wp2);
+
+end
+
+
+%% weno5 functions
+function [fppos, fpneg, fmpos, fmneg] = weno5 (f, dim, BC)
+
+% define shifting dimension 
+shift = circshift([1, 0, 0], [0, dim-1]);
+
+[fm, fp, fmm, fpp, fppp] = makestencil(f, dim, BC);
+fppos = makeweno5poly(fmm ,  fm, f, fp, fpp);   %  left upwind polynomials
+fpneg = makeweno5poly(fppp, fpp, fp, f, fm );   % right upwind polynomials
+
+% get the fractions for left cell face 
+% (cheat, just set boundaries to 0 for closed BCs)
+fmpos = shiftflux(fppos, shift, dim, BC);
+fmneg = shiftflux(fpneg, shift, dim, BC);
 end
 
 function [fhalf] = makeweno5poly (fww, fw, fc, fe, fee)
@@ -295,7 +308,7 @@ end
 
 %% tvd function
 
-function [dflux] = tvd (f, v, dim, BC)
+function [fppos, fpneg, fmpos, fmneg] = tvd (f, vpos, vneg, dim, BC)
 % total variation diminishing approach as described in Sramek 2010
 % flux is split to ensure upwind-bias.
 % vpos for positive fluxes; vneg for negative fluxes
@@ -305,12 +318,11 @@ shift = circshift([1, 0, 0], [0, dim-1]);
 
 [fm, fp, ~, fpp] = makestencil(f, dim, BC);
 
-vpos = 0.5*(v + abs(v));    % positive velocity
-vneg = 0.5*(v - abs(v));    % negative velocity
-
+% out/influx ratios on the cells that share the east face
 Rpos = ( shiftflux(vpos, shift,dim,BC).*(f  -fm))./( vpos.*(fp-f) );
 Rneg = ( shiftflux(vneg,-shift,dim,BC).*(fpp-fp))./( vneg.*(fp-f) );
 
+% use the flux ratios to retrieve weights
 % minmod approach
 % lpos = max(0, min(1,Rpos));
 % lneg = max(0, min(1,Rneg));
@@ -319,13 +331,14 @@ Rneg = ( shiftflux(vneg,-shift,dim,BC).*(fpp-fp))./( vneg.*(fp-f) );
 lpos = max( zeros(size(Rpos)), max(min(1,2*Rpos), min(2, Rpos)) );
 lneg = max( zeros(size(Rneg)), max(min(1,2*Rneg), min(2, Rneg)) );
 
-fpos = f  + 0.5*lpos.*(fp - f );
-fneg = fp + 0.5*lneg.*(f  - fp);
+% calculate + and - phase fractions on the east face
+fppos = f  + 0.5*lpos.*(fp - f );
+fpneg = fp + 0.5*lneg.*(f  - fp);
 
-Fpos = vpos.*fpos;
-Fneg = vneg.*fneg;
+% get the fractions for left cell face 
+% (cheat, just set boundaries to 0 for closed BCs)
+fmpos = shiftflux(fppos, shift, dim, BC);
+fmneg = shiftflux(fpneg, shift, dim, BC);
 
-dflux = Fpos - shiftflux(Fpos, shift, dim, BC) + ...
-        Fneg - shiftflux(Fneg, shift, dim, BC);
 end
 
