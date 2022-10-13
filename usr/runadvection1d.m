@@ -66,8 +66,8 @@ f1 = figure;
 Nrow = floor(sqrt(Nschm));
 Ncol = ceil(Nschm/Nrow);
 
-set(gcf,'Position',[200,500,Ncol*300,Nrow*200]);
-tiledlayout(Nrow,Ncol,'TileSpacing','compact','Padding','compact');
+set(gcf,'Position',[200,500,Ncol*250,Nrow*200]);
+tiledlayout(Nrow,Ncol,'TileSpacing','tight','Padding','tight');
 
 % plot initial condition
 for si = 1:Nschm

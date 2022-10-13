@@ -19,7 +19,7 @@ ftype = 'square';
 
 % advection scheme 
 % options: {'centr', 'upwd1', 'quick', 'fromm', 'weno3', 'weno5', 'tvdim'}
-schm  = {'quick','weno5'};
+schm  = {'fromm','weno5','tvdim'};
 
 %% initialize fields
 
@@ -51,25 +51,26 @@ switch ftype
         f0 = zeros(N,N) + 1*(x>-D/4 & x<D/4 & z>-D/4 & z<D/4);
         f0 = movmean(movmean(f0,3,1),3,2);
 end
-fmat = repmat(f0, 1, 1, Nschm);
 
 %% plot initial condition
 
 figure; 
 set(gcf,'Position',[500,400,400,700]);
-tiledlayout(4,2,'TileSpacing','compact','Padding','compact');
+tiledlayout(4,2,'TileSpacing','tight','Padding','tight');
 plotfield(x, f0, f0, [1,5,7], 'initial condition');
 
 
 %% run advection
+
+fmat = repmat(f0, 1, 1, Nschm);
 
 f1 = figure; 
 Nrow = 4; 
 Ncol = 2*Nschm; 
 pltvec = [0,2*Ncol,3*Ncol];
 
-set(gcf,'Position',[200,500,Ncol/2*300,Nrow*150]);
-tiledlayout(Nrow,Ncol,'TileSpacing','compact','Padding','compact');
+set(gcf,'Position',[200,500,Ncol/2*200,Nrow*120]);
+tiledlayout(Nrow,Ncol,'TileSpacing','tight','Padding','tight');
 
 % plot initial condition
 for si = 1:Nschm
@@ -146,7 +147,7 @@ function [] = plotfield (x, f, f0, iax, titletext)
 
 nexttile(iax(1),[2,2]); 
 imagesc(x,x,squeeze(f)); axis image; set(gca,'ydir','normal');
-colorbar; caxis([0,1]);
+colorbar('Location','southoutside'); caxis([0,1]);
 title(titletext);
 
 nexttile(iax(2),[1,2]); 
