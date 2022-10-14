@@ -16,10 +16,12 @@ w0 = 0;
 
 % initial condition type. options: {'square', 'gaussian'}
 ftype = 'square';
+BC    = 'closed';
 
 % advection scheme 
 % options: {'centr', 'upwd1', 'quick', 'fromm', 'weno3', 'weno5', 'tvdim'}
 schm  = {'fromm','weno5','tvdim'};
+
 
 %% initialize fields
 
@@ -37,10 +39,13 @@ vmax = max(abs([u(:);w(:)]));
 
 % time step
 dt   = 0.5*cfl*dx/vmax;
+if strcmp(BC, 'periodic'), tEnd = (2*D+dx)/vmax;
+else, tEnd = (0.5*D+dx)/vmax;
+end
 
 % dimensions and BCs corresponding to z, x
 dim = [1,2];
-BC  = {'periodic','periodic'};
+BC  = repmat({BC},1,2);
 
 % initialize field
 switch ftype
@@ -80,7 +85,7 @@ end
 t    = 0;
 step = 0;
 
-while t < (2*D+dx)/vmax
+while t < tEnd
     t    = t + dt;
     step = step + 1;
       
@@ -90,7 +95,7 @@ while t < (2*D+dx)/vmax
     end
     
     % plot
-    if mod(step,10)==0 || (t > (2*D+dx)/vmax)
+    if mod(step,10)==0 || (t > tEnd)
         figure(f1);
         for si = 1:Nschm
             plotfield(x, fmat(:,:,si), f0,  (2*si-1)+pltvec, schm{si});

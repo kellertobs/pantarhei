@@ -8,6 +8,25 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 % advects a quantity f on a velocity field represented by (u,w),
 % for 2D problems
 % 
+% Depending on the scheme, the stencil may cover 2--5 cells, and we split
+% the flux into positive and negative components to ensure upwind bias, so
+% that the equation of div(v f) on the i-th node is
+% 
+% div(v f) = 1/h x { [uppos fppos + upneg fpneg] -  [umpos fmpos + umneg fmneg] }
+% 
+%                            i-1/2     i+1/2
+%                             |         |
+%         |   i-2   |   i-1   |    i    |   i+1   |   i+2   |
+%       ..|----o----|----o----|----o----|----o----|----o----|...
+%         |   fmm   |    fm   |   fcc   |    fp   |   fpp   |
+%                             |         |
+% +flux:           ---------umpos-----umpos-------->
+%                           fmpos     fppos
+%                             |         |
+% -flux:           <--------umneg-----upneg---------
+%                           fmneg     fpneg
+% 
+% 
 % INPUTS
 % f         quantity you want to advect [Nz x Nx, or Nphs x Nz x Nx]
 % u         STAGGERED horiz velocity field [Nz x Nx+1, or Nphs x Nz x Nx+1]
@@ -31,13 +50,18 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 zdim = dim(1);  zBC = BC{1};
 xdim = dim(2);  xBC = BC{2};
 
-fcc = f;
-fdv = f.*(diff(u,1,xdim)./h + diff(w,1,zdim)./h);   % f x div(v)
+% calculate f x div(v)
+dudx = 0; dwdz = 0;
+if size(f,xdim)>1, dudx = diff(u,1,xdim)./h; end
+if size(f,zdim)>1, dwdz = diff(w,1,zdim)./h; end
+fdv = f.*(dudx + dwdz);   
 
 % collect velocities on - (m) and + (p) faces
 [umpos, umneg, uppos, upneg] = facevels(u, xdim);
 [wmpos, wmneg, wppos, wpneg] = facevels(w, zdim);
 
+% cell-centered value
+fcc = f;
 
 % in this switch, define phase fractions at the cell faces, split into
 % positive and negative flux components
@@ -105,11 +129,11 @@ end
 
 
 % now calculate div(v x f)
-adv =  (uppos.*fxppos + upneg.*fxpneg - umpos.*fxmpos - umneg.*fxmneg + ...
-        wppos.*fzppos + wpneg.*fzpneg - wmpos.*fzmpos - wmneg.*fzmneg)./h;
+duf = 0; dwf = 0;
+if size(f,xdim)>1, duf = (uppos.*fxppos + upneg.*fxpneg - umpos.*fxmpos - umneg.*fxmneg)./h; end
+if size(f,zdim)>1, dwf = (wppos.*fzppos + wpneg.*fzpneg - wmpos.*fzmpos - wmneg.*fzmneg)./h; end
+adv = duf + dwf;
 
-    
-    
 if strcmp(scheme{2}, 'vdf')
     % v x grad(f) = div (v x f) - f x div(v)
     adv = adv - fdv;
@@ -117,9 +141,7 @@ end
 
 if nargout>1
     % return advection scale for calculating time step
-    [~, up] = facevels(u, xdim);
-    [~, wp] = facevels(w, zdim);
-    advscl = max(abs([f.*up; f.*wp]), [], 'all');
+    advscl = max(abs([f.*(uppos+upneg); f.*(wppos+wpneg)]), [], 'all');
 end
 end
 
@@ -172,8 +194,9 @@ function [fm, fp, fmm, fpp, fppp] = makestencil (f, dim, BC)
 % makes stencil for calculating differences
 % use circshift which is faster than slicing
 % 
-%  fmm    fm    fcc   fp     fpp   fppp
-% (i-2)  (i-1)  (i)  (i+1)  (i+2)  (i+3)
+%         |   i-2   |   i-1   |    i    |   i+1   |   i+2   |
+%       ..|----o----|----o----|----o----|----o----|----o----|...
+%         |   fmm   |    fm   |   fcc   |    fp   |   fpp   |)
 
 shift = circshift([1, 0, 0], [0, dim-1]);
 sten5 = (nargout>3) ;
@@ -191,8 +214,8 @@ end
 
 % if the boundary is closed (could use more elegance) but i wanted to be
 % able to handle any specified dimension
-if strcmp(BC,'closed')
-    if dim==1 && size(f,dim)>1
+if strcmp(BC,'closed') && size(f,dim)>1
+    if dim==1 
         fm( 1 ,:,:) = f( 1 ,:,:);
         fp(end,:,:) = f(end,:,:);
         
@@ -201,7 +224,7 @@ if strcmp(BC,'closed')
             fpp (end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
             fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
         end
-    elseif dim==2 && size(f,dim)>1
+    elseif dim==2
         fm(:, 1 ,:) = f(:, 1 ,:);
         fp(:,end,:) = f(:,end,:);
         
@@ -210,7 +233,7 @@ if strcmp(BC,'closed')
             fpp (:,end-1:end,:) = repmat(f(:,end,:),1,2,1);
             fppp(:,end-2:end,:) = repmat(f(:,end,:),1,3,1);
         end
-    elseif dim==3 && size(f,dim)>1
+    elseif dim==3
         fm(:,:, 1 ) = f(:,:, 1 );
         fp(:,:,end) = f(:,:,end);
         
@@ -223,6 +246,9 @@ if strcmp(BC,'closed')
     
 end
 end
+
+
+
 
 %% weno3 functions
 
@@ -305,6 +331,8 @@ wp3 = g(3)./(b3.^2 + eps);
 fhalf = (wp1.*p1 + wp2.*p2 + wp3.*p3) ./ (wp1 + wp2 + wp3) ;
 
 end
+
+
 
 %% tvd function
 
