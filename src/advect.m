@@ -11,7 +11,7 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 % INPUTS
 % f         quantity you want to advect [Nz x Nx, or Nphs x Nz x Nx]
 % u         STAGGERED horiz velocity field [Nz x Nx+1, or Nphs x Nz x Nx+1]
-% u         STAGGERED vert  velocity field [Nz+1 x Nx, or Nphs x Nz+1 x Nx]
+% w         STAGGERED vert  velocity field [Nz+1 x Nx, or Nphs x Nz+1 x Nx]
 % h         grid spacing
 % scheme    info about advection scheme [2-element cell]
 %               1st element is the advection scheme name
@@ -169,10 +169,10 @@ end
 
 function [fm, fp, fmm, fpp, fppp] = makestencil (f, dim, BC)
 % 
-% makes stencil for calculate differences
+% makes stencil for calculating differences
 % use circshift which is faster than slicing
 % 
-%  fmm    fm    fcc   fp     fpp   fpppp
+%  fmm    fm    fcc   fp     fpp   fppp
 % (i-2)  (i-1)  (i)  (i+1)  (i+2)  (i+3)
 
 shift = circshift([1, 0, 0], [0, dim-1]);
@@ -192,7 +192,7 @@ end
 % if the boundary is closed (could use more elegance) but i wanted to be
 % able to handle any specified dimension
 if strcmp(BC,'closed')
-    if dim==1
+    if dim==1 && size(f,dim)>1
         fm( 1 ,:,:) = f( 1 ,:,:);
         fp(end,:,:) = f(end,:,:);
         
@@ -201,7 +201,7 @@ if strcmp(BC,'closed')
             fpp (end-1:end,:,:) = repmat(f(end,:,:),2,1,1);
             fppp(end-2:end,:,:) = repmat(f(end,:,:),3,1,1);
         end
-    elseif dim==2
+    elseif dim==2 && size(f,dim)>1
         fm(:, 1 ,:) = f(:, 1 ,:);
         fp(:,end,:) = f(:,end,:);
         
@@ -210,7 +210,7 @@ if strcmp(BC,'closed')
             fpp (:,end-1:end,:) = repmat(f(:,end,:),1,2,1);
             fppp(:,end-2:end,:) = repmat(f(:,end,:),1,3,1);
         end
-    elseif dim==3
+    elseif dim==3 && size(f,dim)>1
         fm(:,:, 1 ) = f(:,:, 1 );
         fp(:,:,end) = f(:,:,end);
         
