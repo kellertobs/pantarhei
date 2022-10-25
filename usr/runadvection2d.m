@@ -16,7 +16,7 @@ w0 = 0;
 
 % initial condition type. options: {'square', 'gaussian'}
 ftype = 'square';
-BC    = 'closed';
+BC    = 'periodic';
 
 % advection scheme 
 % options: {'centr', 'upwd1', 'quick', 'fromm', 'weno3', 'weno5', 'tvdim'}
@@ -65,7 +65,7 @@ tiledlayout(4,2,'TileSpacing','tight','Padding','tight');
 plotfield(x, f0, f0, [1,5,7], 'initial condition');
 
 
-%% run advection
+%% run advection using different schemes
 
 fmat = repmat(f0, 1, 1, Nschm);
 

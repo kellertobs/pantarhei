@@ -96,6 +96,14 @@ step = 0;
 
 % restart run?
 if restart>0
+    % load previous file to get ui, wi, pi, fi
+    % NB: these are not exactly the same as (ui, wi, pi, fi) if nop~=1, 
+    % but closer than zeros initialisation matrices
+    fname = [outdir RunID,'/',RunID,'_',num2str(restart-1),'.mat'];
+    load(fname); fprintf(1,'Loaded %s to get [u,w,p,f] of previous time step.\n', fname);
+    ui = u; wi = w; pi = p;  fi = f;
+    
+    % load current file 
     fname = [outdir RunID,'/',RunID,'_',num2str(restart),'.mat'];
     load(fname); fprintf(1,'Loaded %s.\n', fname);
     rsstep = restart*nop;  % current step

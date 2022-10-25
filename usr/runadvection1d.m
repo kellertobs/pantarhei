@@ -13,8 +13,8 @@ cfl = 0.4;    % courant flow number limiter
 % constant velocities (can try both + and - velocities)
 u0 = 1;
 
-% initial condition type. options: {'square', 'gaussian'}
-ftype = 'square';
+% initial condition type. options: {'square', 'triangle', 'gaussian'}
+ftype = 'gaussian';
 
 % advection scheme 
 % options: {'centr', 'upwd1', 'quick', 'fromm', 'weno3', 'weno5', 'tvdim'}
@@ -29,15 +29,15 @@ x   = linspace(-D,D,N);
 dx  = x(2) - x(1);
 
 % velocity field - have to assign w 
-u    = 0*ones(1,N);   
-w    = u0*ones(1,N+1);
+u    = u0*ones(1,N+1);   
+w    = zeros(2,N);
 vmax = max(abs([u(:);w(:)]));
 
 % time step
 dt   = 0.5*cfl*dx/vmax;
 
 % dimensions and BCs corresponding to z, x
-dim = [2,1];
+dim = [1,2];
 BC  = {'periodic','periodic'};
 
 % initialize field
@@ -45,11 +45,14 @@ f0 = zeros(size(x));
 switch ftype
     case 'square'
         f0(x>-D/4 & x<D/4) = 1;
+        f0 = movmean(movmean(f0,3),3);      % smooth
     case 'triangle'
-        f0(x>-D/4 & x<0  ) =  1 + x(x>-D/4 & x<0  ,:)/(D/4);       % triangular wave
-        f0(x>=0   & x<D/4) =  1 - x(x>=0   & x<D/4,:)/(D/4);  % triangular wave
+        f0(x>-D/4 & x<0  ) =  1 + x(x>-D/4 & x<0  )/(D/4);
+        f0(x>=0   & x<D/4) =  1 - x(x>=0   & x<D/4)/(D/4);
+        f0 = movmean(movmean(f0,3),3);      % smooth
+    case 'gaussian'
+        f0 = exp(- (x / (D/6)).^2);
 end
-f0 = movmean(movmean(f0,3),3);      % smooth
 
 %% plot initial condition
 
@@ -58,7 +61,7 @@ plot(x, f0, '+-');
 title('initial condition');
 
 
-%% run advection
+%% run advection using different schemes
 
 fmat = repmat(f0, 1, 1, Nschm);
 
