@@ -13,11 +13,12 @@ restart= 0;
 
 NPHS   = 3;                 % number of phases
 N      = 250;               % number of grid points in each direction
-D      = [100,100];               % domain dimension in each direction [delta0]
+D      = [100,100];         % domain dimension in each direction [delta0]
 BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
+advn   = 'quick';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
 nupd   = 100;               % update residual and permissions every [nupd] iterations
 atol   = 1e-5;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
@@ -26,7 +27,7 @@ maxits = 5000;              % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.50;              % second-order iterative step size (reduce if not converging)
 cfl    = 0.90;              % Courant number to limit physical time step size
-flim   = 1e-6;              % limit phase fractions in coefficient closures
+flim   = 1e-16;             % limit phase fractions in coefficient closures
 thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
@@ -48,27 +49,11 @@ A = [   0.60, 0.25, 0.30;
         0.20, 0.20, 0.20; 
         0.20, 0.20, 0.20; ];  % permission slopes
 B = [   0.30, 0.15, 0.55; 
-        0.48, 0.02, 0.50; 
+        0.48, 0.02, 0.50;   
         0.80, 0.08, 0.12; ];  % permission step locations
 C = [   0.20, 0.20, 0.20; 
         0.60, 0.60, 0.12; 
         0.20, 0.25, 0.50; ];  % permission step widths
-
-% check problem scales (returns delta0, w0)
-scales;
-
-% reset domain depth to multiple of max segr-comp-length
-D  = D.*max(delta0(:));
-h  = D(1)/N;
-
-% reset shear rate to multiple of max segr velocity scale
-[w0max,tmp] = max(abs(w0(:)));
-[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
-Pu = Pu * w0max / f0(iphs) / D(1);
-Si = Si * w0max / f0(iphs) / D(1);
-
-% set appropriate initial time step size
-dt = cfl.*h/2/max(w0(:));
 
 % run model
 run('../src/pantarhei');

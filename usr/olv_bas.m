@@ -18,6 +18,7 @@ BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = nop*500;           % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
+advn   = 'quick';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
 nupd   = 100;               % update residual and permissions every [nupd] iterations
 atol   = 1e-5;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
@@ -25,8 +26,8 @@ minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.4;               % second-order iterative step size (reduce if not converging)
-cfl    = 0.9;               % Courant number to limit physical time step size
-flim   = 1e-4;              % limit phase fractions in coefficient closures
+cfl    = 0.5;               % Courant number to limit physical time step size
+flim   = 1e-16;             % limit phase fractions in coefficient closures
 thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
@@ -47,22 +48,6 @@ d0   = [ 5e-3; 5e-3];       % characteristic size of local-scale phase constitue
 A = [ 0.5989, 0.1772; 0.0397, 0.1182 ];  % permission slopes
 B = [ 0.6870, 0.3130; 0.9998, 0.0002 ];  % permission step locations
 C = [ 9.0105, 0.1592; 0.7249, 3.5524 ];  % permission step widths
-
-% check problem scales (returns delta0, w0)
-scales;
-
-% reset domain depth to multiple of max segr-comp-length
-D  = D.*max(delta0(:));
-h  = D/N;
-
-% reset shear rate to multiple of max segr velocity scale
-[w0max,tmp] = max(abs(w0(:)));
-[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
-Pu = Pu * w0max / f0(iphs) / D(1);
-Si = Si * w0max / f0(iphs) / D(1);
-
-% set appropriate initial time step size
-dt = cfl.*h/2/max(w0(:));
 
 % run model
 run('../src/pantarhei');

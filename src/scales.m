@@ -1,3 +1,8 @@
+
+function [delta0, w0] = scales (f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim)
+
+NPHS = length(f0);
+
 % get diffusivity contrasts
 kv = eta0;          % momentum diffusivity
 kf = d0.^2./eta0;   % volume diffusivity
@@ -16,14 +21,10 @@ thtv = 1./(1./thtv + 1./(thtlim.^0.5*gmv)) + (gmv/thtlim.^0.5);
 thtf = 1./(1./thtf + 1./(thtlim.^0.5*gmf)) + (gmf/thtlim.^0.5);
 
 % get momentum and volume flux and transfer coefficients
-Kv =    f0 .*eta0       .*thtv;
-Kf =    f0 .*d0.^2./eta0.*thtf;
-Cv = (1-f0)./d0.^2.*Kv;
-Cf = (1-f0)./d0.^2.*Kf;
+Cv = f0.*(1-f0).*eta0.*thtv./d0.^2;
+Cf = f0.*(1-f0).*      thtf./eta0 ;
 
 % apply cutoff to coefficients to safeguard numerical stability
-Kv = Kv + max(geomean(geomean(Kv,3),2))./cfflim;
-Kf = Kf + max(geomean(geomean(Kf,3),2))./cfflim;
 Cv = 1./(1./Cv + 1./(min(geomean(geomean(Cv,3),2)).*cfflim));
 Cf = 1./(1./Cf + 1./(min(geomean(geomean(Cf,3),2)).*cfflim));
 
@@ -35,3 +36,5 @@ delta0 = delta0 - diag(diag(delta0));
 % get Darcy speed scales
 DeltaRho0 = abs(rho0 - rho0.');
 w0        = DeltaRho0.*max(abs(grav)).*f0.'.^2./Cv.';
+
+end

@@ -18,20 +18,21 @@ BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
+advn   = 'quick';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
 nupd   = 50;                % update residual and permissions every [nupd] iterations
 atol   = 1e-6;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.99;              % first-order iterative step size (reduce if not converging)
-beta   = 0.85;              % second-order iterative step size (reduce if not converging)
-cfl    = 1.00;              % Courant number to limit physical time step size
+alpha  = 0.90;              % first-order iterative step size (reduce if not converging)
+beta   = 0.50;              % second-order iterative step size (reduce if not converging)
+cfl    = 0.50;              % Courant number to limit physical time step size
 flim   = 1e-6;              % limit phase fractions in coefficient closures
 thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [ 0.20; 0.20; 0.60]; % initial background phase fractions (unity sum!)
+f0   = [ 0.10; 0.10; 0.80]; % initial background phase fractions (unity sum!)
 dfg  = [ 0.00;-0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.02; 0.02; 0.00]; % initial random perturbation amplitude (unity sum!)
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
@@ -53,22 +54,6 @@ B  =  [ 0.45, 0.35, 0.20; ...
 C  =  [ 0.40, 0.40, 0.20; ...
         0.40, 0.40, 0.20; ...
         0.60, 0.20, 0.60; ];  % permission step widths
-    
-% check problem scales (returns delta0, w0)
-scales;
-
-% reset domain depth to multiple of max segr-comp-length
-D  = D.*max(delta0(:));
-h  = D/N;
-
-% reset shear rate to multiple of max segr velocity scale
-[w0max,tmp] = max(abs(w0(:)));
-[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
-Pu = Pu * w0max / f0(iphs) / D(1);
-Si = Si * w0max / f0(iphs) / D(1);
-
-% set appropriate initial time step size
-dt = cfl.*h/2/max(w0(:));
 
 % run model
 run('../src/pantarhei');

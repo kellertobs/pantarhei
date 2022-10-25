@@ -18,6 +18,7 @@ BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
+advn   = 'quick';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
 nupd   = 50;                % update residual and permissions every [nupd] iterations
 atol   = 1e-5;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
@@ -53,22 +54,6 @@ B  =  [ 0.44, 0.18, 0.38; ...
 C  =  [ 0.30, 0.30, 0.30; ...
         0.60, 0.60, 0.12; ...
         0.60, 0.12, 0.60; ];  % permission step widths
-
-% check problem scales (returns delta0, w0)
-scales;
-
-% reset domain depth to multiple of max segr-comp-length
-D  = D.*max(delta0(:));
-h  = D/N;
-
-% reset shear rate to multiple of max segr velocity scale
-[w0max,tmp] = max(abs(w0(:)));
-[~   ,iphs] = ind2sub([NPHS,NPHS],tmp); % index of segregating phase
-Pu = Pu * w0max / f0(iphs) / D(1);
-Si = Si * w0max / f0(iphs) / D(1);
-
-% set appropriate initial time step size
-dt = cfl.*h/2/max(w0(:));
 
 % run model
 run('../src/pantarhei');
