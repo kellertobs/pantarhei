@@ -78,7 +78,7 @@ end
 %% intialise phase fraction
 
 if exist('fInit','var')  
-    f = fInit(X, Z);
+    f = fInit(X, Z, D);
 else
     % initialise smoothed random and gaussian perturbation fields
     rng(15);

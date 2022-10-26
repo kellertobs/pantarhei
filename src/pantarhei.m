@@ -76,10 +76,10 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
                      cfl*0.5*h./max(abs([ushr(:);wshr(:)]) + 1e-16) ]);  
 
         % update residual fields
-        res_u =             + diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h + Gvx + Qvx    ;
-        res_w =             + diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h + Gvz + Qvz    ;
-        res_p =             + dqf                                            + Gf  + Gm./rho;
-        res_f = (f-fo)./dt  + (fadv+fadvo)./2                                -(Gf + Gfo)./2 ;
+        res_u =            +    Div_qvx      + Gvx + Qvx     ;
+        res_w =            +    Div_qvz      + Gvz + Qvz     ;
+        res_p =            +    Div_qf       + Gf  + Gm./rho ;
+        res_f = (f-fo)./dt + (fadv+fadvo)./2 -(Gf + Gfo)./2 ;
         
         % call manufactured solution (if benchmarking)
         if (mms); mms_calc_source; end
