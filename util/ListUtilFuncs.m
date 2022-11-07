@@ -2,10 +2,10 @@ function ListUtilFuncs (prefix)
 
 if nargin==0, prefix = '..'; end
 
-anlypath = [prefix '/utils/anly/'];
+anlypath = [prefix '/util/anly/'];
 anlyfiles = dir([anlypath '*.m']);
 
-plotpath = [prefix '/utils/plot/'];
+plotpath = [prefix '/util/plot/'];
 plotfiles = dir([plotpath '*.m']);
 
 
