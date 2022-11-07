@@ -17,20 +17,20 @@
 clear; close all; %clc;
 
 % set model parameters
-RunID  = 'olv05_bas95_d01_w10';
+RunID  = 'olv05_bas95_d01_w10_weno5';
 outdir = '../out/';         % directory to save output files
-nop    = 10;                % plot and store output every [nop] time step
+nop    = 6;                % plot and store output every [nop] time step
 svop   = 1;                 % save output
 restart= 0;
 
 NPHS   = 2;                 % number of phases
 N      = 1000;              % number of grid points in each direction
-D      = 500;               % domain dimension in each direction [delta0]
+Dfac   = 500;               % domain dimension in each direction [delta0]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = nop*100;           % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
-advn   = 'weno5';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
+advn   = 'weno5';           % advection scheme. best ones: 'quick', 'weno5'
 nupd   = 100;               % update residual and permissions every [nupd] iterations
 atol   = 1e-5;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
@@ -65,7 +65,7 @@ C = [ 9.0105, 0.1592; 0.7249, 3.5524 ];  % permission step widths
 fInit = @(X,Z,Ddim) Gaussian1D(X, Z, Ddim, f0, [+0.10;-0.10], 0.1);
 
 % run model
-run('../src/pantarhei');
+run('../src/pantarhei'); 
 
 %%
 

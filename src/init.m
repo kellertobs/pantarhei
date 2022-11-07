@@ -1,4 +1,39 @@
 
+%% prepare folder and associated files
+
+% prepare workspace
+if svop && ~exist([outdir RunID],'dir'); mkdir([outdir RunID]); end
+
+% make a log file
+if svop
+    logfile = [outdir,'/',RunID,'/',RunID,'.log'];
+    if exist(logfile,'file'); delete(logfile); end
+    diary(logfile)
+end
+
+load('ocean.mat','ocean');
+
+% print header
+fprintf(1,'\n\n');
+fprintf(1,'**************************************************************\n');
+fprintf(1,'**********  pantarhei | multi-phase flow simulator  **********\n');
+fprintf(1,'**************************************************************\n\n');
+
+% check if running verification using mms
+if ~exist('mms','var'), mms = false; end
+if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n\n'); end
+
+% print some information on the run
+fprintf(1, 'NPHS\t= %d \n', NPHS);
+fprintf(1, 'f0  \t= [  '); fprintf(1, '%.2f  ', f0); fprintf('] with ');
+if dfg~=0, fprintf(1, 'gaussian '); end
+if dfr~=0, fprintf(1, 'random '); end
+if exist('fInit','var'), fprintf(1, 'fInit '); end
+fprintf(1, '\n');
+fprintf(1, 'N   \t= %.d \t\t D \t= %.0f x max(delta)\n', N, Dfac);
+fprintf(1, 'alpha\t= %.2f \t\t beta \t= %.2f\n', alpha, beta);
+
+
 %% calculate material properties,
 % reset nondimensional variables to dimensional values
 
@@ -12,7 +47,7 @@ Mf = kf.'./kf;      % volume diffusivity ratios
 [delta0, w0] = scales(f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim);
 
 % reset domain depth to multiple of max segr-comp-length
-D  = D.*max(delta0(:));
+D  = Dfac.*max(delta0(:));
 h  = D(1)/N;
 
 % reset shear rate to multiple of max segr velocity scale
@@ -23,26 +58,6 @@ Si = Si * w0max / f0(iphs) / D(1);
 
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
-
-
-%% prepare files and load options
-
-% prepare workspace
-if svop && ~exist([outdir RunID],'dir'); mkdir([outdir RunID]); end
-if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
-
-% make a log file
-if svop
-    logfile = [outdir,'/',RunID,'/',RunID,'.log'];
-    if exist(logfile,'file'); delete(logfile); end
-    diary(logfile)
-end
-
-load('ocean.mat','ocean');
-
-% check if running verification using mms
-if ~exist('mms','var'), mms = false; end
-if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n'); end
 
 
 %% initialise coordinate arrays and BCs
@@ -74,7 +89,6 @@ elseif strcmp(BC{2},'open') || strcmp(BC{2},'closed')
     icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx];
 end
 
-
 %% intialise phase fraction
 
 if exist('fInit','var')  
@@ -91,16 +105,20 @@ else
     f   = f0 + dfr.*rnd + dfg.*gsn;
 end
 
-f = max(1e-16,min(1-1e-16,f));  
-f = f./sum(f,1);  fo = f;  fi = f;     res_f = 0*f;  dtau_f = res_f;
-
+f = max(1e-16,min(1-1e-16,f)); f = f./sum(f,1); 
 
 %% initialise other fields
 
+rho    = rho0.*ones(size(f));
+rhomix = mean(mean(sum(f.*rho,1)));
+if (mms), mms_init_phasefrac; end
+if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
+if (mms), mms_plot_truesol; end
+
+fo = f;  fi = f;     res_f = 0*f;  dtau_f = res_f;
 u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
 w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
 p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
-if (mms), mms_init_phasefrac; end
 
 % shearing velocities on the staggered grid
 ushr   = z'*Si - [x-0.5*h,x(end)+0.5*h] *Pu;    ushr = permute(ushr,[3,1,2]);
@@ -113,5 +131,4 @@ Gvx    = zeros(NPHS,Nz,Nx+1);  Gvz  = zeros(NPHS,Nz+1,Nx);
 Gf     = zeros(NPHS,Nz,Nx  );  Gfo  = Gf; 
 fadv   = zeros(NPHS,Nz,Nx  );  fadvo= fadv;
 delta  = zeros(NPHS,NPHS,Nz,Nx);
-rho    = rho0.*ones(size(f));
-rhomix = mean(mean(sum(f.*rho,1)));
+

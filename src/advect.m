@@ -8,10 +8,9 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 % possible advection schemes :
 %       'centr', 'upwd1', 'quick', 'fromm', 'weno3', 'weno5', 'tvdim'
 %
-% advects a quantity f on a velocity field (u,w), for 2D problems
-%
-%
-% Depending on the scheme, the stencil may cover 2--5 cells, and we split
+% Advects a quantity f on a velocity field (u,w), for 2D problems.
+% 
+% Depending on the scheme, the stencil may cover 2--7 cells, and we split
 % the flux into positive and negative components to ensure upwind bias, so
 % that the equation of div(v f) on the i-th node is
 %
@@ -23,7 +22,7 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 %       ..|----o----|----o----|----o----|----o----|----o----|...
 %         |   fmm   |    fm   |   fcc   |    fp   |   fpp   |
 %                             |         |
-% +flux:           ---------umpos-----umpos-------->
+% +flux:           ---------umpos-----uppos-------->
 %                           fmpos     fppos
 %                             |         |
 % -flux:           <--------umneg-----upneg---------
@@ -53,7 +52,8 @@ function [adv, advscl] = advect (f, u, w, h, scheme, dim, BC)
 zdim = dim(1);  zBC = BC{1};
 xdim = dim(2);  xBC = BC{2};
 
-% collect velocities on - (m) and + (p) faces
+% collect velocities on i-1/2 (m) and i+1/2 (p) faces. 
+% On each face, velocities are split into (pos)itive & (neg)ative flux components
 [umpos, umneg, uppos, upneg] = facevels(u, xdim);
 [wmpos, wmneg, wppos, wpneg] = facevels(w, zdim);
 
@@ -102,7 +102,7 @@ switch scheme{1}
         
         fxppos = fcc + (fxp-fxm )./4;      fxpneg = fxp + (fcc-fppx)./4;
         fxmpos = fxm + (fcc-fmmx)./4;      fxmneg = fcc + (fxm-fxp )./4;
-        fzppos = fcc + (fzp-fzm )./4 ;     fzpneg = fzp + (fcc-fppz)./4;
+        fzppos = fcc + (fzp-fzm )./4;      fzpneg = fzp + (fcc-fppz)./4;
         fzmpos = fzm + (fcc-fmmz)./4;      fzmneg = fcc + (fzm-fzp )./4;
         
     case 'weno3'
@@ -127,12 +127,10 @@ adv = (uppos.*fxppos + upneg.*fxpneg - umpos.*fxmpos - umneg.*fxmneg)./h + ...
       (wppos.*fzppos + wpneg.*fzpneg - wmpos.*fzmpos - wmneg.*fzmneg)./h;
 
 % if you only want the advection term, remove f x div(v)
+% v x grad(f) = div (f v) - f x div(v)
 if strcmp(scheme{2}, 'vdf')
-    % calculate f x div(v)
-    fdv = f.*(diff(u,1,xdim)./h + diff(w,1,zdim)./h);
-    
-    % v x grad(f) = div (f v) - f x div(v)
-    adv = adv - fdv;
+    fdv = f.*(diff(u,1,xdim)./h + diff(w,1,zdim)./h);       % f x div(v)
+    adv = adv - fdv;                                        % v x grad(f)
 end
 
 if nargout>1
@@ -195,6 +193,8 @@ end
 % but i wanted to be able to handle any specified dimension
 if ~strcmp(BC,'periodic') && size(f,dim)>1
     if ischar(BC)
+        % boundary conditions either closed or open, so we repeat the
+        % boundary values
         if dim==1
             fmm(    1:2  ,:,:) = repmat(f( 1 ,:,:),2,1,1);
             fm (    1    ,:,:) =        f( 1 ,:,:);
@@ -227,6 +227,7 @@ if ~strcmp(BC,'periodic') && size(f,dim)>1
             end
         end
     else
+        % boundary conditions fixed to specified values
         if dim==1
             fmm(    1:2  ,:,:) = BC(1);
             fm (    1    ,:,:) = BC(1);

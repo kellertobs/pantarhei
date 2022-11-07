@@ -13,12 +13,12 @@ restart= 0;
 
 NPHS   = 3;                 % number of phases
 N      = 200;               % number of grid points in each direction
-D      = 100;               % domain dimension in each direction [delta0]
+Dfac   = 100;               % domain dimension in each direction [delta0]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
-advn   = 'quick';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
+advn   = 'weno5';           % advection scheme. best ones: 'quick', 'weno5'
 nupd   = 50;                % update residual and permissions every [nupd] iterations
 atol   = 1e-5;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-4;              % residual tolerance for convergence of iterative solver

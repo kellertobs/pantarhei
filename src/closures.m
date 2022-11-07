@@ -29,11 +29,8 @@ omfx = (Kf(:,:,imx)+Kf(:,:,ipx))./2./sum((Kf(:,:,imx)+Kf(:,:,ipx))./2,1);
 omfz = (Kf(:,imz,:)+Kf(:,ipz,:))./2./sum((Kf(:,imz,:)+Kf(:,ipz,:))./2,1);
 
 % get phase advection term
-ustar     = sum(omvx.*u,1);
-wstar     = sum(omvz.*w,1);
-% vstar_Gf  = diff((f(:,:,imx)+f(:,:,ipx))./2.*(ustar),1,3)./h ...
-%           + diff((f(:,imz,:)+f(:,ipz,:))./2.*(wstar),1,2)./h ...
-%           - f.*(diff(ustar,1,3)./h + diff(wstar,1,2)./h);
+ustar    = sum(omvx.*u,1);
+wstar    = sum(omvz.*w,1);
 vstar_Gf = advect(f, ustar, wstar, h, {advn, 'vdf'}, [2,3], BC);
 
 % get iterative pseudo-time steps

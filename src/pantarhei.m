@@ -1,15 +1,11 @@
 
-% print header
-fprintf(1,'\n\n****************************************************\n');
-fprintf(1,'*****  pantarhei | multi-phase flow simulator  *****\n');
-fprintf(1,'****************************************************\n\n');
-
 % initialise simulation information and matrices
 init;
 
 % initialise time stepping loop
 time = 0;
 step = 0;
+it   = 0;
 
 % restart run?
 if restart>0
@@ -61,18 +57,19 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         
         it = it+1;  % update iteration count
         
-        % update coefficient closures (only every 'nupd' iterations)
-        if ~mod(it,nupd); closures; end
+        % update coefficient closures and phase advection on shear velocity
+        % (only every 'nupd' iterations)
+        if ~mod(it,nupd)
+            closures; 
+            fadv = advect(f, ushr, wshr, h, {advn, 'vdf'}, [2,3], BC);
+        end
         
         % update constitutive relations
-        constitutive;
-        
-        % update phase advection term when shear velocities are included
-        fadv = advect(f, ushr, wshr, h, {advn, 'vdf'}, [2,3], BC);
+        constitutive;        
            
         % update physical time step [s]
         dt   = min([ 2*dto; 
-                     cfl/(max(abs([qfx(:);qfz(:)]+advscl))/(h/2) + max(abs(Gf(:)))./1e-2); 
+                     cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2); 
                      cfl*0.5*h./max(abs([ushr(:);wshr(:)]) + 1e-16) ]);  
 
         % update residual fields
@@ -129,7 +126,10 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     
     
     % update closures, constitutives, then plot and store model output
-    if (nop~=0) && ~mod(step,abs(nop)); closures; constitutive; output; end
+    if (nop~=0) && ~mod(step,abs(nop))
+        closures; constitutive; output; 
+        if (mms), mms_results; end
+    end
     
     % update time and step count
     time = time+dt;
@@ -140,4 +140,3 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     
 end  % time loop
 
-if (mms), mms_results; end

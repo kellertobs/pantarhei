@@ -19,17 +19,14 @@ qvxz  = -(Kv(:,imz,imx)+Kv(:,ipz,imx)+Kv(:,imz,ipx)+Kv(:,ipz,ipx))./4 ...
 Div_qvx = diff(qvxx(:,:,icx),1,3)./h + diff(qvxz,1,2)./h;
 Div_qvz = diff(qvzz(:,icz,:),1,2)./h + diff(qvxz,1,3)./h;
 
-% get diffusive part of volume flux fields
-qfx = - (Kf(:,:,imx)+Kf(:,:,ipx))./2 .* (diff(p(:,:,icx),1,3)./h - Gx_pstar); 
-qfz = - (Kf(:,imz,:)+Kf(:,ipz,:))./2 .* (diff(p(:,icz,:),1,2)./h - Gz_pstar);
+% get volume flux fields
+qfx = - (Kf(:,:,imx)+Kf(:,:,ipx))./2 .* (diff(p(:,:,icx),1,3)./h - Gx_pstar) + ( f(:,:,imx)+ f(:,:,ipx))./2 .* u; 
+qfz = - (Kf(:,imz,:)+Kf(:,ipz,:))./2 .* (diff(p(:,icz,:),1,2)./h - Gz_pstar) + ( f(:,imz,:)+ f(:,ipz,:))./2 .* w;
 if strcmp(BC{1},'closed'); qfz(:,[1,end],:) = 0; end
 if strcmp(BC{2},'closed'); qfx(:,:,[1,end]) = 0; end
 
-% calculate div of advective part of volume flux field directly
-[Div_fv,advscl] = advect(f, u, w, h, {advn, ''}, [2,3], BC);
-
 % divergence of volume fluxes (combine diffusive & advective parts)
-Div_qf = diff(qfx,1,3)./h + diff(qfz ,1,2)./h + Div_fv;
+Div_qf = diff(qfx,1,3)./h + diff(qfz,1,2)./h;
 
 % get parameterised mass transfer fields
 Gm  = Gmg.*ones(size(f));
