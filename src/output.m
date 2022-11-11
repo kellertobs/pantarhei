@@ -37,11 +37,6 @@ if (nop>0) %plot
     
     figvis = 'off'; % toggle for figure visibility on/off
     
-    % prepare for plotting
-    TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
-    TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',14};
-    UN = {'Units','Centimeters'};
-    
     if Nx == 1
         plot1dfields;
     else
