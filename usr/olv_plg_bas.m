@@ -13,7 +13,7 @@ restart= 0;
 
 NPHS   = 3;                 % number of phases
 N      = 200;               % number of grid points in each direction
-Dfac   = 100;               % domain dimension in each direction [delta0]
+Lfac   = 100;               % domain dimension in each direction [delta0]
 BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]

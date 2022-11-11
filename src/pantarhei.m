@@ -70,7 +70,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % update physical time step [s]
         dt   = min([ 2*dto; 
                      cfl/(max(abs([qfx(:);qfz(:)]))/(h/2) + max(abs(Gf(:)))./1e-2); 
-                     cfl*0.5*h./max(abs([ushr(:);wshr(:)]) + 1e-16) ]);  
+                     cfl*0.5*h./max(abs([ushr(:);wshr(:)]) + TINY) ]);  
 
         % update residual fields
         res_u =            +    Div_qvx      + Gvx + Qvx     ;
@@ -110,12 +110,12 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            resflds = [ norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+1e-32); 
-                        norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+1e-32);
-                        norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+1e-32);
-                        norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+1e-32)];
+            resflds = [ norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+TINY) ; 
+                        norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+TINY) ;
+                        norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+TINY) ;
+                        norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+TINY)];
             res = sum(resflds);
-            if res>=10*res0 && it>maxits/4 || isnan(res); error('!!! solver diverged, try again !!!'); end
+            if (res>=10*res0 && it>maxits/4) || isnan(res) || (step>0 && res>1e-2); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);

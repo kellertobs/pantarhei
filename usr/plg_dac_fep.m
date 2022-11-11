@@ -13,7 +13,7 @@ restart= 0;
 
 NPHS   = 3;                 % number of phases
 N      = 200;               % number of grid points in each direction
-Dfac   = 100;               % domain dimension in each direction [delta0]
+Lfac   = 100;               % domain dimension in each direction [delta0]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
@@ -26,7 +26,7 @@ minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.60;              % second-order iterative step size (reduce if not converging)
-cfl    = 1.00;              % Courant number to limit physical time step size
+cfl    = 0.90;              % Courant number to limit physical time step size
 flim   = 1e-6;              % limit phase fractions in coefficient closures
 thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
