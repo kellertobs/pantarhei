@@ -38,7 +38,6 @@ tmp       = dir(oldpath);
 oldfnames = {tmp.name}';
 oldfnames(strcmp(oldfnames, '.')) = [];
 oldfnames(strcmp(oldfnames, '..')) = [];
-%oldfnames = oldfnames(contains(oldfnames, '.pdf') | contains(oldfnames, '.mat') | contains(oldfnames, '.mp4'));
 
 % replace oldID with newID in filenames
 newfnames = strrep(oldfnames, oldID, newID);

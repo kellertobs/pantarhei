@@ -62,21 +62,10 @@ if (opt.xdsc)
     z = z./max(delta0(:));
     zunit = '$\times \delta_0$';
 else
-    zunit = 'm';
-    if floor(log10(D(1)))>3
-        % change units to km
-        x = 1e-3*x; z = 1e-3*z; D = 1e-3*D;
-        zunit = 'km';
-    end
+    [x, z, zunit] = RescaleLengths(x, z);
 end
 
-tyr = (365.25*24*60*60); tunit = 's';
-if max(t)>tyr
-    t = t/tyr; tunit = 'yr';
-    if max(t)>1e3
-        t = 1e-3*t; tunit = 'kyr';
-    end
-end
+[t, tunit] = RescaleTime(t);
 
 
 % prepare for plotting

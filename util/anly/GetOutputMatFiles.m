@@ -14,7 +14,7 @@ function [fp, fn, ft, NPHS] = GetOutputMatFiles (folder, RunID)
 % OUTPUTS
 % fp        string of parameter file name
 % fn        cell vector containing all the names of simulations
-% ft        string of time vector file name
+% ft        cell vector of other mat files
 % NPHS      number of phases
 % 
 % YQW, 19 January 2021
@@ -26,9 +26,12 @@ f    	= dir([outdir '*.mat']);
 
 % separate files into simulation and parameter files
 fname = strcat(outdir, {f.name}');
-fp    = char(fname(contains(fname, '_par' )));
-ft    = char(fname(contains(fname, '_tvec')));
-fn    = setdiff(fname, {fp; ft});
+fp    = fname(contains(fname, '_par' ));    %  parameter files
+fn    = fname(contains(fname, '_step'));    % simulation files
+ft    = setdiff(fname, [fp; fn]);           %  other mat files 
+
+% return parameter file name as a character vector
+fp = fp{1}; 
 
 % if you only want the parameters file, quit
 if nargout==1, return; end
@@ -45,6 +48,9 @@ end
 [~,order] = sort(ind,'ascend');
 fn        = fn(order);
 
+% return this last file as a character vector if there is only one
+if length(ft)==1, ft = ft{1}; end
+
 % check the number of phases
-if nargout>2, load(fp, 'NPHS'); end
+if nargout>3, load(fp, 'NPHS'); end
 end
