@@ -10,8 +10,9 @@ end
 % functions to calculate sources
 % (need separate functions because u, w, p/f are on different grids
 
-function [usrc, dqvx, Gvx, Qvx] = Calc_usrc (t, x, z, ...
+function [usrc, dqvx, Gvx, Qvx, dqvxxdx, dqvxzdz] = Calc_usrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
+% on the vertical cell faces where u is defined
 
 [f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
 [p, ~   , dpdx, ~                         ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
@@ -33,24 +34,24 @@ div_v    = dudx  + dwdz;
 d_divv_x = dudx2 + dwdxdz;
 
 % momentum flux
-dqvxxdx  = - Kv.*          (dudx2 - 1/3*d_divv_x) ...
-    - dKv(:,:,:,2).*(dudx  - 1/3*div_v) + f.*dpdx + p.*dfdx;
+dqvxxdx  = - Kv.*(dudx2 - 1/3*d_divv_x)  - dKv(:,:,:,2).*(dudx  - 1/3*div_v) + f.*dpdx + p.*dfdx;
 dqvxzdz  = -0.5*Kv.*(dwdxdz + dudz2) - 0.5*dKv(:,:,:,3).*(dwdx + dudz);
 dqvx     = dqvxxdx + dqvxzdz;
 
 % momentum transfer
-Gvx  = - Cv.*(u-ustar) + pstar.*dfdx;
+Gvx  = Cv.*(u-ustar) - pstar.*dfdx;
 
 % momentum source
-Qvx = f.*(rho-rhomix).*grav(2);
+Qvx = -f.*(rho-rhomix).*grav(2);
 
 % sum it all
-usrc = + dqvx - Gvx - Qvx;
+usrc = + dqvx + Gvx + Qvx;
 end
 
 
-function [wsrc, dqvz, Gvz, Qvz] = Calc_wsrc (t, x, z, ...
+function [wsrc, dqvz, Gvz, Qvz, gvz1, gvz2] = Calc_wsrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
+% on the horizontal cell faces where w is defined
 
 [f, dfdt, dfdx, dfdz                      ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
 [p, ~   , ~   , dpdz                      ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
@@ -71,24 +72,26 @@ pstar = sum(omCf.*p, 1);
 div_v    = dudx   + dwdz;
 d_divv_z = dudxdz + dwdz2;
 
-dqvxzdx = -0.5*Kv.*(dwdx2 + dudxdz) - 0.5*dKv(:,:,:,2).*(dwdx + dudz);
-dqvzzdz = -    Kv         .*(dwdz2 - 1/3.*d_divv_z) ...
-    -   dKv(:,:,:,3).*(dwdz  - 1/3.*div_v) + f.*dpdz + p.*dfdz;
+dqvxzdx = -0.5*Kv.*(dwdx2 + dudxdz)    - 0.5*dKv(:,:,:,2).*(dwdx + dudz);
+dqvzzdz = -    Kv.*(dwdz2 - 1/3.*d_divv_z) - dKv(:,:,:,3).*(dwdz - 1/3.*div_v) + f.*dpdz + p.*dfdz;
 dqvz = dqvxzdx + dqvzzdz;
 
 % momentum transfer
-Gvz = - Cv.*(w-wstar) + pstar.*dfdz;
+gvz1 =  Cv.*(w-wstar);
+gvz2 = pstar.*dfdz;
+Gvz = Cv.*(w-wstar) - pstar.*dfdz;
 
 % momentum source
-Qvz = f.*(rho-rhomix).*grav(1);
+Qvz = -f.*(rho-rhomix).*grav(1);
 
-wsrc = + dqvz - Gvz - Qvz;
+wsrc = + dqvz + Gvz + Qvz;
 
 end
 
 
-function [psrc, fsrc, dqf, Gf] = Calc_pfsrc (t, x, z, ...
+function [psrc, fsrc, adv] = Calc_pfsrc (t, x, z, ...
     d0,eta0,rho0,rhomix,grav,A,B,C,Gm, Amf,dmf,Tmf,Xmf,Zmf, thtlim, cfflim)
+% on the cell centers where p and f are defined
 
 [f, dfdt, dfdx, dfdz                 ] = Calc_f(t,x,z,Tmf(:,1),Xmf(:,1),Zmf(:,1),Amf(:,1),dmf(:,1));
 [p, ~   , dpdx, dpdz, dpdx2, dpdz2   ] = Calc_p(t,x,z,Tmf(:,2),Xmf(:,2),Zmf(:,2),Amf(:,2),dmf(:,2));
@@ -115,10 +118,11 @@ dqfxdx = -Kf.*(dpdx2 - dpdx2star) - dKf(:,:,:,2).*(dpdx - dpdxstar) + f.*dudx + 
 dqfzdz = -Kf.*(dpdz2 - dpdz2star) - dKf(:,:,:,3).*(dpdz - dpdzstar) + f.*dwdz + w.*dfdz;
 dqf    = dqfxdx + dqfzdz;
 
-Gf = - Cf.*(p-pstar) + ustar.*dfdx + wstar.*dfdz + Gm./rhostar;
+adv = ustar.*dfdx + wstar.*dfdz;
+Gf = Cf.*(p-pstar) - ustar.*dfdx - wstar.*dfdz - Gm./rhostar;
 
-psrc =       dqf - Gf - Gm./rho;
-fsrc = dfdt      + Gf;
+psrc =       dqf + Gf + Gm./rho;
+fsrc = dfdt      - Gf;
 
 end
 
@@ -310,8 +314,7 @@ end
 function [f, dfdt, dfdx, dfdz] = Calc_f (t, x, z, T, X, Z, f0, df0)
 % calculate phase fractions (cosines)
 
-% tfrac    = t./T;
-tfrac    = 0;
+tfrac    = t./T;
 xfrac    = x./X;
 zfrac    = z./Z;
 f        = f0 + df0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
@@ -332,21 +335,20 @@ end
 function [p, dpdt, dpdx, dpdz, dpdx2, dpdz2] = Calc_p (t, x, z, T, X, Z, P0, dP0)
 % pressure (cosines)
 
-% tfrac = t./T;
-tfrac = 0;
+tfrac = t./T;
 xfrac = x./X;
 zfrac = z./Z;
-p     = P0 + dP0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
+p     = P0 + dP0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
 
 if nargout>1
-    dpdt = -1./T.*dP0.*sin(tfrac).*cos(xfrac).*cos(zfrac);
-    dpdx = -1./X.*dP0.*cos(tfrac).*sin(xfrac).*cos(zfrac);
-    dpdz = -1./Z.*dP0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
+    dpdt = -1./T.*dP0.*sin(tfrac).*cos(xfrac).*sin(zfrac);
+    dpdx = -1./X.*dP0.*cos(tfrac).*sin(xfrac).*sin(zfrac);
+    dpdz =  1./Z.*dP0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
 end
 
 if nargout>4
-    dpdx2  = -1./(X.*X).*dP0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
-    dpdz2  = -1./(Z.*Z).*dP0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
+    dpdx2  = -1./(X.*X).*dP0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
+    dpdz2  = -1./(Z.*Z).*dP0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
 end
 
 end
@@ -355,22 +357,21 @@ end
 function [u, dudt, dudx, dudz, dudx2, dudz2, dudxdz] = Calc_u (t, x, z, T, X, Z, U0, dU0)
 % horizontal velocity (cosines)
 
-% tfrac = t./T;
-tfrac = 0;
+tfrac = t./T;
 xfrac = x./X;
 zfrac = z./Z;
-u     = U0 + dU0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
+u     = U0 + dU0.*cos(tfrac).*sin(xfrac).*sin(zfrac);
 
 if nargout>1
-    dudt = -1./T.*dU0.*sin(tfrac).*cos(xfrac).*cos(zfrac);
-    dudx = -1./X.*dU0.*cos(tfrac).*sin(xfrac).*cos(zfrac);
-    dudz = -1./Z.*dU0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
+    dudt = -1./T.*dU0.*sin(tfrac).*sin(xfrac).*sin(zfrac);
+    dudx =  1./X.*dU0.*cos(tfrac).*cos(xfrac).*sin(zfrac);
+    dudz =  1./Z.*dU0.*cos(tfrac).*sin(xfrac).*cos(zfrac);
 end
 
 if nargout>4
-    dudx2  = -1./(X.*X).*dU0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
-    dudz2  = -1./(Z.*Z).*dU0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
-    dudxdz =  1./(X.*Z).*dU0.*cos(tfrac).*sin(xfrac).*sin(zfrac);
+    dudx2  = -1./(X.*X).*dU0.*cos(tfrac).*sin(xfrac).*sin(zfrac);
+    dudz2  = -1./(Z.*Z).*dU0.*cos(tfrac).*sin(xfrac).*sin(zfrac);
+    dudxdz =  1./(X.*Z).*dU0.*cos(tfrac).*cos(xfrac).*cos(zfrac);
 end
 
 end
@@ -379,8 +380,7 @@ end
 function [w, dwdt, dwdx, dwdz, dwdx2, dwdz2, dwdxdz] = Calc_w (t, x, z, T, X, Z, W0, dW0)
 % vertical velocity (cosines)
 
-% tfrac = t./T;
-tfrac = 0;
+tfrac = t./T;
 xfrac = x./X;
 zfrac = z./Z;
 w     = W0 + dW0.*cos(tfrac).*cos(xfrac).*cos(zfrac);

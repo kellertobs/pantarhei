@@ -1,77 +1,87 @@
 
 %% print individual residuals
 
-% generate manufactured solutions
+% generate true manufactured solutions
 fTrue = MMSsource('Calc_f', time, X     , Z     , Tmf(:,1), Xmf(:,1), Zmf(:,1), Amf(:,1), dmf(:,1));
 pTrue = MMSsource('Calc_p', time, X     , Z     , Tmf(:,2), Xmf(:,2), Zmf(:,2), Amf(:,2), dmf(:,2));
 uTrue = MMSsource('Calc_u', time, XuGrid, ZuGrid, Tmf(:,3), Xmf(:,3), Zmf(:,3), Amf(:,3), dmf(:,3));
 wTrue = MMSsource('Calc_w', time, XwGrid, ZwGrid, Tmf(:,4), Xmf(:,4), Zmf(:,4), Amf(:,4), dmf(:,4));
 
-% 2-norm error
-fNormErr = 100*norm(f(:)-fTrue(:),2)./(norm(fTrue(:),2)+1e-32);
-pNormErr = 100*norm(p(:)-pTrue(:),2)./(norm(pTrue(:),2)+1e-32);
-uNormErr = 100*norm(u(:)-uTrue(:),2)./(norm(uTrue(:),2)+1e-32);
-wNormErr = 100*norm(w(:)-wTrue(:),2)./(norm(wTrue(:),2)+1e-32);
-
+% L2 norm error
+fNormErr = calcnormerr(f, fTrue, 2, NPHS);
+pNormErr = calcnormerr(p, pTrue, 2, NPHS);
+uNormErr = calcnormerr(u, uTrue, 2, NPHS);
+wNormErr = calcnormerr(w, wTrue, 2, NPHS);
 
 % maximum error
-fMaxErr = 100*norm(f(:)-fTrue(:),inf)./(norm(fTrue(:),inf)+1e-32);
-pMaxErr = 100*norm(p(:)-pTrue(:),inf)./(norm(pTrue(:),inf)+1e-32);
-uMaxErr = 100*norm(u(:)-uTrue(:),inf)./(norm(uTrue(:),inf)+1e-32);
-wMaxErr = 100*norm(w(:)-wTrue(:),inf)./(norm(wTrue(:),inf)+1e-32);
+fMaxErr = calcnormerr(f, fTrue, inf, NPHS);
+pMaxErr = calcnormerr(p, pTrue, inf, NPHS);
+uMaxErr = calcnormerr(u, uTrue, inf, NPHS);
+wMaxErr = calcnormerr(w, wTrue, inf, NPHS);
+
 
 fprintf(1, '\n\n');
-fprintf(1,'2-norm [f,p,u,w] percent error: \n%.6e, %.6f, %.6f, %.6f.\n\n', ...
-    fNormErr, pNormErr, uNormErr, wNormErr);
-fprintf(1,'Max [f,p,u,w] percent error: \n%.6e, %.6f, %.6f, %.6f.', ...
-    fMaxErr, pMaxErr, uMaxErr, wMaxErr);
+fprintf(1,'2-norm [f,p,u,w] percent error:\n');
+for iphs = 1:NPHS
+    fprintf(1, '%.6f, %.6f, %.6f, %.6f.\n', ...
+        fNormErr(iphs), pNormErr(iphs), uNormErr(iphs), wNormErr(iphs));
+end
+fprintf(1,'\n Max [f,p,u,w] percent error:\n');
+for iphs = 1:NPHS
+    fprintf(1, '%.6f, %.6f, %.6f, %.6f.\n', ...
+        fMaxErr(iphs), pMaxErr(iphs), uMaxErr(iphs), wMaxErr(iphs));
+end
 fprintf(1, '\n\n');
 
 
 
 %% plot
 
-if (nop)
-    % prepare for plotting
-    TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
-    TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',14};
-    UN = {'Units','Centimeters'};
-    
-    axh = 6.00; axw = 7.50;
-    ahs = 0.90; avs = 0.90;
-    axb = 0.75; axt = 0.90;
-    axl = 1.75; axr = 0.90;
-    fh = axb + (NPHS+1)*axh + NPHS*avs + axt;
-    fw = axl + 4*axw + 3*ahs + axr;
-    
-    
-    f7 = figure(7); clf; colormap(ocean);
-    fh = axb + NPHS*axh + (NPHS-1)*avs + axt;
-    fw = axl + 4*axw + 3*ahs + axr;
-    set(f7,UN{:},'Position',[4 4 fw fh]);
-    set(f7,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
-    set(f7,'Color','w','InvertHardcopy','off');
-    set(f7,'Resize','off');
-    for n=1:NPHS
-        ax((n-1)*4+1) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-        ax((n-1)*4+2) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-        ax((n-1)*4+3) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
-        ax((n-1)*4+4) = axes(UN{:},'position',[axl+3*axw+3*ahs axb+(NPHS-n)*axh+(NPHS-n)*avs axw axh]);
+f7 = figure(7); f7.Visible = figvis;
+clf; colormap(ocean);
+fh = axb + NPHS*axh + (NPHS-1)*avs + axt;
+fw = axl + 4*axw + 3*ahs + axr;
+set(f7,UN{:},'Position',[4 4 fw fh]);
+set(f7,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
+set(f7,'Color','w','InvertHardcopy','off');
+set(f7,'Resize','off');
+
+
+% predefine axis positions
+axpos = zeros(NPHS*4, 4);
+for nrow = 1:NPHS
+    for ncol = 1:4
+        axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS-nrow)*axh+(NPHS-nrow)*avs axw axh];
     end
-    
-    for n=1:NPHS
-        axes(ax((n-1)*4+1));
-        imagesc(x,x,squeeze(wTrue(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w_\textrm{true}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
-        set(gca,'XTickLabel',[]);
-        axes(ax((n-1)*4+2));
-        imagesc(x,x,squeeze(uTrue(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u_\textrm{true}^',num2str(n),'$ [m/s]'],TX{:},FS{:});
-        set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-        axes(ax((n-1)*4+3));
-        imagesc(x,x,squeeze(pTrue(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p_\textrm{true}^',num2str(n),'$ [Pa]' ],TX{:},FS{:});
-        set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-        axes(ax((n-1)*4+4));
-        imagesc(x,x,squeeze(fTrue(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f_\textrm{true}^',num2str(n),'$' ],TX{:},FS{:});
-        set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    end
-    drawnow;
+end
+
+for n=1:NPHS
+    axes(UN{:},'position',axpos(4*(n-1)+1,:));
+    imagesc(x,z,squeeze(wTrue(n,:,:)-w(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$w_{mms}^',num2str(n),'-w^',num2str(n) '$ [m/s]'],TX{:},FS{:});
+    set(gca,'XTickLabel',[]);
+    axes(UN{:},'position',axpos(4*(n-1)+2,:));
+    imagesc(x,z,squeeze(uTrue(n,:,:)-u(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$u_{mms}^',num2str(n),'-u^',num2str(n) '$ [m/s]'],TX{:},FS{:});
+    set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+    if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
+    axes(UN{:},'position',axpos(4*(n-1)+3,:));
+    imagesc(x,z,squeeze(pTrue(n,:,:)-p(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$p_{mms}^',num2str(n),'-p^',num2str(n) '$ [Pa]'],TX{:},FS{:});
+    set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+    axes(UN{:},'position',axpos(4*(n-1)+4,:));
+    imagesc(x,z,squeeze(fTrue(n,:,:)-f(n,:,:))); axis xy equal tight; cb = colorbar; set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title(['$f_{mms}^',num2str(n),'-f^',num2str(n) '$ [vol]'],TX{:},FS{:});
+    set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+end
+
+name = [outdir,RunID,'/',RunID,'_mmse_',num2str(step/nop)];
+print(f7,'-dpdf','-r200','-opengl',name,'-loose');
+
+%%
+
+function [ne] = calcnormerr (v, vtrue, no, NPHS)
+TINY = 1e-16;
+ne   = nan(NPHS, 1);
+
+for iphs = 1:NPHS
+    ne(iphs) = 100*norm(squeeze(v(iphs,:,:)-vtrue(iphs,:,:)),no)...
+                ./(norm(squeeze(vtrue(iphs,:,:)),no)+TINY);
+end
 end

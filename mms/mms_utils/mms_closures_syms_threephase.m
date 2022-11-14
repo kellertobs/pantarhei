@@ -1,4 +1,4 @@
-function [] = mms_closures_syms ()
+function [] = mms_closures_syms_threephase ()
 % symbolic math to get the partial derivatives of flux and transfer coeffs
 % wrt phase fraction
 % 
@@ -72,7 +72,7 @@ fprintf(1,'Writing derivatives to file...\n');
 tic; 
 matlabFunction(...
     dKvdf1,dKvdf2,dKvdf3,   dKfdf1,dKfdf2,dKfdf3,...
-    'File','coeff_derivs','Vars',VarOrder); 
+    'File','coeff_derivs_threephase','Vars',VarOrder); 
 toc;
 fprintf(1,'Done writing derivatives to file...\n\n');
 

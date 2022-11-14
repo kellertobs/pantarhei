@@ -1,6 +1,7 @@
 function [] = mms_closures_syms_twophase ()
 % symbolic math to get the partial derivatives of flux and transfer coeffs
 % wrt phase fraction
+% for two phase systems, much fewer terms needed 
 % 
 % YQW, 26 November 2020
 
