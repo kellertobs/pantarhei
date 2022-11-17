@@ -87,23 +87,23 @@ switch scheme{1}
     case 'quick'
         % quick scheme == 3rd order upwind
         % flux conservative approach, split velocities into + and -
-        [fxm, fxp, fmmx, fppx] = makestencil(f, xdim, xBC);
-        [fzm, fzp, fmmz, fppz] = makestencil(f, zdim, zBC);
+        [fxm, fxp, fxmm, fxpp] = makestencil(f, xdim, xBC);
+        [fzm, fzp, fzmm, fzpp] = makestencil(f, zdim, zBC);
         
-        fxppos = (2*fxp + 5*fcc - fxm )./6;      fxpneg = (2*fcc + 5*fxp - fppx)./6;
-        fxmpos = (2*fcc + 5*fxm - fmmx)./6;      fxmneg = (2*fxm + 5*fcc - fxp )./6;
-        fzppos = (2*fzp + 5*fcc - fzm )./6;      fzpneg = (2*fcc + 5*fzp - fppz)./6;
-        fzmpos = (2*fcc + 5*fzm - fmmz)./6;      fzmneg = (2*fzm + 5*fcc - fzp )./6;
+        fxppos = (2*fxp + 5*fcc - fxm )./6;      fxpneg = (2*fcc + 5*fxp - fxpp)./6;
+        fxmpos = (2*fcc + 5*fxm - fxmm)./6;      fxmneg = (2*fxm + 5*fcc - fxp )./6;
+        fzppos = (2*fzp + 5*fcc - fzm )./6;      fzpneg = (2*fcc + 5*fzp - fzpp)./6;
+        fzmpos = (2*fcc + 5*fzm - fzmm)./6;      fzmneg = (2*fzm + 5*fcc - fzp )./6;
         
     case 'fromm'
         % Fromm scheme
-        [fxm, fxp, fmmx, fppx] = makestencil(f, xdim, xBC);
-        [fzm, fzp, fmmz, fppz] = makestencil(f, zdim, zBC);
+        [fxm, fxp, fxmm, fxpp] = makestencil(f, xdim, xBC);
+        [fzm, fzp, fzmm, fzpp] = makestencil(f, zdim, zBC);
         
-        fxppos = fcc + (fxp-fxm )./4;      fxpneg = fxp + (fcc-fppx)./4;
-        fxmpos = fxm + (fcc-fmmx)./4;      fxmneg = fcc + (fxm-fxp )./4;
-        fzppos = fcc + (fzp-fzm )./4;      fzpneg = fzp + (fcc-fppz)./4;
-        fzmpos = fzm + (fcc-fmmz)./4;      fzmneg = fcc + (fzm-fzp )./4;
+        fxppos = fcc + (fxp-fxm )./4;      fxpneg = fxp + (fcc-fxpp)./4;
+        fxmpos = fxm + (fcc-fxmm)./4;      fxmneg = fcc + (fxm-fxp )./4;
+        fzppos = fcc + (fzp-fzm )./4;      fzpneg = fzp + (fcc-fzpp)./4;
+        fzmpos = fzm + (fcc-fzmm)./4;      fzmneg = fcc + (fzm-fzp )./4;
         
     case 'weno3'
         % 3rd order WENO from Jiang & Shu 1996, J Comp Physics
