@@ -27,6 +27,7 @@ omvz = (Cv(:,imz,:)+Cv(:,ipz,:))./2./sum((Cv(:,imz,:)+Cv(:,ipz,:))./2,1);
 omfc =  Cf./sum(Cf,1);
 omfx = (Kf(:,:,imx)+Kf(:,:,ipx))./2./sum((Kf(:,:,imx)+Kf(:,:,ipx))./2,1);
 omfz = (Kf(:,imz,:)+Kf(:,ipz,:))./2./sum((Kf(:,imz,:)+Kf(:,ipz,:))./2,1);
+omdp =  Kf./sum(Kf,1);
 
 % get phase advection term
 ustar    = sum(omvx.*u,1);
@@ -34,7 +35,11 @@ wstar    = sum(omvz.*w,1);
 vstar_Gf = advect(f, ustar, wstar, h, {advn, 'vdf'}, [2,3], BC);
 
 % get iterative pseudo-time steps
-dtau_u = min(1.0./((Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2),[],1).*ones(size(u));  % [Pas/m2]
-dtau_w = min(1.0./((Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2),[],1).*ones(size(w));  % [Pas/m2]
-dtau_p = min(1.0./( Kf                         ./(h/2)^2 + (1-omfc).* Cf                        ),[],1).*ones(size(p));  % [1/Pas]
+dtau_u = min(1.0./abs(-(Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2),[],1).*ones(size(u));  % [Pas/m2]
+dtau_w = min(1.0./abs(-(Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2),[],1).*ones(size(w));  % [Pas/m2]
+dtau_p = min(1.0./abs(- Kf                         ./(h/2)^2 + (1-omfc).* Cf                        ),[],1).*ones(size(p));  % [1/Pas]
 dtau_f = dt/10.*ones(size(f));  % [s]
+
+% dtau_u = 1.0./abs(-(Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2);  % [Pas/m2]
+% dtau_w = 1.0./abs(-(Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2);  % [Pas/m2]
+% dtau_p = 0.5./abs( -Kf.*(1-omdp)               ./(h/2)^2 + (1-omfc).* Cf                        );  % [1/Pas]

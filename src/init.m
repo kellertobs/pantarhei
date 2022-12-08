@@ -27,6 +27,9 @@ if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n\n'); end
 TINY = 1e-16;
 HUGE = 1e+16;
 
+figvis = 'off'; % toggle for figure visibility on/off
+
+
 %% calculate material properties,
 % reset nondimensional variables to dimensional values
 

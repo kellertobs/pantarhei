@@ -34,9 +34,7 @@ end
 
 
 if (nop>0) %plot
-    
-    figvis = 'off'; % toggle for figure visibility on/off
-    
+        
     if Nx == 1
         plot1dfields;
     else

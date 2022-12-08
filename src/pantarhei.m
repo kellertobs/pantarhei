@@ -48,7 +48,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     end
     
     % make iterative convergence plot
-    if (nop>0) && ~mod(step,abs(nop)), f10 = figure(10);  f10.Visible = 'off'; end
+    if (nop>0) && ~mod(step,abs(nop)), f10 = figure(10);  f10.Visible = figvis; end
     
     while  conv_crit(res,res0,it) > 0 % keep stepping until convergence criterion reached
         
@@ -119,7 +119,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
-            if (nop>0) && ~mod(step,abs(nop)), semilogy(it,res,'r.','MarkerSize',10); axis tight; hold on; end
+            if (nop>0) && ~mod(step,abs(nop)), semilogy(it,res,'r.','MarkerSize',10); axis tight; hold on; drawnow; end
         end
         
     end  % iteration loop
