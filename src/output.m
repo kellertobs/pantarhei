@@ -25,11 +25,14 @@ for i=1:NPHS
 end
 
 if svop % save
-    name = [outdir,RunID,'/',RunID,'_step_',num2str(step/abs(nop), '%03d')];
+    name = [outdir,RunID,'/',RunID,'_frame_',num2str(step/abs(nop), '%03d')];
     save([name,'.mat'],'resflds','res','res0','time','z','x',...
         'u','w','p','f','ustar','wstar','pstar','usegr','wsegr','pcmpt',...
         'qvxx','qvzz','qvxz','qfx','qfz','Gvx','Gvz','Gf',...
         'Kv','Kf','Cv','Cf','delta');
+
+    name = [outdir,RunID,'/',RunID,'_hist'];
+    save([name,'.mat'], 'hist');
 end
 
 

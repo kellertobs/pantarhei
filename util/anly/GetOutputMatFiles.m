@@ -1,4 +1,4 @@
-function [fp, fn, ft, NPHS] = GetOutputMatFiles (folder, RunID)
+function [fp, fh, fn, ft, NPHS] = GetOutputMatFiles (folder, RunID)
 % 
 % [fp, fn, ft, NPHS] = GetOutputMatFiles (folder, RunID)
 % 
@@ -26,15 +26,16 @@ f    	= dir([outdir '*.mat']);
 
 % separate files into simulation and parameter files
 fname = strcat(outdir, {f.name}');
-fp    = fname(contains(fname, '_par' ));    %  parameter files
-fn    = fname(contains(fname, '_step'));    % simulation files
-ft    = setdiff(fname, [fp; fn]);           %  other mat files 
+fp    = fname(contains(fname, '_par'  ));    %  parameter file
+fh    = fname(contains(fname, '_hist' ));    %    history file
+fn    = fname(contains(fname, '_frame'));    % simulation files
+ft    = setdiff(fname, [fp; fn]);            %  other mat files 
 
-% return parameter file name as a character vector
-fp = fp{1}; 
+% return parameter and history file names as a character vector
+fp = fp{1};  fh = fh{1};
 
 % if you only want the parameters file, quit
-if nargout==1, return; end
+if nargout<=2, return; end
 
 % collect number at end of simulation file name so we can sort in order
 ind = zeros(length(fn),1);
@@ -52,5 +53,5 @@ fn        = fn(order);
 if length(ft)==1, ft = ft{1}; end
 
 % check the number of phases
-if nargout>3, load(fp, 'NPHS'); end
+if nargout>4, load(fp, 'NPHS'); end
 end

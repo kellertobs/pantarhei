@@ -6,6 +6,7 @@ axb = 0.75; axt = 0.90;
 axl = 1.75; axr = 0.90;
 
 UN = {'Units','Centimeters'};
+TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
 
 %% plot u, w, p, f and reference fields
 

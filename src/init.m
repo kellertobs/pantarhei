@@ -110,11 +110,10 @@ if (mms), mms_init_phasefrac; end
 if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
 if (mms), mms_plot_truesol; end
 
-f = max(flim,min(1-flim,f)); f = f./sum(f,1); 
-fo = f;  fi = f;     res_f = 0*f;  dtau_f = res_f;
-u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = res_u;
-w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = res_w;
-p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = res_p;
+f = max(flim,min(1-flim,f)); f = f./sum(f,1);   fo = f;  fi = f;       res_f = 0*f;  dtau_f = 0*f; upd_f = 0*f;
+u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = 0*u; upd_u = 0*u;
+w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = 0*w; upd_w = 0*w;
+p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = 0*p; upd_p = 0*p;
 
 % shearing velocities on the staggered grid
 ushr   = z'*Si - [x-0.5*h,x(end)+0.5*h] *Pu;    ushr = permute(ushr,[3,1,2]);

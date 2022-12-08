@@ -7,6 +7,8 @@ time = 0;
 step = 0;
 it   = 0;
 
+history;
+
 % restart run?
 if restart>0
     % load previous file to get ui, wi, pi, fi
@@ -110,10 +112,10 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            resflds = [ norm(res_u(:).*dtau_u(:),2)./(norm(u(:),2)+TINY) ; 
-                        norm(res_w(:).*dtau_w(:),2)./(norm(w(:),2)+TINY) ;
-                        norm(res_p(:).*dtau_p(:),2)./(norm(p(:),2)+TINY) ;
-                        norm(res_f(:).*dtau_f(:),2)./(norm(f(:),2)+TINY)];
+            resflds = [ norm(upd_u(:),2)./(norm(u(:),2)+TINY) ; 
+                        norm(upd_w(:),2)./(norm(w(:),2)+TINY) ;
+                        norm(upd_p(:),2)./(norm(p(:),2)+TINY) ;
+                        norm(upd_f(:),2)./(norm(f(:),2)+TINY)];
             res = sum(resflds);
             if (res>=10*res0 && it>maxits/4) || isnan(res) || (step>0 && res>1e-2); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
@@ -124,13 +126,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         
     end  % iteration loop
     
-    
+    % populate history matrices
+    history;
+
     % update closures, constitutives, then plot and store model output
     if (nop~=0) && ~mod(step,abs(nop))
         closures; constitutive; output; 
         if (mms), mms_results; end
     end
-    
+
     % update time and step count
     time = time+dt;
     step = step+1;
