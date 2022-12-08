@@ -23,7 +23,7 @@ function [t, tfname] = MakeTimeMatfile (folder, RunID)
 % 
 
 % get files from simulations
-[~, fn] = GetOutputMatFiles(folder, RunID);
+[~,~,fn]= GetOutputMatFiles(folder, RunID);
 Nf      = length(fn);          % number of files
 
 % initialise outputs

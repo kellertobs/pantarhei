@@ -21,7 +21,7 @@ function [t, x, z, varargout] = ExtractFieldwTime (folder, RunID, varnames, ti)
 % YQW, 4 May 2021
 
 % get files from simulations
-[~, fn] = GetOutputMatFiles(folder, RunID);
+[~, ~, fn] = GetOutputMatFiles(folder, RunID);
 
 Nf   = length(fn);          % number of files
 Nvar = length(varnames);    % number of variables

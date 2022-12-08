@@ -35,7 +35,7 @@ end
 function [t, x, z, varmat] = GetVars (folder, RunID, varname)
 
 % get files from simulations
-[~,fn] = GetOutputMatFiles(folder, RunID);
+[~,~,fn] = GetOutputMatFiles(folder, RunID);
 
 Nf   = length(fn);          % number of files
 Nvar = length(varname);    % number of variables

@@ -24,7 +24,7 @@ opt = defopts(varargin{:});
 [t, zp, v] = GetVertProfiles(folder, RunID, {'f'});
 
 % collect output files
-[fp,fn] = GetOutputMatFiles(folder, RunID);
+[fp,~,fn] = GetOutputMatFiles(folder, RunID);
 Nf = length(fn);
 
 % get phase names and other params

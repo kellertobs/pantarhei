@@ -36,10 +36,10 @@ function [fig,varmat,x] = PlayPhaseFracwTime (folder, RunID, varargin)
 load ocean.mat
 
 % get output mat files
-[fp,fn] = GetOutputMatFiles(folder, RunID);
+[fp,~,fn] = GetOutputMatFiles(folder, RunID);
 
-load(fp, 'NPHS','D');
-if length(D) == 1, D = [D, D]; end
+load(fp, 'NPHS','L');
+if length(L) == 1, L = [L, L]; end
 
 % get plotting options
 opt = defopts(length(fn), varargin{:});
