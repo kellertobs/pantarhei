@@ -8,9 +8,8 @@ clear; close all; clc;
 % run method of manufactured solutions for time step 0 to check consistent
 % f, p, u, w
 
-% Nvec = [400,240,200,150,120,100,80,50,40,25];
-Nvec = 100;
-beta = 0.70;
+Nvec = [400,240,200,150,120,100,80,50,40,25];
+beta = 0.90;
 
 for ni = 1:length(Nvec)
     beta = RunModel(Nvec(ni), beta);
@@ -43,7 +42,7 @@ atol   = 1e-8;              % residual tolerance for convergence of iterative so
 rtol   = 1e-10;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
+alpha  = 0.70;              % first-order iterative step size (reduce if not converging)
 % beta   = 0.80;              % second-order iterative step size (reduce if not converging)
 cfl    = 0.50;              % Courant number to limit physical time step size
 flim   = 1e-16;              % limit phase fractions in coefficient closures
@@ -91,6 +90,8 @@ while flag==0 && beta>=0
         getReport(exception, 'basic')
         flag = 0;
     end
+    close all;
+
     beta = beta-0.1;
 end
 end
