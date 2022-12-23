@@ -36,7 +36,7 @@ Gvx = (Cv(:,:,imx)+Cv(:,:,ipx))./2 .* (u-ustar) - pstar_Gfx;
 Gvz = (Cv(:,imz,:)+Cv(:,ipz,:))./2 .* (w-wstar) - pstar_Gfz;
 
 %get volume transfer fields
-Gf  =               Cf             .* (p-pstar) - vstar_Gf - Gm./rhostar;
+Gf  =                            Cf.* (p-pstar) - vstar_Gf - Gm./rhostar;
 
 % get momentum source fields
 Qvx = -(f(:,:,imx)+f(:,:,ipx))./2.*((rho(:,:,imx)+rho(:,:,ipx))./2-rhomix).*grav(2);

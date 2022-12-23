@@ -8,7 +8,8 @@ if step==0
                   'w'  , nan(NtMax,NPHS,3), ...
                   'p'  , nan(NtMax,NPHS,3), ...
                   'f'  , nan(NtMax,NPHS,3), ...
-                  'res', nan(NtMax,NPHS,4)    );
+                  'res', nan(NtMax,NPHS,4), ...
+                  'res0',nan(NtMax,1)    );
 end
 
 %%
@@ -38,3 +39,5 @@ hist.res(step+1,:,1) = vecnorm(vecnorm(upd_u,2,3),2,2)./(vecnorm(vecnorm(u,2,3),
 hist.res(step+1,:,2) = vecnorm(vecnorm(upd_w,2,3),2,2)./(vecnorm(vecnorm(w,2,3),2,2)+TINY);
 hist.res(step+1,:,3) = vecnorm(vecnorm(upd_p,2,3),2,2)./(vecnorm(vecnorm(p,2,3),2,2)+TINY);
 hist.res(step+1,:,4) = vecnorm(vecnorm(upd_f,2,3),2,2)./(vecnorm(vecnorm(f,2,3),2,2)+TINY);
+
+hist.res0(step+1) = res0;
