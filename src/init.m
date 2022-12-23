@@ -56,6 +56,10 @@ Si = Si * w0max / f0(iphs) / L(1);
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
 
+Re = 3*sqrt(10)*0.5*pi;
+r = 0.5;
+
+
 
 %% initialise coordinate arrays and BCs
 

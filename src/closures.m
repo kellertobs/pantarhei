@@ -35,7 +35,11 @@ wstar    = sum(omvz.*w,1);
 vstar_Gf = advect(f, ustar, wstar, h, {advn, 'vdf'}, [2,3], BC);
 
 % get iterative pseudo-time steps
-dtau_u = min(1.0./((Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2),[],1).*ones(size(u));  % [Pas/m2]
-dtau_w = min(1.0./((Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2),[],1).*ones(size(w));  % [Pas/m2]
-dtau_p = min(1.0./( Kf                         ./(h/2)^2 + (1-omfc).* Cf                        ),[],1).*ones(size(p));  % [1/Pas]
+% dtau_u = 1.0./(7/3*(Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2);  % [Pas/m2]
+% dtau_w = 1.0./(7/3*(Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2);  % [Pas/m2]
+% dtau_p = 1.0./(  4* Kf                         ./(h/2)^2 + (1-omfc).* Cf                        );  % [1/Pas]
 dtau_f = dt/10.*ones(size(f));  % [s]
+
+dtau_u = 1/sqrt(2)/Re.*(1.0./((Kv(:,:,imx)+Kv(:,:,ipx))./2./(h/2)^2 + (1-omvx).*(Cv(:,:,imx)+Cv(:,:,ipx))/2));
+dtau_w = 1/sqrt(2)/Re.*(1.0./((Kv(:,imz,:)+Kv(:,ipz,:))./2./(h/2)^2 + (1-omvz).*(Cv(:,imz,:)+Cv(:,ipz,:))/2));
+dtau_p = 1/sqrt(2)*r/(r+2)*Re.*(h/2).^2./(Kf                        ./(h/2)^2 + (1-omfc).* Cf                        );
