@@ -56,10 +56,6 @@ Si = Si * w0max / f0(iphs) / L(1);
 % set appropriate initial time step size
 dt = cfl.*h/2/max(w0(:));
 
-Re = 3*sqrt(10)*0.5*pi;
-r = 0.5;
-
-
 
 %% initialise coordinate arrays and BCs
 
@@ -72,6 +68,11 @@ Z     = permute(repmat(Z,1,1,NPHS),[3,2,1]);
 X     = permute(repmat(X,1,1,NPHS),[3,2,1]);
 Nz    = length(z);
 Nx    = length(x);
+
+
+ndim = 1 + double(length(x)>1);
+Re = 9*sqrt(3)*0.25*pi;
+r  = 0.25;
 
 % initialise indexing for boundary condition stencils (order: {zBC, xBC})
 if ~iscell(BC), BC = {BC, BC}; end
@@ -102,7 +103,7 @@ else
         rnd = rnd + diff(rnd(:,icz,:),2,2)./12 + diff(rnd(:,:,icx),2,3)./12;
     end
     rnd = rnd./max(abs(rnd(:)));
-    gsn = exp(-X.^2./(L(2)/8).^2).*exp(-Z.^2./(L(1)/8).^2);
+    gsn = exp(-X.^2./(L(2)/12).^2).*exp(-Z.^2./(L(1)/12).^2);
     f   = f0 + dfr.*rnd + dfg.*gsn;
 end
 

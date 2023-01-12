@@ -29,7 +29,7 @@ fname = strcat(outdir, {f.name}');
 fp    = fname(contains(fname, '_par'  ));    %  parameter file
 fh    = fname(contains(fname, '_hist' ));    %    history file
 fn    = fname(contains(fname, '_frame'));    % simulation files
-ft    = setdiff(fname, [fp; fn]);            %  other mat files 
+ft    = setdiff(fname, [fp; fh; fn]);        %  other mat files 
 
 % return parameter and history file names as a character vector
 fp = fp{1};  fh = fh{1};
