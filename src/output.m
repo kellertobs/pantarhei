@@ -17,13 +17,6 @@ qfm   = sqrt(((qfx(:,imz,:)+qfx(:,ipz,:))./2).^2 + ((qfz(:,:,imx)+qfz(:,:,ipx)).
 Gvm   = sqrt(((Gvx(:,imz,:)+Gvx(:,ipz,:))./2).^2 + ((Gvz(:,:,imx)+Gvz(:,:,ipx))./2).^2);
 Gfm   = sqrt(Gf.^2);
 
-% get segregation-compaction lengths
-for i=1:NPHS
-    for k=1:NPHS
-        delta(i,k,:,:) = (f(i,:,:).^2./Cv(i,:,:).*f(k,:,:).^2./Cf(k,:,:)).^0.5;
-    end
-end
-
 if svop % save
     name = [outdir,RunID,'/',RunID,'_frame_',num2str(step/abs(nop), '%03d')];
     save([name,'.mat'],'resflds','res','res0','time','z','x',...

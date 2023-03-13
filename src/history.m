@@ -40,4 +40,4 @@ hist.res(step+1,:,2) = vecnorm(vecnorm(upd_w,2,3),2,2)./(vecnorm(vecnorm(w,2,3),
 hist.res(step+1,:,3) = vecnorm(vecnorm(upd_p,2,3),2,2)./(vecnorm(vecnorm(p,2,3),2,2)+TINY);
 hist.res(step+1,:,4) = vecnorm(vecnorm(upd_f,2,3),2,2)./(vecnorm(vecnorm(f,2,3),2,2)+TINY);
 
-hist.res0(step+1) = res0;
+% hist.res0(step+1) = res0;

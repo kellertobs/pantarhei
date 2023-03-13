@@ -82,8 +82,8 @@ plot(squeeze(qvzz-f.*p),z);
 format1dpanels(1, L, '$q_{v,zz}$ [Pa]', strcat('$q_{v,zz}^',num2str((1:NPHS)'),'$'));
 
 axes(UN{:},'position',axpos(2,:));
-plot(squeeze(qfz-(f(:,imz,:)+f(:,ipz,:))./2.*w),[z-h/2,z(end)+h/2]); 
-format1dpanels(2, L, '$q_{f,z}$ [m/s]', strcat('$q_{f,z}^',num2str((1:NPHS)'),'$'));
+plot(squeeze(Div_qf),z); 
+format1dpanels(2, L, 'div qf', strcat('$q_{f,z}^',num2str((1:NPHS)'),'$'));
 
 axes(UN{:},'position',axpos(3,:));
 plot(squeeze(Gvz),[z-h/2,z(end)+h/2]); 

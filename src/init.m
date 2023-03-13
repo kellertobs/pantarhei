@@ -24,8 +24,12 @@ if ~exist('mms','var'), mms = false; end
 if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n\n'); end
 
 % stabilizing values
-TINY = 1e-16;
-HUGE = 1e+16;
+TINY = 1e-32;
+HUGE = 1e+32;
+Re = 9*sqrt(3)/4*pi;
+r  = 1/4;
+vfact = 1/Re;
+pfact = r/(r+2)*Re;
 
 figvis = 'off'; % toggle for figure visibility on/off
 
@@ -40,7 +44,7 @@ Mv = kv.'./kv;      % momentum diffusivity ratios
 Mf = kf.'./kf;      % volume diffusivity ratios
 
 % check problem scales (returns delta0, w0)
-[delta0, w0] = scales(f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim);
+[delta0, w0, p0] = scales(f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim);
 
 % reset domain depth to multiple of max segr-comp-length
 if length(Lfac)==1, Lfac = [Lfac, Lfac]; end
@@ -54,8 +58,8 @@ Pu = Pu * w0max / f0(iphs) / L(1);
 Si = Si * w0max / f0(iphs) / L(1);
 
 % set appropriate initial time step size
-dt = cfl.*h/2/max(w0(:));
-
+dt  = cfl.*h/2/max(w0(:));
+dto = dt;
 
 %% initialise coordinate arrays and BCs
 
@@ -68,6 +72,7 @@ Z     = permute(repmat(Z,1,1,NPHS),[3,2,1]);
 X     = permute(repmat(X,1,1,NPHS),[3,2,1]);
 Nz    = length(z);
 Nx    = length(x);
+if Nx==1; ndim=1; else; ndim=2; end
 
 % initialise indexing for boundary condition stencils (order: {zBC, xBC})
 if ~iscell(BC), BC = {BC, BC}; end
@@ -111,9 +116,34 @@ if svop && restart==0, save([outdir RunID,'/',RunID,'_par.mat']); end
 if (mms), mms_plot_truesol; end
 
 f = max(flim,min(1-flim,f)); f = f./sum(f,1);   fo = f;  fi = f;       res_f = 0*f;  dtau_f = 0*f; upd_f = 0*f;
-u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ustar = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = 0*u; upd_u = 0*u;
-w = zeros(NPHS,Nz+1,Nx  );  wi = w;  wstar = mean(w,1);  wsegr = 0*w;  res_w = 0*w;  dtau_w = 0*w; upd_w = 0*w;
-p = zeros(NPHS,Nz  ,Nx  );  pi = p;  pstar = mean(p,1);  pcmpt = 0*p;  res_p = 0*p;  dtau_p = 0*p; upd_p = 0*p;
+
+u = zeros(NPHS,Nz  ,Nx+1);  ui = u;  ur = mean(u,1);  usegr = 0*u;  res_u = 0*u;  dtau_u = 0*u; upd_u = 0*u;
+w = zeros(NPHS,Nz+1,Nx  );  wr = zeros(1,Nz+1,Nx);
+wr = -sum(w0).*ones(1,Nz+1,Nx  );
+w  = (w0./f0 + wr).*ones(NPHS,Nz+1,Nx  );
+if strcmp(BC,'closed')
+for ii=1:Nx*Nz
+    if size(wr,2)>1; wr(:,2:end-1,:) = wr(:,2:end-1,:) + diff(wr,2,2)./8; end
+    if size(wr,3)>1; wr(:,:,2:end-1) = wr(:,:,2:end-1) + diff(wr,2,3)./8; end
+    wr(:,[1 end],:) = 0;
+
+    if size(w,2)>1; w(:,2:end-1,:) = w(:,2:end-1,:) + diff(w,2,2)./8; end
+    if size(w,3)>1; w(:,:,2:end-1) = w(:,:,2:end-1) + diff(w,2,3)./8; end
+    w(:,[1 end],:) = 0;
+end
+end
+wi = w;  wsegr = 0*w;  res_w = 0*w;  dtau_w = 0*w; upd_w = 0*w;
+
+p = zeros(NPHS,Nz,Nx);  pr = zeros(1,Nz,Nx);
+% pr(:,[1 end],:) = -sum(p0).*[1,-1];
+% p(:,[1 end],:) = pr([1,1],[1 end],:);
+% p = zeros(NPHS,Nz  ,Nx  );  
+% p(2,[1 end],:) = max(abs(p0)).*[-1,1];
+pi = p;  pcmpt = 0*p;  res_p = 0*p;  dtau_p = 0*p; upd_p = 0*p;
+
+Du = u-ur;
+Dw = w-wr;
+Dp = p-pr; 
 
 % shearing velocities on the staggered grid
 ushr   = z'*Si - [x-0.5*h,x(end)+0.5*h] *Pu;    ushr = permute(ushr,[3,1,2]);
