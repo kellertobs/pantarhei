@@ -11,8 +11,8 @@ pcmpt =  f.*(p-pstar);
 
 % get flux, transfer magnitudes
 qvm   = sqrt((((qvxx(:,imz,imx)+qvxx(:,imz,ipx)+qvxx(:,ipz,imx)+qvxx(:,ipz,ipx))./4).^2 ...
-            + ((qvzz(:,imz,imx)+qvzz(:,imz,ipx)+qvzz(:,ipz,imx)+qvzz(:,ipz,ipx))./4).^2 ...
-            +   qvxz.^2 + qvxz.^2)./2);
+    + ((qvzz(:,imz,imx)+qvzz(:,imz,ipx)+qvzz(:,ipz,imx)+qvzz(:,ipz,ipx))./4).^2 ...
+    +   qvxz.^2 + qvxz.^2)./2);
 qfm   = sqrt(((qfx(:,imz,:)+qfx(:,ipz,:))./2).^2 + ((qfz(:,:,imx)+qfz(:,:,ipx))./2).^2);
 Gvm   = sqrt(((Gvx(:,imz,:)+Gvx(:,ipz,:))./2).^2 + ((Gvz(:,:,imx)+Gvz(:,:,ipx))./2).^2);
 Gfm   = sqrt(Gf.^2);
@@ -37,13 +37,21 @@ end
 
 
 if (nop>0) %plot
-        
+
     if Nx == 1
         plot1dfields;
     else
         plot2dfields;
     end
-    
+
+    f6 = figure(6); f6.Visible = figvis; clf;
+    for res_j=1:4, semilogy(itvec(:,1),itvec(:,1+res_j),'.','MarkerSize',10,'Color',rc(res_j  ,:)); hold on; end
+    for res_j=5:7, semilogy(itvec(:,1),itvec(:,1+res_j),'*','MarkerSize', 5,'Color',rc(res_j-4,:)); hold on; end
+    semilogy(itvec(:,1), sum(itvec(:,2:end),2),'ko','MarkerSize',3); hold off;
+    axis tight; drawnow;
+    xlabel('iteration number'); ylabel('absolute residual');
+    legend('u','w','p','f','total');
+
     if svop % save
         name = [outdir,RunID,'/',RunID,'_sltn_',num2str(step/nop)];
         print(f1,'-dpdf','-r200','-opengl',name,'-loose');
@@ -53,25 +61,27 @@ if (nop>0) %plot
         print(f3,'-dpdf','-r200','-opengl',name,'-loose');
         name = [outdir,RunID,'/',RunID,'_coef_',num2str(step/nop)];
         print(f4,'-dpdf','-r200','-opengl',name,'-loose');
-        
+
         if exist('f5','var')
             name = [outdir,RunID,'/',RunID,'_vshr_',num2str(step/nop)];
             print(f5,'-dpdf','-r200','-opengl',name,'-loose');
         end
-        
-        if exist('f10','var')
+
+        fig_pos               = f6.PaperPosition;
+        f6.PaperPositionMode = 'manual';
+        f6.PaperPosition     = [0 0 fig_pos(3) fig_pos(4)];
+        f6.PaperSize         = [fig_pos(3) fig_pos(4)];
+        name = [outdir,RunID,'/',RunID,'_itconv_',num2str(step/nop)];
+        print(f6,'-dpdf','-r200','-opengl',name,'-loose');
+
+        if pltits
             fig_pos               = f10.PaperPosition;
             f10.PaperPositionMode = 'manual';
             f10.PaperPosition     = [0 0 fig_pos(3) fig_pos(4)];
             f10.PaperSize         = [fig_pos(3) fig_pos(4)];
-            name = [outdir,RunID,'/',RunID,'_itconv_',num2str(step/nop)];
+            name = [outdir,RunID,'/',RunID,'_updp_',num2str(step/nop)];
             print(f10,'-dpdf','-r200','-opengl',name,'-loose');
         end
 
     end
 end
-
-
-close all;
-
-

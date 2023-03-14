@@ -7,37 +7,39 @@ clear; close all; clc;
 
 % run method of manufactured solutions for time step 0 to check consistent
 % f, p, u, w
-mms = true;
+mms = false;
 
 % set model parameters
 RunID  = 'olvbas_mms';
 outdir = '../out/';         % directory to save output files
+pltits = true;             % whether to plot residuals 
 nop    = 1;                 % plot and store output every [nop] time step
 svop   = 1;                 % save output
 restart= 0;                 
 
 NPHS   = 2;                 % number of phases
-N      = 100;               % number of grid points in each direction
+N      = 120;               % number of grid points in each direction
 Lfac   = 40;                % domain dimension in each direction [delta0]
 BC     = 'periodic';        % boundary conditions: 'open', 'closed', 'periodic'
-NtMax  = 1;                 % maximum number of time steps
+NtMax  = 0;                 % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
 advn   = 'weno5';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
-nupd   = 50;                % update residual and permissions every [nupd] iterations
-atol   = 1e-6;              % residual tolerance for convergence of iterative solver
-rtol   = 1e-10;              % residual tolerance for convergence of iterative solver
+nupd   = 100;                % update residual and permissions every [nupd] iterations
+atol   = 1e-5;              % residual tolerance for convergence of iterative solver
+rtol   = 1e-5;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.90;              % first-order iterative step size (reduce if not converging)
-beta   = 0.50;              % second-order iterative step size (reduce if not converging)
+alpha  = 0.99;              % first-order iterative step size (reduce if not converging)
+beta   = 0.35;              % second-order iterative step size (reduce if not converging)
+dmp = 0;
 cfl    = 0.50;              % Courant number to limit physical time step size
 flim   = 1e-16;              % limit phase fractions in coefficient closures
-thtlim = 1e+16;              % limit phase-internal permission contrasts
-cfflim = 1e+16;              % limit inter-phase coefficient contrasts
+thtlim = 1e+6;              % limit phase-internal permission contrasts
+cfflim = 1e+8;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [ 0.10; 0.90];       % initial background phase fractions (unity sum!)
+f0   = [ 0.95; 0.05];       % initial background phase fractions (unity sum!)
 dfg  = [-0.01; 0.01];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.00; 0.00];       % initial random perturbation amplitude (unity sum!)
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
