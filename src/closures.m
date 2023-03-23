@@ -57,12 +57,12 @@ vr_Gf  = advect(f, ur, wr, h, {advn, 'vdf'}, [2,3], BC);
 
 
 % get iterative pseudo-time steps
-dtau_u  = 1./((1+fx).*(Kvx)./(h/2)^2 + 1 + (1+fx).*(fx.^2./Cfx)./(h/2)^2);
-dtau_w  = 1./((1+fz).*(Kvz)./(h/2)^2 + 1 + (1+fz).*(fz.^2./Cfz)./(h/2)^2);
-dtau_p  = 1./((1+f ).*(Kf )./(h/2)^2 + 1 + (1+f ).*(f .^2./Cv )./(h/2)^2);
+dtau_u  = 1./((1-fx).*(Kvx)./(h/2)^2 + Cvx + (1-fx).*(fx.^2./Cfx)./(h/2)^2);
+dtau_w  = 1./((1-fz).*(Kvz)./(h/2)^2 + Cvz + (1-fz).*(fz.^2./Cfz)./(h/2)^2);
+dtau_p  = 1./((1-f ).*(Kf )./(h/2)^2 + Cf  + (1-f ).*(f .^2./Cv )./(h/2)^2);
 
-dtau_ur = vfact./sum((1+fx).*Kvx./(h/2)^2 + (1-omvx).*Cvx + (1+fx).*fx.^2./Cfx./(h/2)^2);
-dtau_wr = vfact./sum((1+fz).*Kvz./(h/2)^2 + (1-omvz).*Cvz + (1+fz).*fz.^2./Cfz./(h/2)^2);
-dtau_pr = pfact./sum((1+f ).*Kf ./(h/2)^2 + (1-omfc).*Cf  + (1+f ).*f .^2./Cv ./(h/2)^2);
+dtau_ur = 4*vfact./sum(Kvx./(h/2)^2 + fx.^2./Cfx./(h/2)^2);
+dtau_wr = 4*vfact./sum(Kvz./(h/2)^2 + fz.^2./Cfz./(h/2)^2);
+dtau_pr = 4*pfact./sum(Kf ./(h/2)^2 + f .^2./Cv ./(h/2)^2);
 
 dtau_f = dt/2.*ones(size(f)); % [s]

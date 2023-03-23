@@ -123,19 +123,19 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd)
             % get residual norm
-            resflds = [ norm(res_u.*dtau_u,'fro')./(norm(u,'fro')+TINY) ; 
-                        norm(res_w.*dtau_w,'fro')./(norm(w,'fro')+TINY) ;
-                        norm(res_p.*dtau_p,'fro')./(norm(p,'fro')+TINY) ;
-                        norm(sum(res_u).*dtau_ur,'fro')./(norm(ur,'fro')+TINY) ; 
-                        norm(sum(res_w).*dtau_wr,'fro')./(norm(wr,'fro')+TINY) ;
-                        norm(sum(res_p).*dtau_pr,'fro')./(norm(pr,'fro')+TINY)];
+            resflds = [ norm(res_u,'fro')./(norm(u./dtau_u,'fro')+TINY) ; 
+                        norm(res_w,'fro')./(norm(w./dtau_w,'fro')+TINY) ;
+                        norm(res_p,'fro')./(norm(p./dtau_p,'fro')+TINY) ;
+                        norm(sum(res_u),'fro')./(norm(ur./dtau_ur,'fro')+TINY) ; 
+                        norm(sum(res_w),'fro')./(norm(wr./dtau_wr,'fro')+TINY) ;
+                        norm(sum(res_p),'fro')./(norm(pr./dtau_pr,'fro')+TINY)];
             res = sum(resflds(:));
             if (res>=100*res0 && it>maxits/4) || isnan(res) || (step>0 && res>1); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==nupd || res>res0; res0 = res; end
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
         end
-        if (nop>0) && ~mod(step,abs(nop)) && ~mod(it,5*nupd)
+        if (nop>0) && ~mod(step,abs(nop)) && ~mod(it,10*nupd)
             figure(f10);
             semilogy(it,resflds(2,:),'r.','MarkerSize',10); axis tight; hold on;
             semilogy(it,resflds(3,:),'b.','MarkerSize',10);
