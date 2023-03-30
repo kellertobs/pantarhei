@@ -12,28 +12,39 @@
 switch mms_regime
     case "olv_bas_suspension"
 
-        Amf = [f0, [0;0], [0;0], 6.6e-4.*[-1;1]];           % baseline amplitude of variation
-        Tmf =   1*ones(NPHS,4)./(2*deg2rad(180))*1e5;       %  timescale of variation
-        Xmf =   1*ones(NPHS,4)./(2*deg2rad(180))*L(2);      % wavelength of variation in x direction
-        Zmf =   1*ones(NPHS,4)./(2*deg2rad(180))*L(1);      % wavelength of variation in z direction
+        Amf = [f0, [0;0], [0;0], 0.9e-3.*[-1;1]];           % baseline amplitude of variation
+        Tmf = 1*ones(NPHS,4)./(2*deg2rad(180))*1e5;       %  timescale of variation
+        Xmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(2);      % wavelength of variation in x direction
+        Zmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(1);      % wavelength of variation in z direction
 
         % sine/cosine wave amplitude
-        dp  = [  0.5 ; 0.5 ];
-        du  = [  4e-5; 4e-5];
-        dw  = [  8e-5; 5e-5].*sign(dfg);
+        dp  = [  1   ; 0.8 ];
+        du  = [  2e-4; 2e-4];
+        dw  = [  1e-4; 2e-4];
         dmf = [dfg, dp, du, dw];
+
+%         Amf = [f0, [0;0], [0;0], 6.6e-3.*[-1;1]];           % baseline amplitude of variation
+%         Tmf = 1*ones(NPHS,4)./(2*deg2rad(180))*1e5;       %  timescale of variation
+%         Xmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(2);      % wavelength of variation in x direction
+%         Zmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(1);      % wavelength of variation in z direction
+% 
+%         % sine/cosine wave amplitude
+%         dp  = [  0.7   ; 0.9   ];
+%         du  = [  1.6e-4; 1.6e-4];
+%         dw  = [  0.8e-4; 1.6e-4];
+%         dmf = [dfg, dp, du, dw];
 
     case "olv_bas_porous"
 
-        Amf = [f0, [0;0], [0;0], 7.4e-8.*[-1;1]];           % baseline amplitude of variation
-        Tmf =   1*ones(NPHS,4)./(2*deg2rad(180))*1e5;       %  timescale of variation
-        Xmf =   1*ones(NPHS,4)./(2*deg2rad(180))*L(2);      % wavelength of variation in x direction
-        Zmf =   1*ones(NPHS,4)./(2*deg2rad(180))*L(1);      % wavelength of variation in z direction
+        Amf = [f0, [0;0], [0;0], 6.8e-8.*[-1;1]];           % baseline amplitude of variation
+        Tmf = 1*ones(NPHS,4)./(2*deg2rad(180))*1e5;       %  timescale of variation
+        Xmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(2);      % wavelength of variation in x direction
+        Zmf = 1*ones(NPHS,4)./(2*deg2rad(180))*L(1);      % wavelength of variation in z direction
 
         % sine/cosine wave amplitude
-        dp  = [  1e+5; 2e+6 ];
-        du  = [  3e-9; 6e-9];
-        dw  = [  5e-9; 2e-8].*sign(dfg);
+        dp  = [  5e+5; 1.6e+6];
+        du  = [  1e-8; 1e-8];
+        dw  = [  1e-8; 5e-8];
         dmf = [dfg, dp, du, dw];
 end
 

@@ -41,28 +41,11 @@ omfc = Cf./sum(Cf,1);  omfx = Cfx./sum(Cfx,1);  omfz = Cfz./sum(Cfz,1);
 omdp = Kf./sum(Kf,1);  ompx = Kfx./sum(Kfx,1);  ompz = Kfz./sum(Kfz,1);
 
 % get iterative pseudo-time steps
-% dtau_u  = vfac./( (1+fx).*Kvx./Cvx./(h/2)^2 + (1-omvx) + (1+fx).*(fx.^2./Cfx./Cvx).*(1-omvx)./(h/2)^2 ) ;
-% dtau_w  = vfac./( (1+fz).*Kvz./Cvz./(h/2)^2 + (1-omvz) + (1+fz).*(fz.^2./Cfz./Cvz).*(1-omvz)./(h/2)^2 ) ;
-% dtau_p  = pfac./( (1+f ).*Kf ./Cf ./(h/2)^2 + (1-omfc) + (1+f ).*(f .^2./Cv ./Cf ).*(1-omfc)./(h/2)^2 ) ;
-dtau_u  = 1./( (1+fx).*Kvx./(h/2)^2 + Cvx + (1+fx).*(fx.^2./Cfx)./(h/2)^2 ) ;
-dtau_w  = 1./( (1+fz).*Kvz./(h/2)^2 + Cvz + (1+fz).*(fz.^2./Cfz)./(h/2)^2 ) ;
-dtau_p  = 1./( (1+f ).*Kf ./(h/2)^2 + Cf  + (1+f ).*(f .^2./Cv )./(h/2)^2 ) ;
-
+dtau_u = 1./( Kvx./(h/2)^2 + Cvx + (1-fx).*(fx.^2./Cfx)./(h/2)^2 ) ;
+dtau_w = 1./( Kvz./(h/2)^2 + Cvz + (1-fz).*(fz.^2./Cfz)./(h/2)^2 ) ;
+dtau_p = 1./( Kf ./(h/2)^2 + Cf  + (1-f ).*(f .^2./Cv )./(h/2)^2 ) ;
 dtau_f = dt/2.*ones(size(f)); % [s]
 
-% dtau_u  = 1./( (1+fx).*Kvx./(h/2)^2 + Cvx + (1+fx).*(fx.^2./Cfx)./(h/2)^2 ) ;
-% dtau_w  = 1./( (1+fz).*Kvz./(h/2)^2 + Cvz + (1+fz).*(fz.^2./Cfz)./(h/2)^2 ) ;
-% dtau_p  = 1./( (1+f ).*Kf ./(h/2)^2 + Cf  + (1+f ).*(f .^2./Cv )./(h/2)^2 ) ;
-
-dtau_ustar = vfac./( sum((1+fx).*Kvx,1)./(h/2).^2 + sum((1+fx).*fx.^2./Cfx ,1)./(h/2)^2);
-dtau_wstar = vfac./( sum((1+fz).*Kvz,1)./(h/2).^2 + sum((1+fz).*fz.^2./Cfz ,1)./(h/2)^2);
-dtau_pstar = pfac./( sum((1+f ).*Kf ,1)./(h/2).^2 + sum((1+f ).*f .^2./Cv  ,1)./(h/2)^2);
-
-
-% dtau_u  = dtau_f1./( 1./(1-fx).*d0.^2./(h/2)^2 + 1 + fx.^2./Cfx./Cvx./(h/2).^2);
-% dtau_w  = dtau_f1./( 1./(1-fz).*d0.^2./(h/2)^2 + 1 + fz.^2./Cfz./Cvz./(h/2).^2);
-% dtau_p  = dtau_f1./( 1./(1-f ).*d0.^2./(h/2)^2 + 1 + f .^2./Cv ./Cf ./(h/2).^2);
-% 
-% dtau_ustar  = dtau_f2./sum( 1./(1-fx).*d0.^2./(h/2)^2 + fx.^2./Cfx./Cvx./(h/2).^2, 1);
-% dtau_wstar  = dtau_f2./sum( 1./(1-fz).*d0.^2./(h/2)^2 + fz.^2./Cfz./Cvz./(h/2).^2, 1);
-% dtau_pstar  = dtau_f2./sum( 1./(1-f ).*d0.^2./(h/2)^2 + f .^2./Cv ./Cf ./(h/2).^2, 1);
+dtau_ustar = 1./( sum(Kvx + fx.^2./Cfx, 1)./(h/2)^2 );
+dtau_wstar = 1./( sum(Kvz + fz.^2./Cfz, 1)./(h/2)^2 );
+dtau_pstar = 1./( sum(Kf  + f .^2./Cv , 1)./(h/2)^2 );

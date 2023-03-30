@@ -8,9 +8,9 @@ clear; close all; clc;
 % run method of manufactured solutions for time step 0 to check consistent
 % f, p, u, w
 
-Nvec = [120, 160, 200];
-Nvecfrac = Nvec(1).^2./Nvec.^2;
-beta = 0.40;
+Nvec = [120, 160, 200, 240, 280];
+Nvecfrac = (Nvec(1)./Nvec).^2;
+beta = 0.7;
 NormErr = nan(2,4,length(Nvec)); MaxmErr = NormErr;
 
 %%
@@ -18,7 +18,7 @@ NormErr = nan(2,4,length(Nvec)); MaxmErr = NormErr;
 for ni = 1:length(Nvec)
 
     [NormErr(:,:,ni), MaxmErr(:,:,ni),beta] = RunModel(Nvec(ni), Nvecfrac(ni), beta);
-    beta = beta+0.2;
+    beta = min(beta+0.1, 0.9);
 
     ne = squeeze(sum(NormErr,1));
     ne./ne(:,1)
@@ -30,13 +30,13 @@ end
 function [NormErr,MaxmErr,beta] = RunModel (Nin, Nvecfrac, beta)
 
 mms = true;
-mms_regime = "olv_bas_porous"
+mms_regime = "olv_bas_suspension"
 
 % set model parameters
-RunID  = ['olvbas_mms_' num2str(Nin,'%03d')];
+RunID  = ['olvbas_mms_susp_' num2str(Nin,'%03d')];
 % RunID = 'tmp';
 outdir = '../out/';         % directory to save output files
-pltits = true;              % whether to plot residuals 
+pltits = false;              % whether to plot residuals 
 nop    = 1;                 % plot and store output every [nop] time step
 svop   = 1;                 % save output
 restart= 0;
@@ -49,21 +49,21 @@ NtMax  = 0;                 % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
 advn   = 'weno5';           % advection scheme. best ones: 'quick', 'fromm', 'weno5', 'tvdim'
-nupd   = 50;               % update residual and permissions every [nupd] iterations
-atol   = 1e-5*Nvecfrac;              % residual tolerance for convergence of iterative solver
+nupd   = 100;               % update residual and permissions every [nupd] iterations
+atol   = 1e-5*Nvecfrac;     % residual tolerance for convergence of iterative solver
 rtol   = 1e-5;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
-maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.90;              % first-order iterative step size (reduce if not converging)
-% beta   = 0.6;               % second-order iterative step size (reduce if not converging)
+maxits = 10000;             % maximum iteration count for iterative solver
+alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
+% beta   = 0.6;             % second-order iterative step size (reduce if not converging)
 dmp    = 0;
 cfl    = 0.50;              % Courant number to limit physical time step size
-flim   = 1e-16;             % limit phase fractions in coefficient closures
-thtlim = 1e+16;             % limit phase-internal permission contrasts
-cfflim = 1e+16;             % limit inter-phase coefficient contrasts
+flim   = 1e-8;             % limit phase fractions in coefficient closures
+thtlim = 1e+8;             % limit phase-internal permission contrasts
+cfflim = 1e+8;             % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [ 0.95; 0.05];       % initial background phase fractions (unity sum!)
+f0   = [ 0.05; 0.95];       % initial background phase fractions (unity sum!)
 dfg  = [-0.01; 0.01];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.00; 0.00];       % initial random perturbation amplitude (unity sum!)
 smth = (N/40)^2;            % smoothing parameter for random perturbation field
@@ -107,4 +107,20 @@ while flag==0 && beta>=0
 
     beta = beta-0.1;
 end
+
+
+disp('max div_qf error');
+
+
+norm( sum(Div_qf-psrc,1), 'fro' ) / ( norm(Div_qf-psrc, 'fro') + TINY )
+% figure; plot(Div_qf(:,:,21)-psrc(:,:,21), z, sum(Div_qf(:,:,21)-psrc(:,:,21)), z); axis tight; grid on;
+% 
+% dqffig = figure; 
+% subplot(311); imagesc(x, z, squeeze(Div_qf(1,:,:)-psrc(1,:,:))); axis xy equal tight; colormap(ocean); colorbar;
+% subplot(312); imagesc(x, z, squeeze(Div_qf(2,:,:)-psrc(2,:,:))); axis xy equal tight; colormap(ocean); colorbar;
+% subplot(313); imagesc(x, z, squeeze( sum(Div_qf  -psrc   , 1))); axis xy equal tight; colormap(ocean); colorbar;
+% 
+% name = [outdir,RunID,'/',RunID,'_divqfpsrc_',num2str(step/nop)];
+% print(dqffig,'-dpdf','-r200','-opengl',name,'-loose');
+
 end

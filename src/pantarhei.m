@@ -42,7 +42,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     res  = 1e3;
     res0 = res;
     it   = 0;
-    itvec = nan(ceil(maxits/nupd),8); % collect iteration information
+    itvec = nan(ceil(maxits/nupd), 8); % collect iteration information
 
     if step == 0 % require more stringent convergence criterion for first step
         conv_crit = @(resc,res0c,itc) (resc >= atol && itc <= 10*maxits);
@@ -56,10 +56,10 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     while  conv_crit(res,res0,it) > 0 % keep stepping until convergence criterion reached
         
         % store solution of previous two iterations
-        uii = ui;  ui = u;  
-        wii = wi;  wi = w;  
-        pii = pi;  pi = p;  
-        fii = fi;  fi = f;
+        uii = ui;  ui = u;  upd_ui = upd_u;
+        wii = wi;  wi = w;  upd_wi = upd_w;
+        pii = pi;  pi = p;  upd_pi = upd_p;
+        fii = fi;  fi = f;  upd_fi = upd_f;
         
         it = it+1;  % update iteration count
         
@@ -81,7 +81,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % update residual fields
         res_u =            +    Div_qvx      + Gvx + Qvx     ;
         res_w =            +    Div_qvz      + Gvz + Qvz     ;
-        res_p =            +    Div_qf       + Gf  + Gm./rho ;
+        res_p =            +    Div_qf       + Gf  + Gm./rho ; 
         res_f = (f-fo)./dt + (fadv+fadvo)./2 -(Gf + Gfo)./2  ;
         
         % call manufactured solution (if benchmarking)
@@ -93,11 +93,11 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         if strcmp(BC{1},'closed'), res_w(:,[1,end],:) = 0; end
         if strcmp(BC{2},'closed'), res_u(:,:,[1,end]) = 0; end
 
-        upd_u = res_u.*dtau_u + sum(res_u,1).*dtau_ustar;
-        upd_w = res_w.*dtau_w + sum(res_w,1).*dtau_wstar;
-        upd_p = res_p.*dtau_p + sum(res_p,1).*dtau_pstar;
+        upd_u = res_u.*dtau_u +  sum(res_u,1).*dtau_ustar;
+        upd_w = res_w.*dtau_w +  sum(res_w,1).*dtau_wstar;
+        upd_p = res_p.*dtau_p +  sum(res_p,1).*dtau_pstar; 
         upd_f = res_f.*dtau_f - mean(res_f(:).*dtau_f(:));
-
+    
         if any(strcmp(BC, 'periodic'))
             upd_u = upd_u - mean(upd_u(:));
             upd_w = upd_w - mean(upd_w(:));
@@ -107,6 +107,13 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         u = ui - alpha.*upd_u + beta.*(ui-uii);
         w = wi - alpha.*upd_w + beta.*(wi-wii);
         p = pi - alpha.*upd_p + beta.*(pi-pii);
+%         u = (2*ui - 1/2*uii - alpha.*upd_u + beta.*(ui-uii))/(3/2) - diff(upd_u(:,:,[1 1:end end]),2,3)./8; upd_u(:,:,[1,end]) = 0;
+%         w = (2*wi - 1/2*wii - alpha.*upd_w + beta.*(wi-wii))/(3/2) - diff(upd_w(:,[1 1:end end],:),2,2)./8; upd_w(:,[1,end],:) = 0;
+%         p = (2*pi - 1/2*pii - alpha.*upd_p + beta.*(pi-pii))/(3/2) - diff(upd_p(:,[1 1:end end],:),2,2)./8 - diff(upd_p(:,:,[1 1:end end]),2,3)./8;
+        
+        ustar     = sum(omvx.*u,1);
+        wstar     = sum(omvz.*w,1);
+        pstar     = sum(omfc.*p,1);
 
         % update phase fractions (only every 'nupd' iterations)
         if ~mod(it,nupd); f = fi - alpha.*upd_f; f = max(flim,min(1-flim,f)); end
@@ -114,22 +121,21 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            resflds = [ norm(    res_u .*dtau_u    ,'fro')./(norm(u    ,'fro')+TINY); 
-                        norm(    res_w .*dtau_w    ,'fro')./(norm(w    ,'fro')+TINY); 
-                        norm(    res_p .*dtau_p    ,'fro')./(norm(p    ,'fro')+TINY); 
-                        norm(    res_f .*dtau_f    ,'fro')./(norm(f    ,'fro')+TINY);
-                        norm(sum(res_u).*dtau_ustar,'fro')./(norm(ustar,'fro')+TINY);
-                        norm(sum(res_w).*dtau_wstar,'fro')./(norm(wstar,'fro')+TINY);
-                        norm(sum(res_p).*dtau_pstar,'fro')./(norm(pstar,'fro')+TINY)];
- 
-%             resflds = [ norm(upd_u,'fro')./(norm(u,'fro')+TINY); 
-%                         norm(upd_w,'fro')./(norm(w,'fro')+TINY);
-%                         norm(upd_p,'fro')./(norm(p,'fro')+TINY); 
-%                         norm(upd_f,'fro')./(norm(f,'fro')+TINY);];
-%             
-            res = sum(resflds,'all');
+%             resflds = [ norm(u(:)-ui(:)+TINY-TINY,2)./(norm(u(:)+TINY,2))
+%                         norm(w(:)-wi(:)+TINY-TINY,2)./(norm(w(:)+TINY,2))
+%                         norm(p(:)-pi(:)+TINY-TINY,2)./(norm(p(:)+TINY,2))
+%                         norm(f(:)-fi(:)+TINY-TINY,2)./(norm(f(:)+TINY,2)) ];
+            resflds = [ (norm(    res_u    ,'fro')+TINY-TINY)./(norm(u    ./dtau_u    ,'fro')+TINY);
+                        (norm(    res_w    ,'fro')+TINY-TINY)./(norm(w    ./dtau_w    ,'fro')+TINY);
+                        (norm(    res_p    ,'fro')+TINY-TINY)./(norm(p    ./dtau_p    ,'fro')+TINY);
+                        (norm(    res_f    ,'fro')+TINY-TINY)./(norm(f    ./dtau_f    ,'fro')+TINY); 
+                        (norm(sum(res_u ,1),'fro')+TINY-TINY)./(norm(ustar./dtau_ustar,'fro')+TINY);
+                        (norm(sum(res_w ,1),'fro')+TINY-TINY)./(norm(wstar./dtau_wstar,'fro')+TINY);
+                        (norm(sum(res_p ,1),'fro')+TINY-TINY)./(norm(pstar./dtau_pstar,'fro')+TINY); ];
             
-            itvec(round(it/nupd)+1,:) = [it, resflds'];
+            res = norm(resflds, 2);
+            
+            itvec(round(it/nupd)+1,:) = [it, resflds(:)'];
 
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
 
@@ -137,16 +143,17 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
 
-            if pltits
+            if pltits && it>1
+                % plot the residuals as function of the iterations
                 figure(f10);
                 subplot(1,4,[1,2]);
-                for res_j=1:4, semilogy(it,resflds(res_j),'.','MarkerSize',10,'Color',rc(res_j  ,:)); hold on; end
-                for res_j=5:7, semilogy(it,resflds(res_j),'*','MarkerSize', 5,'Color',rc(res_j-4,:)); hold on; end
-                semilogy(it, res,'ko','MarkerSize',8); axis tight; drawnow;
+                for jvar=1:4, semilogy(it,resflds(jvar),'.','MarkerSize',10,'Color',rc(jvar  ,:),'linewidth',1); hold on; end
+                for jvar=5:7, semilogy(it,resflds(jvar),'*','MarkerSize', 6,'Color',rc(jvar-4,:),'linewidth',0.2); hold on; end
+                semilogy(it, res,'ko','MarkerSize',8,'linewidth',1); axis tight; drawnow;
 
                 if ~mod(it,nupd*2)
-                    subplot(143); plot(upd_p(:,:,1), z , sum(upd_p(:,:,1)), z , 'k-'); grid on; axis tight; title('upd p')
-                    subplot(144); plot(upd_w(:,:,1), zw, sum(upd_w(:,:,1)), zw, 'k-'); grid on; axis tight; title('upd w')
+                    subplot(143); plot(res_p(:,:,1).*dtau_p(:,:,1), z , sum(res_p(:,:,1),1).*dtau_pstar(:,:,1), z , 'k-'); grid on; axis tight; title('upd p')
+                    subplot(144); plot(res_w(:,:,1).*dtau_w(:,:,1), zw, sum(res_w(:,:,1),1).*dtau_wstar(:,:,1), zw, 'k-'); grid on; axis tight; title('upd w')
 
                     if ~mod(it,nupd*20)
                         subplot(143); xlimits1 = xlim; subplot(144); xlimits2 = xlim;

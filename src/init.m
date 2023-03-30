@@ -31,7 +31,7 @@ HUGE = 1e+16;
 figvis = 'off'; % toggle for figure visibility on/off
 if ~exist('pltits','var'), pltits = false; end
 
-%% calculate material properties,
+%% calculate material properties
 % reset nondimensional variables to dimensional values
 
 % get diffusivity contrasts
@@ -98,7 +98,8 @@ if ndim==1
 elseif ndim==2
     Re = 3*sqrt(10)*pi/2; r = 0.5;
 end
-vfac = 1./Re; pfac = r/(r+2)*Re;
+vfac = 0.9/Re/sqrt(ndim);
+pfac = 0.9*Re/sqrt(ndim)/(r+2);
 
 %% intialise phase fraction
 

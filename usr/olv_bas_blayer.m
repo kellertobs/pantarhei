@@ -5,7 +5,7 @@
 clear; close all; clc;
 
 % set model parameters
-RunID  = 'olvbas_blayer';          % identifier for this run
+RunID  = 'olvbas_blayer400';          % identifier for this run
 outdir = '../out/';         % directory to save output files
 pltits = true;
 nop    = 4;                % plot and store output every [nop] time step
@@ -13,8 +13,8 @@ svop   = 1;                 % save output
 restart= 0;
 
 NPHS   = 2;                 % number of phases
-N      = 320;               % number of grid points in each direction
-Lfac   = 80;                % domain dimension in each direction [delta0]
+N      = 400;               % number of grid points in each direction
+Lfac   = 50;                % domain dimension in each direction [delta0]
 BC     = 'closed';        % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = nop*0;           % maximum number of time steps
 tend   = 1e16;              % model run time [s]
@@ -24,17 +24,17 @@ nupd   = 100;               % update residual and permissions every [nupd] itera
 atol   = 1e-6;              % residual tolerance for convergence of iterative solver
 rtol   = 1e-5;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
-maxits = 50000;              % maximum iteration count for iterative solver
-alpha  = 0.5;              % first-order iterative step size (reduce if not converging)
-beta   = 0.00;              % second-order iterative step size (reduce if not converging)
-dmp    = 0;
+maxits = 1e5;              % maximum iteration count for iterative solver
+alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
+beta   = 0.80;              % second-order iterative step size (reduce if not converging)
+dmp    = 2;
 cfl    = 0.5;               % Courant number to limit physical time step size
 flim   = 1e-6;             % limit phase fractions in coefficient closures
-thtlim = 1e+6;              % limit phase-internal permission contrasts
+thtlim = 1e+4;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [ 0.95; 0.05];       % initial background phase fractions (unity sum!)
+f0   = [ 0.05; 0.95];       % initial background phase fractions (unity sum!)
 dfg  = [-0.00;+0.00];       % initial guassian peak amplitude (unity sum!)
 dfr  = [-0.00;+0.00];       % initial random perturbation amplitude (unity sum!)
 smth = (N/20)^2;            % smoothing parameter for random perturbation field
@@ -56,20 +56,7 @@ wInit = @(w, w0) wbl(w, w0, f0);
 
 % run model
 run('../src/pantarhei');
-
-%%
-kfx = - Kfx.*(diff(p(:,:,icx),1,3)./h - Gx_pstar);
-kfz = - Kfz.*(diff(p(:,icz,:),1,2)./h - Gz_pstar);
-div_kf = diff(kfx,1,3)./h + diff(kfz,1,2)./h;
-
-disp('max div_qf error'); max(sum(Div_qf+TINY-TINY))./max(Div_qf(:)+TINY)
-disp('max     Gf error'); max(sum(    Gf+TINY-TINY))./max(    Gf(:)+TINY)
-disp('max div_kf error'); max(sum(div_kf+TINY-TINY))./max(div_kf(:)+TINY)
-
-figure(21); 
-subplot(131); plot(Div_qf, z, sum(Div_qf), z); grid on; axis tight;
-subplot(132); plot(    Gf, z, sum(    Gf), z); grid on; axis tight;
-subplot(133); plot(div_kf, z, sum(div_kf), z); grid on; axis tight;
+run('../src/checkmasscons.m');
 
 %%
 

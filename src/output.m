@@ -45,12 +45,13 @@ if (nop>0) %plot
     end
 
     f6 = figure(6); f6.Visible = figvis; clf;
-    for res_j=1:4, semilogy(itvec(:,1),itvec(:,1+res_j),'.','MarkerSize',10,'Color',rc(res_j  ,:)); hold on; end
-    for res_j=5:7, semilogy(itvec(:,1),itvec(:,1+res_j),'*','MarkerSize', 5,'Color',rc(res_j-4,:)); hold on; end
-    semilogy(itvec(:,1), sum(itvec(:,2:end),2),'ko','MarkerSize',3); hold off;
+    rc = lines(4);
+    for jvar=1:4, semilogy(itvec(:,1),itvec(:,jvar+1),'.','MarkerSize',10,'Color',rc(jvar  ,:),'linewidth',1); hold on; end
+    for jvar=5:7, semilogy(itvec(:,1),itvec(:,jvar+1),'*','MarkerSize', 6,'Color',rc(jvar-4,:),'linewidth',0.2); hold on; end
+    semilogy(itvec(:,1), sum(itvec(:,2:end),2),'ko','MarkerSize',3,'linewidth',1); hold off;
     axis tight; drawnow;
     xlabel('iteration number'); ylabel('absolute residual');
-    legend('u','w','p','f','total');
+    legend('u','w','p','f','ustar','wstar','pstar','total','NumColumns',2,'location','northoutside');
 
     if svop % save
         name = [outdir,RunID,'/',RunID,'_sltn_',num2str(step/nop)];
@@ -84,4 +85,7 @@ if (nop>0) %plot
         end
 
     end
+
 end
+
+close all;

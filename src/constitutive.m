@@ -1,8 +1,8 @@
 
 % update reference and auxiliary fields
-ustar     = sum(omvx.*u,1);
-wstar     = sum(omvz.*w,1);
-pstar     = sum(omfc.*p,1);
+ustar     = sum(omvx.*u  ,1);
+wstar     = sum(omvz.*w  ,1);
+pstar     = sum(omfc.*p  ,1);
 rhostar   = sum(omfc.*rho,1);
 Gx_pstar  = sum(ompx.*diff(p(:,:,icx),1,3)./h,1);
 Gz_pstar  = sum(ompz.*diff(p(:,icz,:),1,2)./h,1);
@@ -24,12 +24,12 @@ Div_qf = diff(qfx,1,3)./h + diff(qfz,1,2)./h;
 Gm  = Gmg.*ones(size(f));
 
 %get volume transfer fields
-Gf  = Cf .*(p-pstar) - vstar_Gf - Gm./rhostar;
+Gf  = Cf.*(p-pstar) - vstar_Gf - Gm./rhostar;
 
 
 % momentum flux fields
-qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3 + dmp*sum(Div_qf) - Pu) + f.*p;
-qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3 + dmp*sum(Div_qf) + Pu) + f.*p;
+qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3 - Pu) + f.*p;
+qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3 + Pu) + f.*p;
 qvxz  = - Kvn.* (diff(u(:,icz,:),1,2)./h + diff(w(:,:,icx),1,3)./h + 2*Si)./2;
 
 % divergence of momentum fluxes
@@ -43,4 +43,6 @@ Gvz = Cvz.*(w-wstar) - pstar_Gfz;
 % momentum source fields
 Qvx = -fx.*(rhox-rhomix).*grav(2);
 Qvz = -fz.*(rhoz-rhomix).*grav(1);
+
+
 
