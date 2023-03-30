@@ -93,14 +93,6 @@ elseif strcmp(BC{2},'open') || strcmp(BC{2},'closed')
     icx = [1,1:Nx,Nx]; imx = [1,1:Nx]; ipx = [1:Nx,Nx];
 end
 
-if ndim==1
-    Re = 9*sqrt( 3)*pi/4; r = 0.25; 
-elseif ndim==2
-    Re = 3*sqrt(10)*pi/2; r = 0.5;
-end
-vfac = 0.9/Re/sqrt(ndim);
-pfac = 0.9*Re/sqrt(ndim)/(r+2);
-
 %% intialise phase fraction
 
 if exist('fInit','var')  

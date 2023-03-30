@@ -45,7 +45,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     itvec = nan(ceil(maxits/nupd), 8); % collect iteration information
 
     if step == 0 % require more stringent convergence criterion for first step
-        conv_crit = @(resc,res0c,itc) (resc >= atol && itc <= 10*maxits);
+        conv_crit = @(resc,res0c,itc) (resc >= atol && itc <= 10*maxits || itc < minits);
     else
         conv_crit = @(resc,res0c,itc) (resc >= atol && resc/res0c >= rtol && itc <= maxits || itc < minits);
     end
@@ -107,10 +107,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         u = ui - alpha.*upd_u + beta.*(ui-uii);
         w = wi - alpha.*upd_w + beta.*(wi-wii);
         p = pi - alpha.*upd_p + beta.*(pi-pii);
-%         u = (2*ui - 1/2*uii - alpha.*upd_u + beta.*(ui-uii))/(3/2) - diff(upd_u(:,:,[1 1:end end]),2,3)./8; upd_u(:,:,[1,end]) = 0;
-%         w = (2*wi - 1/2*wii - alpha.*upd_w + beta.*(wi-wii))/(3/2) - diff(upd_w(:,[1 1:end end],:),2,2)./8; upd_w(:,[1,end],:) = 0;
-%         p = (2*pi - 1/2*pii - alpha.*upd_p + beta.*(pi-pii))/(3/2) - diff(upd_p(:,[1 1:end end],:),2,2)./8 - diff(upd_p(:,:,[1 1:end end]),2,3)./8;
-        
+
         ustar     = sum(omvx.*u,1);
         wstar     = sum(omvz.*w,1);
         pstar     = sum(omfc.*p,1);
@@ -121,10 +118,6 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-%             resflds = [ norm(u(:)-ui(:)+TINY-TINY,2)./(norm(u(:)+TINY,2))
-%                         norm(w(:)-wi(:)+TINY-TINY,2)./(norm(w(:)+TINY,2))
-%                         norm(p(:)-pi(:)+TINY-TINY,2)./(norm(p(:)+TINY,2))
-%                         norm(f(:)-fi(:)+TINY-TINY,2)./(norm(f(:)+TINY,2)) ];
             resflds = [ (norm(    res_u    ,'fro')+TINY-TINY)./(norm(u    ./dtau_u    ,'fro')+TINY);
                         (norm(    res_w    ,'fro')+TINY-TINY)./(norm(w    ./dtau_w    ,'fro')+TINY);
                         (norm(    res_p    ,'fro')+TINY-TINY)./(norm(p    ./dtau_p    ,'fro')+TINY);
@@ -139,7 +132,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
 
             fprintf(1,'    ---  it = %d;   abs res = %4.4e;   rel res = %4.4e; \n',it,res,res/res0);
 
-            if (res>=100*res0 && it>maxits/4) || isnan(res) || (step>0 && res>1); error('!!! solver diverged, try again !!!'); end
+            if (step>0 && res>=100*res0 && it>maxits/4) || isnan(res) || (step>0 && res>1); error('!!! solver diverged, try again !!!'); end
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
 

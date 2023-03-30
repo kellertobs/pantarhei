@@ -28,8 +28,8 @@ Gf  = Cf.*(p-pstar) - vstar_Gf - Gm./rhostar;
 
 
 % momentum flux fields
-qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3 - Pu) + f.*p;
-qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3 + Pu) + f.*p;
+qvxx  = - Kv .* (diff(u,1,3)./h - Div_v./3 + dmp*sum(Div_qf,1) - Pu) + f.*p;
+qvzz  = - Kv .* (diff(w,1,2)./h - Div_v./3 + dmp*sum(Div_qf,1) + Pu) + f.*p;
 qvxz  = - Kvn.* (diff(u(:,icz,:),1,2)./h + diff(w(:,:,icx),1,3)./h + 2*Si)./2;
 
 % divergence of momentum fluxes
