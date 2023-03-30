@@ -7,7 +7,7 @@ clear; close all; clc;
 
 % run method of manufactured solutions for time step 0 to check consistent
 % f, p, u, w
-mms = false;
+mms = true;
 mms_regime = "olv_bas_suspension"
 
 % set model parameters
@@ -33,7 +33,7 @@ minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.70;              % second-order iterative step size (reduce if not converging)
-dmp    = 0;
+dmp    = 0;                 % damping parameter, acts as numerical bulk viscosity
 cfl    = 0.50;              % Courant number to limit physical time step size
 flim   = 1e-8;              % limit phase fractions in coefficient closures
 thtlim = 1e+8;              % limit phase-internal permission contrasts

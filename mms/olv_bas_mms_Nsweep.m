@@ -56,11 +56,11 @@ minits = 500;               % minimum iteration count for iterative solver
 maxits = 10000;             % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 % beta   = 0.6;             % second-order iterative step size (reduce if not converging)
-dmp    = 0;
+dmp    = 0;                 % damping parameter, acts as numerical bulk viscosity
 cfl    = 0.50;              % Courant number to limit physical time step size
-flim   = 1e-8;             % limit phase fractions in coefficient closures
-thtlim = 1e+8;             % limit phase-internal permission contrasts
-cfflim = 1e+8;             % limit inter-phase coefficient contrasts
+flim   = 1e-8;              % limit phase fractions in coefficient closures
+thtlim = 1e+8;              % limit phase-internal permission contrasts
+cfflim = 1e+8;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.05; 0.95];       % initial background phase fractions (unity sum!)

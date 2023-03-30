@@ -7,6 +7,7 @@ clear; close all; clc;
 % set model parameters
 RunID  = 'plgdacmvp';
 outdir = '../out/';         % directory to save output files
+pltits = false;             % whether to plot residuals 
 nop    = 5;                 % plot and store output every [nop] time step
 svop   = 1;                 % save output and print figures
 restart= 0;
@@ -26,8 +27,9 @@ minits = 500;               % minimum iteration count for iterative solver
 maxits = 5000;              % maximum iteration count for iterative solver
 alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
 beta   = 0.50;              % second-order iterative step size (reduce if not converging)
+dmp    = 0;                 % damping parameter, acts as numerical bulk viscosity
 cfl    = 0.90;              % Courant number to limit physical time step size
-flim   = 1e-16;             % limit phase fractions in coefficient closures
+flim   = 1e-6;              % limit phase fractions in coefficient closures
 thtlim = 1e+6;              % limit phase-internal permission contrasts
 cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
