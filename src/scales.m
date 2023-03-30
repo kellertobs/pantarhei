@@ -1,5 +1,5 @@
 
-function [delta0, w0] = scales (f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim)
+function [delta0, w0, p0, Cv] = scales (f0, grav, rho0, eta0, d0, A, B, C, thtlim, cfflim)
 
 NPHS = length(f0);
 
@@ -36,6 +36,7 @@ delta0 = delta0 - diag(diag(delta0));
 % get Darcy speed scales
 % DeltaRho0 = abs(rho0 - rho0.');
 DeltaRho0 = rho0 - sum(f0.*rho0,1);
-w0        = DeltaRho0.*max(abs(grav)).*f0.^2./Cv;
+w0        = DeltaRho0.*grav(1).*f0.^2./Cv;
+p0        = max(abs(diff(rho0))).*max(abs(grav)).*max(abs(delta0(:)));
 
 end

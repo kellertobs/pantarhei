@@ -82,16 +82,16 @@ plot(squeeze(qvzz-f.*p),z);
 format1dpanels(1, L, '$q_{v,zz}$ [Pa]', strcat('$q_{v,zz}^',num2str((1:NPHS)'),'$'));
 
 axes(UN{:},'position',axpos(2,:));
-plot(squeeze(qfz-(f(:,imz,:)+f(:,ipz,:))./2.*w),[z-h/2,z(end)+h/2]); 
-format1dpanels(2, L, '$q_{f,z}$ [m/s]', strcat('$q_{f,z}^',num2str((1:NPHS)'),'$'));
+plot(squeeze(Div_qf),z, squeeze(sum(Div_qf,1)),z, 'k-'); 
+format1dpanels(2, L, '$\nabla \cdot q_{f}$ [m/s]', strcat('$\nabla \cdot q_{f}^',[num2str((1:NPHS)');'t'],'$'));
 
 axes(UN{:},'position',axpos(3,:));
-plot(squeeze(Gvz),[z-h/2,z(end)+h/2]); 
-format1dpanels(3, L, '$\Gamma_{v,z}$ [Pa/m]', strcat('$\Gamma_{v,z}^',num2str((1:NPHS)'),'$'));
+plot(squeeze(Gvz),[z-h/2,z(end)+h/2], squeeze(sum(Gvz)),[z-h/2,z(end)+h/2], 'k-'); 
+format1dpanels(3, L, '$\Gamma_{v,z}$ [Pa/m]', strcat('$\Gamma_{v,z}^',[num2str((1:NPHS)');'t'],'$'));
 
 axes(UN{:},'position',axpos(4,:));
-plot(squeeze(Gf),z); 
-format1dpanels(4, L, '$\Gamma_f$ [1/s]', strcat('$\Gamma_f^',num2str((1:NPHS)'),'$'));
+plot(squeeze(Gf),z, squeeze(sum(Gf,1)),z, 'k-'); 
+format1dpanels(4, L, '$\Gamma_f$ [1/s]', strcat('$\Gamma_f^',[num2str((1:NPHS)');'t'],'$'));
 
 annotation('textbox','String',['time = ',num2str(time,'%.1e'),' [s]'],'Position',[0.5,0.9,0.1,0.1],'LineStyle','none','HorizontalAlignment','center',TX{:},FS{:});
 

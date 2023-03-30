@@ -81,7 +81,6 @@ TINY = 1e-16;
 ne   = nan(NPHS, 1);
 
 for iphs = 1:NPHS
-    ne(iphs) = 100*norm(squeeze(v(iphs,:,:)-vtrue(iphs,:,:)),no)...
-                ./(norm(squeeze(vtrue(iphs,:,:)),no)+TINY);
+    ne(iphs) = 100*norm(squeeze(v(iphs,:,:)+TINY - vtrue(iphs,:,:)-TINY),no)./(norm(squeeze(vtrue(iphs,:,:)+TINY),no));
 end
 end

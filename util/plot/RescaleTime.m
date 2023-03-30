@@ -1,4 +1,4 @@
-function [trscl, tunit] = RescaleTime (t)
+function [trscl, tunit, tscl] = RescaleTime (t)
 % 
 % rescale the units of time into something that makes sense for the viewer
 % 
@@ -10,6 +10,7 @@ tscales  = cumprod([ 1 ; 3600;   24 ; 365.25;  1e3 ]);
 
 [~,ti] = min(abs(log10(max(t)./tscales)));
 
+tscl  = tscales(ti);
 trscl = t./tscales(ti);
 tunit = tunitvec{ti};
 

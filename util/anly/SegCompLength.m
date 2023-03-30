@@ -1,4 +1,4 @@
-function [dsc, Kv, Kf, Cv, Cf, Xf] = SegCompLength (f, eta0, d0, A, B, C, thtlim, cfflim)
+function [dsc, Kv, Kf, Cv, Cf, Xf, thtv, thtf] = SegCompLength (f, eta0, d0, A, B, C, thtlim, cfflim)
 % 
 % [dsc, Kv, Kf, Cv, Cf, Xf] = SegCompLength(f, eta0, d0, A, B, C, thtlim, cfflim)
 % 
@@ -66,7 +66,7 @@ dsc = zeros(NPHS,NPHS,size(f,2));
 for k = 1:NPHS
     for i = 1:NPHS
         if i==k, continue; end
-        dsc(k,i,:) = f(i,:).*f(k,:)./sqrt(Cv(i,:).*Cf(k,:));
+        dsc(k,i,:) = f(i,:).*f(k,:)./sqrt(Cv(k,:).*Cf(i,:));
     end
 end
 
