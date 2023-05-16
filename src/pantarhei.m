@@ -118,15 +118,15 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            resflds = [ (norm(    res_u    ,'fro')+TINY-TINY)./(norm(u    ./dtau_u    ,'fro')+TINY);
-                        (norm(    res_w    ,'fro')+TINY-TINY)./(norm(w    ./dtau_w    ,'fro')+TINY);
-                        (norm(    res_p    ,'fro')+TINY-TINY)./(norm(p    ./dtau_p    ,'fro')+TINY);
-                        (norm(    res_f    ,'fro')+TINY-TINY)./(norm(f    ./dtau_f    ,'fro')+TINY); 
-                        (norm(sum(res_u ,1),'fro')+TINY-TINY)./(norm(ustar./dtau_ustar,'fro')+TINY);
-                        (norm(sum(res_w ,1),'fro')+TINY-TINY)./(norm(wstar./dtau_wstar,'fro')+TINY);
-                        (norm(sum(res_p ,1),'fro')+TINY-TINY)./(norm(pstar./dtau_pstar,'fro')+TINY); ];
+            resflds = [ (norm(    res_u   ,'fro'))./(norm(u    ./dtau_u    ,'fro')+TINY);
+                        (norm(    res_w   ,'fro'))./(norm(w    ./dtau_w    ,'fro')+TINY);
+                        (norm(    res_p   ,'fro'))./(norm(p    ./dtau_p    ,'fro')+TINY);
+                        (norm(    res_f   ,'fro'))./(norm(f    ./dtau_f    ,'fro')+TINY); 
+                        (norm(sum(res_u,1),'fro'))./(norm(ustar./dtau_ustar,'fro')+TINY);
+                        (norm(sum(res_w,1),'fro'))./(norm(wstar./dtau_wstar,'fro')+TINY);
+                        (norm(sum(res_p,1),'fro'))./(norm(pstar./dtau_pstar,'fro')+TINY)];
             
-            res = norm(resflds, 2);
+            res = sum(resflds);
             
             itvec(round(it/nupd)+1,:) = [it, resflds(:)'];
 
@@ -150,7 +150,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
 
                     if ~mod(it,nupd*20)
                         subplot(143); xlimits1 = xlim; subplot(144); xlimits2 = xlim;
-                    elseif it>20*nupd;
+                    elseif it>20*nupd
                         subplot(143); xlim(xlimits1); subplot(144); xlim(xlimits2);
                     end
                     drawnow;

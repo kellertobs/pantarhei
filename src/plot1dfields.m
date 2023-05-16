@@ -36,7 +36,7 @@ plot(squeeze(p),z,squeeze(pstar),z,':');
 format1dpanels(3, L, '$p$ [Pa]', [strcat('$p^',num2str((1:NPHS)'),'$');'$p^*$']);
 
 axes(UN{:},'position',axpos(4,:));
-plot(squeeze(f-f0),z,0,0);
+plot(squeeze(f),z,0,0);
 format1dpanels(4, L, '$f-f_0$', [strcat('$f^',num2str((1:NPHS)'),'$');'N/A  ']);
 
 annotation('textbox','String',['time = ',num2str(time,'%.1e'),' [s]'],'Position',[0.5,0.9,0.1,0.1],'LineStyle','none','HorizontalAlignment','center',TX{:},FS{:});
