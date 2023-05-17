@@ -2,7 +2,7 @@
 % calibrated for plagioclase + dacitic melt + Fe-P-rich melt
 
 % clear workspace
-clear; close all; clc;
+clear; close all; %clc;
 
 % set model parameters
 % detect system
@@ -12,27 +12,28 @@ outdir = '../out/';         % directory to save output files
 nop    = 10;                % plot and store output every [nop] time step
 svop   = 1;                 % save output and print figures
 restart= 0;
+pltits = 1;
 
 NPHS   = 3;                 % number of phases
-N      = 1000;               % number of grid points in each direction
-Lfac   = 10;                % domain dimension in each direction [delta0]
+N      = 1000;              % number of grid points in each direction
+Lfac   = 8;                 % domain dimension in each direction [delta0]
 BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
 NtMax  = 1e3;               % maximum number of time steps
 tend   = 1e16;              % model run time [s]
 
 advn   = 'weno5';           % advection scheme. best ones: 'quick', 'weno5'
-nupd   = 50;                % update residual and permissions every [nupd] iterations
-atol   = 1e-8;              % residual tolerance for convergence of iterative solver
-rtol   = 1e-4;              % residual tolerance for convergence of iterative solver
+nupd   = 100;               % update residual and permissions every [nupd] iterations
+atol   = 1e-7;              % residual tolerance for convergence of iterative solver
+rtol   = 1e-5;              % residual tolerance for convergence of iterative solver
 minits = 500;               % minimum iteration count for iterative solver
 maxits = 2e4;               % maximum iteration count for iterative solver
-alpha  = 0.80;              % first-order iterative step size (reduce if not converging)
-beta   = 0.30;              % second-order iterative step size (reduce if not converging)
-cfl    = 0.10;              % Courant number to limit physical time step size
+alpha  = 0.95;              % first-order iterative step size (reduce if not converging)
+beta   = 0.50;              % second-order iterative step size (reduce if not converging)
+dmp    = 0;                 % damping parameter, acts as numerical bulk viscosity
+cfl    = 0.125;              % Courant number to limit physical time step size
 flim   = 1e-6;              % limit phase fractions in coefficient closures
 thtlim = 1e+4;              % limit phase-internal permission contrasts
-cfflim = 1e+9;              % limit inter-phase coefficient contrasts
-dmp    = 0.5;               % damping parameter, acts as numerical bulk viscosity
+cfflim = 1e+4;              % limit inter-phase coefficient contrasts
 
 grav = [-9.81,0];           % gravity in vertical and horizontal direction
 f0   = [ 0.65; 0.25; 0.10]; % initial background phase fractions (unity sum!)

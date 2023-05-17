@@ -42,7 +42,7 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
     res  = 1e3;
     res0 = res;
     it   = 0;
-    itvec = nan(ceil(maxits/nupd), 8); % collect iteration information
+    itvec = nan(ceil(maxits/nupd), 5); % collect iteration information
 
     if step == 0 % require more stringent convergence criterion for first step
         conv_crit = @(resc,res0c,itc) (resc >= atol && itc <= 10*maxits || itc < minits);
@@ -118,13 +118,17 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
         % print iteration diagnostics
         if ~mod(it,nupd) || it==1
             % get residual norm
-            resflds = [ (norm(    res_u   ,'fro'))./(norm(u    ./dtau_u    ,'fro')+TINY);
-                        (norm(    res_w   ,'fro'))./(norm(w    ./dtau_w    ,'fro')+TINY);
-                        (norm(    res_p   ,'fro'))./(norm(p    ./dtau_p    ,'fro')+TINY);
-                        (norm(    res_f   ,'fro'))./(norm(f    ./dtau_f    ,'fro')+TINY); 
-                        (norm(sum(res_u,1),'fro'))./(norm(ustar./dtau_ustar,'fro')+TINY);
-                        (norm(sum(res_w,1),'fro'))./(norm(wstar./dtau_wstar,'fro')+TINY);
-                        (norm(sum(res_p,1),'fro'))./(norm(pstar./dtau_pstar,'fro')+TINY)];
+            resflds = [ (norm(    upd_u   ,'fro'))./(norm(u    ,'fro')+TINY);
+                        (norm(    upd_w   ,'fro'))./(norm(w    ,'fro')+TINY);
+                        (norm(    upd_p   ,'fro'))./(norm(p    ,'fro')+TINY);
+                        (norm(    upd_f   ,'fro'))./(norm(f    ,'fro')+TINY)]; 
+            % resflds = [ (norm(    res_u   ,'fro'))./(norm(u    ./dtau_u    ,'fro')+TINY);
+            %             (norm(    res_w   ,'fro'))./(norm(w    ./dtau_w    ,'fro')+TINY);
+            %             (norm(    res_p   ,'fro'))./(norm(p    ./dtau_p    ,'fro')+TINY);
+            %             (norm(    res_f   ,'fro'))./(norm(f    ./dtau_f    ,'fro')+TINY)]; 
+                        % (norm(sum(res_u,1),'fro'))./(norm(ustar./dtau_ustar,'fro')+TINY);
+                        % (norm(sum(res_w,1),'fro'))./(norm(wstar./dtau_wstar,'fro')+TINY);
+                        % (norm(sum(res_p,1),'fro'))./(norm(pstar./dtau_pstar,'fro')+TINY)];
             
             res = sum(resflds);
             
@@ -136,25 +140,24 @@ while time <= tend && step <= NtMax  % keep stepping until final run time reache
             if max(abs(u(:)))>1e2 || max(abs(w(:)))>1e2, error('!!! solution is blowing up, try again !!!'); end
             if it==1; res0 = res; end
 
-            if pltits && it>1
+            if pltits && it>1 && ~mod(it,nupd*5)
                 % plot the residuals as function of the iterations
                 figure(f10);
                 subplot(1,4,[1,2]);
                 for jvar=1:4, semilogy(it,resflds(jvar),'.','MarkerSize',10,'Color',rc(jvar  ,:),'linewidth',1); hold on; end
-                for jvar=5:7, semilogy(it,resflds(jvar),'*','MarkerSize', 6,'Color',rc(jvar-4,:),'linewidth',0.2); hold on; end
+                % for jvar=5:7, semilogy(it,resflds(jvar),'*','MarkerSize', 6,'Color',rc(jvar-4,:),'linewidth',0.2); hold on; end
                 semilogy(it, res,'ko','MarkerSize',8,'linewidth',1); axis tight; drawnow;
 
-                if ~mod(it,nupd*2)
-                    subplot(143); plot(res_p(:,:,1).*dtau_p(:,:,1), z , sum(res_p(:,:,1),1).*dtau_pstar(:,:,1), z , 'k-'); grid on; axis tight; title('upd p')
-                    subplot(144); plot(res_w(:,:,1).*dtau_w(:,:,1), zw, sum(res_w(:,:,1),1).*dtau_wstar(:,:,1), zw, 'k-'); grid on; axis tight; title('upd w')
-
-                    if ~mod(it,nupd*20)
-                        subplot(143); xlimits1 = xlim; subplot(144); xlimits2 = xlim;
-                    elseif it>20*nupd
-                        subplot(143); xlim(xlimits1); subplot(144); xlim(xlimits2);
-                    end
-                    drawnow;
-                end
+                subplot(143); plot(upd_p(:,:,1)./norm(p,'fro')*sqrt(length(p(:))), z , sum(res_p(:,:,1),1).*dtau_pstar(:,:,1)./norm(p,'fro')*sqrt(length(p(:))), z , 'k-'); grid on; axis tight; title('upd p')
+                subplot(144); plot(upd_w(:,:,1)./norm(w,'fro')*sqrt(length(w(:))), zw, sum(res_w(:,:,1),1).*dtau_wstar(:,:,1)./norm(w,'fro')*sqrt(length(w(:))), zw, 'k-'); grid on; axis tight; title('upd w')
+                % subplot(143); plot(upd_p(:,:,1)./norm(p,'fro')*sqrt(length(p(:))), z ); grid on; axis tight; title('upd p')
+                % subplot(144); plot(upd_w(:,:,1)./norm(w,'fro')*sqrt(length(w(:))), zw); grid on; axis tight; title('upd w')
+                % if ~mod(it,nupd*50)
+                %     subplot(143); xlimits1 = xlim; subplot(144); xlimits2 = xlim;
+                % elseif it>nupd*50
+                %     subplot(143); xlim(xlimits1); subplot(144); xlim(xlimits2);
+                % end
+                drawnow;
             end
         end
      end  % iteration loop

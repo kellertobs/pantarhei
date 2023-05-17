@@ -1,8 +1,8 @@
 
 % update reference and auxiliary fields
-ustar     = sum(omvx.*u  ,1);
-wstar     = sum(omvz.*w  ,1);
-pstar     = sum(omfc.*p  ,1);
+ustar     = sum(omvx.*u  ,1); Du = u-ustar;
+wstar     = sum(omvz.*w  ,1); Dw = w-wstar;
+pstar     = sum(omfc.*p  ,1); Dp = p-pstar;
 rhostar   = sum(omfc.*rho,1);
 Gx_pstar  = sum(ompx.*diff(p(:,:,icx),1,3)./h,1);
 Gz_pstar  = sum(ompz.*diff(p(:,icz,:),1,2)./h,1);

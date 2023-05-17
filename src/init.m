@@ -117,7 +117,8 @@ if (mms), mms_plot_truesol; end
 
 f = max(flim,min(1-flim,f)); f = f./sum(f,1);   fo = f;  
 u = zeros(NPHS,Nz  ,Nx+1);  ustar = mean(u,1);  
-w = zeros(NPHS,Nz+1,Nx  );  wstar = mean(w,1);  
+w = w0./f0.*(1-exp(-2*(L(1)/2-zw)./max(delta0(:)))-exp(-2*(L(1)/2+zw)./max(delta0(:)))).*ones(NPHS,Nz+1,Nx  ); wstar = mean(w,1);  
+% w = 0.*w0./f0.*ones(NPHS,Nz+1,Nx  ); w(:,[1 end],:) = 0; wstar = mean(w,1);  
 p = zeros(NPHS,Nz  ,Nx  );  pstar = mean(p,1);  
 
 if exist('wInit', 'var'), [w,wstar] = wInit(w, w0); end

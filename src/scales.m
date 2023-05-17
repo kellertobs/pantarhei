@@ -37,6 +37,6 @@ delta0 = delta0 - diag(diag(delta0));
 % DeltaRho0 = abs(rho0 - rho0.');
 DeltaRho0 = rho0 - sum(f0.*rho0,1);
 w0        = DeltaRho0.*grav(1).*f0.^2./Cv;
-p0        = max(abs(diff(rho0))).*max(abs(grav)).*max(abs(delta0(:)));
+p0        = DeltaRho0.*grav(1).*delta0;
 
 end
