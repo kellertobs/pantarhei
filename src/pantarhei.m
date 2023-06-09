@@ -55,7 +55,6 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
     
     while  conv_crit(res,res0,it) > 0 % keep stepping until convergence criterion reached
         
-        closures; constitutive;
         if step>0
             % update physical time step [s]
             dt   = min([ 2*dto;
@@ -67,31 +66,31 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
             f    = fo + (dfdt+dfdto)/2*dt;
         end
 
-        % source fields
+        % update source fields
         rhomix = mean(mean(sum(f.*rho,1)));
         Qvx    = fx.*(rhox-rhomix).*PHS.grav(2);
         Qvz    = fz.*(rhoz-rhomix).*PHS.grav(1);
         Qf     = zeros(size(f));
 
-        ui = u; wi = w; pi = p;
-        [u, w, p] = multigrid_solve(u, w, p, Qvx, Qvz, Qf, f, PHS, NUM);
-        upd_u = u-ui; upd_w = w-wi;  upd_p = p-pi;
+        % update closures and residuals
+        closures; residuals;
 
-        closures; constitutive;
-        res_u = Div_qvx + Gvx - Qvx;
-        res_w = Div_qvz + Gvz - Qvz;
-        res_p = Div_qf  + Gf  - Qf ;
+        [upd_u, upd_w, upd_p] = multigrid_solve(res_u, res_w, res_p, f, PHS, NUM);
+
+        % apply correction
+        u = u - upd_u;
+        w = w - upd_w;
+        p = p - upd_p;
 
         it = it+1;  % update iteration count
 
-        % get residual norm
+        % get residual norms
         resflds = [ (norm(upd_u,'fro'))./(norm(u,'fro')+NUM.TINY);
                     (norm(upd_w,'fro'))./(norm(w,'fro')+NUM.TINY);
                     (norm(upd_p,'fro'))./(norm(p,'fro')+NUM.TINY)  ];
 
-        res = sum(resflds);
+        res = sum(resflds)/(NUM.ndim+1);
         if it==1 || res>res0; res0 = res; end
-
 
         itvec(it+1,:) = [it, resflds(:)'];
 
@@ -107,8 +106,8 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
             for jvar=1:3, semilogy(it,resflds(jvar),'.','MarkerSize',10,'Color',rc(jvar  ,:),'linewidth',1); hold on; end
             semilogy(it, res,'ko','MarkerSize',8,'linewidth',1); axis tight;
 
-            subplot(143); plot(upd_p(:,:,1)./norm(p,'fro')*sqrt(length(p(:))), NUM.z , sum(-res_p,1)./norm(p./dtau_p,'fro')*(length(p(:))), NUM.z , 'k-'); grid on; axis tight; title('upd p')
-            subplot(144); plot(upd_w(:,:,1)./norm(w,'fro')*sqrt(length(w(:))), NUM.zw, sum(-res_w,1)./norm(w./dtau_w,'fro')*(length(w(:))), NUM.zw, 'k-'); grid on; axis tight; title('upd w')
+            subplot(143); plot(upd_p(:,:,1)./norm(p,'fro')*sqrt(length(p(:))), NUM.z ); grid on; axis tight; title('upd p')
+            subplot(144); plot(upd_w(:,:,1)./norm(w,'fro')*sqrt(length(w(:))), NUM.zw); grid on; axis tight; title('upd w')
             drawnow;
         end
      end  % iteration loop

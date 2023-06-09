@@ -129,7 +129,8 @@ function [] = format1dpanels (plotcol, L, vartext, legtext)
 TX = {         'Interpreter','Latex'}; FS = {'FontSize',18};
 TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',14};
 
-ylim(0.5*[-L(1),L(1)]);
+% ylim(0.5*[-L(1),L(1)]);
+axis tight;
 set(gca,TL{:},TS{:});
 xlabel(vartext,TX{:},FS{:}); 
 legend(legtext,TX{:},FS{:},'Location','southoutside');

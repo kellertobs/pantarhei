@@ -26,6 +26,7 @@ if (mms), addpath('../mms/mms_utils/'); fprintf(1, 'Running MMS...\n\n'); end
 % stabilizing values
 NUM.TINY = 1e-16;
 NUM.HUGE = 1e+16;
+NUM.pltits = IO.pltits;
 
 % some plotting checks
 if ~isfield(IO,'pltits'), IO.pltits = false; end
@@ -40,21 +41,7 @@ PHS.Mv = kv.'./kv;      % momentum diffusivity ratios
 PHS.Mf = kf.'./kf;      % volume diffusivity ratios
 
 % check problem scales (returns delta0, w0)
-[PHS.delta0, PHS.w0, PHS.p0, PHS.Cv0] = scales(PHS,NUM);
-n=0;
-for i=1:NUM.NPHS
-    for j=i:NUM.NPHS
-        if i~=j
-        n=n+1;
-        [delta0(n),ind] = max([PHS.delta0(i,j),PHS.delta0(j,i)]);
-        if ind==1; delta0_segr(n) = i; else; delta0_segr(n) = j; end
-        if ind==1; delta0_cmpt(n) = j; else; delta0_cmpt(n) = i; end
-        end
-    end
-end
-[delta0,ind] = unique(delta0);
-delta0_segr = delta0_segr(ind);
-delta0_cmpt = delta0_cmpt(ind);
+[PHS] = scales(PHS,NUM);
 
 % reset domain depth to multiple of max segr-comp-length
 if length(NUM.Lfac)==1, NUM.Lfac = [NUM.Lfac, NUM.Lfac]; end
@@ -87,22 +74,17 @@ NUM.ndim  = sum(double([NUM.Nx;NUM.Nz]>1));
 NUM.zw    = [NUM.z-0.5*NUM.h,NUM.z(end)+0.5*NUM.h];  % z coordinates for z velocity (horiz    cell faces)
 NUM.xu    = [NUM.x-0.5*NUM.h,NUM.x(end)+0.5*NUM.h];  % x coordinates for x velocity (vertical cell faces)
 
+if size(NUM.Z,3) > 1
+    NUM.maxlvl = log2(min([size(NUM.Z,2),size(NUM.Z,3)]));
+else
+    NUM.maxlvl = log2(size(NUM.Z,2));
+end
+
 % initialise indexing for boundary condition stencils (order: {zBC, xBC})
 if ~iscell(NUM.BC), NUM.BC = {NUM.BC, NUM.BC}; end
 
-% first, z direction
-if strcmp(NUM.BC{1},'periodic')
-    NUM.icz = [NUM.Nz,1:NUM.Nz,1]; NUM.imz = [NUM.Nz,1:NUM.Nz]; NUM.ipz = [1:NUM.Nz,1];
-elseif strcmp(NUM.BC{1},'open') || strcmp(NUM.BC{1},'closed')
-    NUM.icz = [1,1:NUM.Nz,NUM.Nz]; NUM.imz = [1,1:NUM.Nz]; NUM.ipz = [1:NUM.Nz,NUM.Nz];
-end
-
-% now x direction
-if strcmp(NUM.BC{2},'periodic')
-    NUM.icx = [Nx,1:NUM.Nx,1]; NUM.imx = [NUM.Nx,1:NUM.Nx]; NUM.ipx = [1:NUM.Nx,1];
-elseif strcmp(NUM.BC{2},'open') || strcmp(NUM.BC{2},'closed')
-    NUM.icx = [1,1:NUM.Nx,NUM.Nx]; NUM.imx = [1,1:NUM.Nx]; NUM.ipx = [1:NUM.Nx,NUM.Nx];
-end
+% create index arrays
+get_indices;
 
 %% intialise phase fraction
 
@@ -162,7 +144,11 @@ else    , fprintf(1, 'Running 2D model'); end
 fprintf(1, ' with RunID [ %s ] .\n\n', IO.RunID);
 
 fprintf(1, '    NPHS = %d \n', NUM.NPHS);
-fprintf(1, '      f0 = [ '); fprintf(1, '%.2f ', PHS.f0); fprintf('] with ');
+fprintf(1, '      f0 = [ '); fprintf(1, '%.4f ', PHS.f0); fprintf(']\n');
+fprintf(1, '  delta0 = [ '); fprintf(1, '%.4f ', PHS.delta0); fprintf(']\n');
+fprintf(1, '    segr = [ '); fprintf(1, '    %d  ', PHS.delta0_segr); fprintf(']\n');
+fprintf(1, '    cmpt = [ '); fprintf(1, '    %d  ', PHS.delta0_cmpt); fprintf(']');
+
 if PHS.dfg~=0, fprintf(1, 'gaussian '); end
 if PHS.dfr~=0, fprintf(1, 'random '); end
 if exist('fInit','var'), fprintf(1, 'fInit '); end

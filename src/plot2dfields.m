@@ -11,9 +11,9 @@ TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
 %% plot u, w, p, f and reference fields
 
 % initialize figure and axes
-f1 = figure(1); f1.Visible = figvis;
+f1 = figure(1); f1.Visible = IO.figvis;
 clf; colormap(ocean);
-fh = axb + (NPHS+1)*axh + NPHS*avs + axt;
+fh = axb + (NUM.NPHS+1)*axh + NUM.NPHS*avs + axt;
 fw = axl + 4*axw + 3*ahs + axr;
 set(f1,UN{:},'Position',[2 2 fw fh]);
 set(f1,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
@@ -21,54 +21,54 @@ set(f1,'Color','w','InvertHardcopy','off');
 set(f1,'Resize','off');
 
 % predefine axis positions
-axpos = zeros((NPHS+1)*4, 4);
-for nrow = 1:NPHS+1
+axpos = zeros((NUM.NPHS+1)*4, 4);
+for nrow = 1:NUM.NPHS+1
     for ncol = 1:4
-        axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS+1-nrow)*axh+(NPHS+1-nrow)*avs axw axh];
+        axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NUM.NPHS+1-nrow)*axh+(NUM.NPHS+1-nrow)*avs axw axh];
     end
 end
 
 axes(UN{:},'position',axpos(1,:));
-imagesc(x,z,squeeze(wstar(1,:,:))); 
+imagesc(NUM.x,NUM.z,squeeze(wstar(1,:,:))); 
 format2dpanels(1, '$w^*$ [m/s]');
 
 axes(UN{:},'position',axpos(2,:));
-imagesc(x,z,squeeze(ustar(1,:,:))); 
+imagesc(NUM.x,NUM.z,squeeze(ustar(1,:,:))); 
 format2dpanels(2, '$u^*$ [m/s]');
 
-text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
+text(0,NUM.z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
 
 axes(UN{:},'position',axpos(3,:));
-imagesc(x,z,squeeze(pstar(1,:,:))); 
+imagesc(NUM.x,NUM.z,squeeze(pstar(1,:,:))); 
 format2dpanels(3, '$p^*$ [m/s]');
 
 axes(UN{:},'position',axpos(4,:))
-imagesc(x,z,squeeze(sum(f.*rho,1))); 
+imagesc(NUM.x,NUM.z,squeeze(sum(f.*rho,1))); 
 format2dpanels(4, '$\bar{\rho}$ [kg/m$^3$]');
 
-for n=2:NPHS+1
+for n=2:NUM.NPHS+1
     axes(UN{:},'position',axpos(4*(n-1)+1,:));
-    imagesc(x,z,squeeze(w(n-1,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(w(n-1,:,:))); 
     format2dpanels(1, ['$w^',num2str(n-1),'$ [m/s]']);
 
     axes(UN{:},'position',axpos(4*(n-1)+2,:));
-    imagesc(x,z,squeeze(u(n-1,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(u(n-1,:,:))); 
     format2dpanels(2, ['$u^',num2str(n-1),'$ [m/s]']);
 
     axes(UN{:},'position',axpos(4*(n-1)+3,:));
-    imagesc(x,z,squeeze(p(n-1,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(p(n-1,:,:))); 
     format2dpanels(3, ['$p^',num2str(n-1),'$ [Pa]' ]);
 
     axes(UN{:},'position',axpos(4*(n-1)+4,:));
-    imagesc(x,z,squeeze(f(n-1,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(f(n-1,:,:))); 
     format2dpanels(4, ['$f^',num2str(n-1),'$ [vol]']);
 end
 
 %% plot udelta, wdelta, pdelta, dfdt
 
-f2 = figure(2); f2.Visible = figvis;
+f2 = figure(2); f2.Visible = IO.figvis;
 clf; colormap(ocean);
-fh = axb + NPHS*axh + (NPHS-1)*avs + axt;
+fh = axb + NUM.NPHS*axh + (NUM.NPHS-1)*avs + axt;
 fw = axl + 4*axw + 3*ahs + axr;
 set(f2,UN{:},'Position',[4 4 fw fh]);
 set(f2,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
@@ -76,90 +76,90 @@ set(f2,'Color','w','InvertHardcopy','off');
 set(f2,'Resize','off');
 
 % predefine axis positions
-axpos = zeros(NPHS*4, 4);
-for nrow = 1:NPHS
+axpos = zeros(NUM.NPHS*4, 4);
+for nrow = 1:NUM.NPHS
     for ncol = 1:4
-        axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NPHS-nrow)*axh+(NPHS-nrow)*avs axw axh];
+        axpos((nrow-1)*4 + ncol,:) = [axl + (ncol-1)*axw+(ncol-1)*ahs axb+(NUM.NPHS-nrow)*axh+(NUM.NPHS-nrow)*avs axw axh];
     end
 end
 
-for n=1:NPHS
+for n=1:NUM.NPHS
     axes(UN{:},'position',axpos(4*(n-1)+1,:));
-    imagesc(x,z,squeeze(wsegr(n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(wsegr(n,:,:))); 
     format2dpanels(1, ['$w_\Delta^',num2str(n),'$ [m/s]']);
 
     axes(UN{:},'position',axpos(4*(n-1)+2,:));
-    imagesc(x,z,squeeze(usegr(n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(usegr(n,:,:))); 
     format2dpanels(2, ['$u_\Delta^',num2str(n),'$ [m/s]']);
 
-    if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
+    if n==1, text(0,NUM.z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
     
     axes(UN{:},'position',axpos(4*(n-1)+3,:));
-    imagesc(x,z,squeeze(pcmpt(n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(pcmpt(n,:,:))); 
     format2dpanels(3, ['$p_\Delta^',num2str(n),'$ [Pa]' ]);
     
     axes(UN{:},'position',axpos(4*(n-1)+4,:));
-    imagesc(x,z,squeeze((f(n,:,:)-fo(n,:,:))./dt)); 
+    imagesc(NUM.x,NUM.z,squeeze((f(n,:,:)-fo(n,:,:))./dt)); 
     format2dpanels(4, ['$\partial f^',num2str(n),'/\partial t$ [vol/s]']);
 end
 drawnow;
 
 %% plot qvzz, qfz, Gvz, Gf
 
-f3 = figure(3); f3.Visible = figvis;
+f3 = figure(3); f3.Visible = IO.figvis;
 clf; colormap(ocean);
 set(f3,UN{:},'Position',[6 6 fw fh]);
 set(f3,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
 set(f3,'Color','w','InvertHardcopy','off');
 set(f3,'Resize','off');
 
-for n=1:NPHS
+for n=1:NUM.NPHS
     axes(UN{:},'position',axpos(4*(n-1)+1,:));
-    imagesc(x,z,squeeze(qvzz(n,:,:)-f(n,:,:).*p(n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(qvzz(n,:,:)-f(n,:,:).*p(n,:,:))); 
     format2dpanels(1, ['$q_{v,zz}^',num2str(n),'$ [Pa]']);
 
     axes(UN{:},'position',axpos(4*(n-1)+2,:));
-    imagesc(x,z,squeeze(qfz (n,:,:)-(f(n,imz,:)+f(n,ipz,:))./2.*w(n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(qfz (n,:,:)-fz(n,:,:).*w(n,:,:))); 
     format2dpanels(2, ['$q_{f,z}^',num2str(n),'$ [m/s]']);
     
-    if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
+    if n==1, text(0,NUM.z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
     
     axes(UN{:},'position',axpos(4*(n-1)+3,:));
-    imagesc(x,z,squeeze(Gvz (n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(Gvz (n,:,:))); 
     format2dpanels(3, ['$\Gamma_{v,z}^',num2str(n),'$ [Pa/m]' ]);
 
     axes(UN{:},'position',axpos(4*(n-1)+4,:));
-    imagesc(x,z,squeeze(Gf  (n,:,:))); 
+    imagesc(NUM.x,NUM.z,squeeze(Gf  (n,:,:))); 
     format2dpanels(4, ['$\Gamma_f^',num2str(n),'$ [1/s]']);
 end
 drawnow;
 
 %% plot flux and transfer coeffs
 
-f4 = figure(4); f4.Visible = figvis;
+f4 = figure(4); f4.Visible = IO.figvis;
 clf; colormap(ocean);
 set(f4,UN{:},'Position',[8 8 fw fh]);
 set(f4,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
 set(f4,'Color','w','InvertHardcopy','off');
 set(f4,'Resize','off');
 
-for n=1:NPHS
+for n=1:NUM.NPHS
     axes(UN{:},'position',axpos(4*(n-1)+1,:));
-    imagesc(x,z,squeeze(log10(Kv(n,:,:)))); 
+    imagesc(NUM.x,NUM.z,squeeze(log10(Kv(n,:,:)))); 
     format2dpanels(1, ['$K_v^',num2str(n),'$ [Pa s]']);
 
     axes(UN{:},'position',axpos(4*(n-1)+2,:));
-    imagesc(x,z,squeeze(log10(Kf(n,:,:)))); 
+    imagesc(NUM.x,NUM.z,squeeze(log10(Kf(n,:,:)))); 
     format2dpanels(2, ['$K_f^',num2str(n),'$ [m$^2$/Pa s]']);
 
-    if n==1, text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
+    if n==1, text(0,NUM.z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center'); end
     
     axes(UN{:},'position',axpos(4*(n-1)+3,:));
-    imagesc(x,z,squeeze(log10(Cv(n,:,:)))); 
+    imagesc(NUM.x,NUM.z,squeeze(log10(Cv(n,:,:)))); 
     format2dpanels(3, ['$C_v^',num2str(n),'$ [Pa s/m$^2$]' ]);
 
     axes(UN{:},'position',axpos(4*(n-1)+4,:));
-    imagesc(x,z,squeeze(log10(Cf(n,:,:)))); 
+    imagesc(NUM.x,NUM.z,squeeze(log10(Cf(n,:,:)))); 
     format2dpanels(4, ['$C_f^',num2str(n),'$ [1/Pa s]' ]);
 end
 
@@ -167,7 +167,7 @@ end
 
 %% plot ushr, wshr velocity fields
 
-f5 = figure(5); f5.Visible = figvis;
+f5 = figure(5); f5.Visible = IO.figvis;
 clf; colormap(ocean);
 fh = axb + 2*axh + 1*avs + axt;
 fw = axl + 2*axw + 1*ahs + axr;
@@ -185,21 +185,21 @@ for nrow = 1:2
 end
 
 axes(UN{:},'position',axpos(1,:));
-imagesc(x,z,squeeze(wshr)); 
+imagesc(NUM.x,NUM.z,squeeze(wshr)); 
 format2dpanels(1, '$w^{shr}$ [m/s]');
 
 axes(UN{:},'position',axpos(2,:));
-imagesc(x,z,squeeze(ushr)); 
+imagesc(NUM.x,NUM.z,squeeze(ushr)); 
 format2dpanels(2, '$u^{shr}$ [m/s]');
 
-text(0,z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
+text(0,NUM.z(1),['time = ',num2str(time,'%.1e'),' [s]'],TX{:},FS{:},'Color','k','VerticalAlignment','bottom','HorizontalAlignment','center');
 
 axes(UN{:},'position',axpos(3,:));
-imagesc(x,z,squeeze(wstar+wshr)); 
+imagesc(NUM.x,NUM.z,squeeze(wstar+wshr)); 
 format2dpanels(3, '$w^* + w^{shr}$ [m/s]');
 
 axes(UN{:},'position',axpos(4,:))
-imagesc(x,z,squeeze(ustar+ushr)); 
+imagesc(NUM.x,NUM.z,squeeze(ustar+ushr)); 
 format2dpanels(4, '$u^* + u^{shr}$ [m/s]');
 
 %%

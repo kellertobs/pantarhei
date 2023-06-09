@@ -2,61 +2,67 @@
 % calibrated for plagioclase + dacitic melt + Fe-P-rich melt
 
 % clear workspace
-clear; close all; clc;
+clear; close all; %clc;
 
 % set model parameters
 % detect system
-RunID  = 'NEW4P4';
-% outdir = '../out/';       % directory to save output files
-outdir = '/media/43TB_RAID_Array/tchai/out/';
-nop    = 10;                % plot and store output every [nop] time step
-svop   = 1;                 % save output and print figures
-restart= 0;
+IO.RunID  = 'P4';
+IO.outdir = '../out/';         % directory to save output files
+% IO.outdir = '/media/43TB_RAID_Array/tchai/out/';
+IO.pltits  = false;             % whether to plot residuals 
+IO.figvis  = 'on';             % toggle for figure visibility on/off
+IO.nop     = 10;               % plot and store output every [nop] time step
+IO.svop    = 1;                % save output
+IO.restart = 0;
 
-NPHS   = 3;                 % number of phases
-N      = 2000;               % number of grid points in each direction
-Lfac   = 10;                % domain dimension in each direction [delta0]
-BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
-NtMax  = 1e3;               % maximum number of time steps
-tend   = 1e16;              % model run time [s]
+NUM.NPHS   = 3;                 % number of phases
+NUM.N      = 2^12;              % number of grid points in each direction
+NUM.Lfac   = 16;                % domain dimension in each direction [delta0]
+NUM.BC     = 'closed';          % boundary conditions: 'open', 'closed', 'periodic'
+NUM.NtMax  = 1e3;               % maximum number of time steps
+NUM.tend   = 1e16;              % model run time [s]
 
-advn   = 'weno5';           % advection scheme. best ones: 'quick', 'weno5'
-nupd   = 50;                % update residual and permissions every [nupd] iterations
-atol   = 1e-6;              % residual tolerance for convergence of iterative solver
-rtol   = 1e-5;              % residual tolerance for convergence of iterative solver
-minits = 500;               % minimum iteration count for iterative solver
-maxits = 5000;              % maximum iteration count for iterative solver
-alpha  = 0.60;              % first-order iterative step size (reduce if not converging)
-beta   = 0.32;              % second-order iterative step size (reduce if not converging)
-cfl    = 0.25;              % Courant number to limit physical time step size
-flim   = 1e-6;              % limit phase fractions in coefficient closures
-thtlim = 1e+4;              % limit phase-internal permission contrasts
-cfflim = 1e+9;              % limit inter-phase coefficient contrasts
-dmp    = 1;                 % damping parameter, acts as numerical bulk viscosity
+NUM.advn   = 'weno5';           % advection scheme. best ones: 'quick', 'weno5'
+NUM.smth   = 20;                % update residual and permissions every [nupd] iterations
+NUM.atol   = 3e-6;              % residual tolerance for convergence of iterative solver
+NUM.rtol   = 3e-4;              % residual tolerance for convergence of iterative solver
+NUM.minits = 5;                 % minimum iteration count for iterative solver
+NUM.maxits = 100;               % maximum iteration count for iterative solver
+NUM.alpha  = 0.99;              % first-order iterative step size (reduce if not converging)
+NUM.beta   = 0.10;              % second-order iterative step size (reduce if not converging)
+NUM.gamma  = 0.99;              % multi-grid update step size (reduce if not converging)
+NUM.dmp    = 0.00;              % damping parameter, acts as numerical bulk viscosity
+NUM.maxlvl = 12;                % maximum size MG level [2^maxlvl]
+NUM.minlvl = 2;                 % minimum size MG level [2^minlvl]
+NUM.minlvl_maxits = 500;        % residual tolerance for at minimum MG level
+NUM.cfl    = 0.25;              % Courant number to limit physical time step size
+NUM.flim   = 1e-3;              % limit phase fractions in coefficient closures
+NUM.thtlim = 1e+4;              % limit phase-internal permission contrasts
+NUM.cfflim = 1e+6;              % limit inter-phase coefficient contrasts
 
-grav = [-9.81,0];           % gravity in vertical and horizontal direction
-f0   = [ 0.54; 0.26; 0.20]; % initial background phase fractions (unity sum!)
-dfg  = [ 0.00; 0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
-dfr  = [ 0.00; 0.00; 0.00]; % initial random perturbation amplitude (unity sum!)
-smth = (N/40)^2;            % smoothing parameter for random perturbation field
-Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
-Pu   = 0;                   %   pure shear strain rate [multiple of max segr speed]
-Si   = 0;                   % simple shear strain rate [multiple of max segr speed]
+PHS.grav = [-9.81,0];           % gravity in vertical and horizontal direction
+PHS.f0   = [ 0.54; 0.26; 0.20]; % initial background phase fractions (unity sum!)
+PHS.dfg  = [ 0.00; 0.00; 0.00]; % initial guassian peak amplitude (unity sum!)
+PHS.dfr  = [ 0.00; 0.00; 0.00]; % initial random perturbation amplitude (unity sum!)
+PHS.smth = (NUM.N/40)^2;        % smoothing parameter for random perturbation field
+PHS.Gmg  = [1;-1;0].*0e-4;      % impose gaussian-shaped mass transfer rate (unity sum!)
+PHS.Pu   = 0;                   %   pure shear strain rate [multiple of max segr speed]
+PHS.Si   = 0;                   % simple shear strain rate [multiple of max segr speed]
 
-rho0 = [2700 ; 2400; 4000]; % pure-phase densities
-eta0 = [1e+16; 1e+5;    1]; % pure-phase viscosities
-d0   = [1e-3 ; 1e-3; 1e-3]; % characteristic size of local-scale phase constituents
+PHS.rho0 = [2700 ; 2400; 4000]; % pure-phase densities
+PHS.eta0 = [1e+16; 1e+5;   1]; % pure-phase viscosities
+PHS.d0   = [1e-3 ; 1e-3; 1e-3]; % characteristic size of local-scale phase constituents
 
 % set permission weight parameters for coefficient closure model
-A  =  [ 0.25, 0.25, 0.25; ...
-        0.25, 0.25, 0.25; ...
-        0.25, 0.25, 0.25; ];  % permission slopes
-B  =  [ 0.44, 0.18, 0.38; ...
-        0.60, 0.02, 0.38; ...
-        0.72, 0.25, 0.03; ];  % permission step locations
-C  =  [ 0.30, 0.30, 0.30; ...
-        0.60, 0.60, 0.12; ...
-        0.60, 0.12, 0.60; ];  % permission step widths
+PHS.A  =  [ 0.25, 0.25, 0.25; ...
+            0.25, 0.25, 0.25; ...
+            0.25, 0.25, 0.25; ];  % permission slopes
+PHS.B  =  [ 0.44, 0.18, 0.38; ...
+            0.60, 0.02, 0.38; ...
+            0.72, 0.25, 0.03; ];  % permission step locations
+PHS.C  =  [ 0.30, 0.30, 0.30; ...
+            0.60, 0.60, 0.12; ...
+            0.60, 0.12, 0.60; ];  % permission step widths
 
 
 
