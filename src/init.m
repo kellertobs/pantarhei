@@ -86,6 +86,10 @@ if ~iscell(NUM.BC), NUM.BC = {NUM.BC, NUM.BC}; end
 % create index arrays
 get_indices;
 
+% checks for direct solver
+if NUM.ndim>1; NUM.direct = false; end
+if NUM.direct; NUM.dmp = 0; end
+
 %% intialise phase fraction
 
 if exist('fInit','var')  
@@ -155,5 +159,3 @@ if exist('fInit','var'), fprintf(1, 'fInit '); end
 fprintf(1, '\n\n');
 fprintf(1, '[Nz, Nx] = [  %d  %d ]  \n', NUM.Nz, NUM.Nx);
 fprintf(1, '[Lz, Lx] = [   %.0f   %.0f ] x max(delta)\n\n', NUM.Lfac(1), NUM.Lfac(2).*(NUM.Nx>1));
-fprintf(1, '   alpha = %.2f \n', NUM.alpha);
-fprintf(1, '   beta  = %.2f \n', NUM.beta);

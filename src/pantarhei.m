@@ -35,8 +35,24 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
     % print time step diagnostic
     fprintf(1,'\n\n*****  step %d;  dt = %4.4e;  time = %4.4e;\n\n',step,dt,time);
     
+    if     strcmp(NUM.tint,'be1im') || step==1 % first step / 1st-order backward-Euler implicit scheme
+        a1 = 1; a2 = 1; a3 = 0;
+        b1 = 1; b2 = 0; b3 = 0;
+    elseif strcmp(NUM.tint,'bd2im') || step==2 % second step / 2nd-order 3-point backward-difference implicit scheme
+        a1 = 3/2; a2 = 4/2; a3 = -1/2;
+        b1 = 1;   b2 =  0;  b3 = 0;
+    elseif strcmp(NUM.tint,'cn2si')            % other steps / 2nd-order Crank-Nicolson semi-implicit scheme
+        a1 = 1;   a2 = 1;   a3 = 0;
+        b1 = 1/2; b2 = 1/2; b3 = 0;
+    elseif strcmp(NUM.tint,'bd2si')            % other steps / 2nd-order 3-point backward-difference semi-implicit scheme
+        a1 = 3/2; a2 = 4/2; a3 = -1/2;
+        b1 = 3/4; b2 = 2/4; b3 = -1/4;
+    end
+
     % store phase fractions of previous step
-    fo = f;  dto = dt; dfdto = dfdt;
+    foo = fo; fo = f;  
+    dfdtoo = dfdto; dfdto = dfdt;  
+    dto = dt; 
     
     % initialise non-linear iteration loop
     res  = 1e3;
@@ -63,7 +79,8 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
 
             fadv = -advect(f, ushr, wshr, NUM.h, {NUM.advn, 'vdf'}, [2,3], NUM.BC);
             dfdt = fadv + Gf;
-            f    = fo + (dfdt+dfdto)/2*dt;
+            f    = (a2*fo+a3*foo + (b1*dfdt + b2*dfdto + b3*dfdtoo)*dt)/a1;
+            f    = max(NUM.flim,min(1-NUM.flim, f ));
         end
 
         % update source fields
@@ -75,12 +92,19 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
         % update closures and residuals
         closures; residuals;
 
-        [upd_u, upd_w, upd_p] = multigrid_solve(res_u, res_w, res_p, f, PHS, NUM);
+        if NUM.direct
+            [upd_u, upd_w, upd_p] = direct_solve(u, w, p, f, Qvz, Qf, PHS, NUM);
+        else
+            [upd_u, upd_w, upd_p] = multigrid_solve(res_u, res_w, res_p, f, PHS, NUM);
+        end
 
-        % apply correction
+        % % apply correction
         u = u - upd_u;
         w = w - upd_w;
         p = p - upd_p;
+
+        % update closures and residuals
+        closures; residuals;
 
         it = it+1;  % update iteration count
 
