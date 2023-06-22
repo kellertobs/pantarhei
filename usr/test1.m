@@ -16,8 +16,8 @@ IO.svop    = 1;                % save output
 IO.restart = 0;
 
 NUM.NPHS   = 3;                 % number of phases
-NUM.N      = 4000;              % number of grid points in each direction
-NUM.Lfac   = 16;                % domain dimension in each direction [delta0]
+NUM.N      = 5000;              % number of grid points in each direction
+NUM.Lfac   = 8;                 % domain dimension in each direction [delta0]
 NUM.BC     = 'opentop';         % boundary conditions: 'open', 'closed', 'periodic'
 NUM.NtMax  = 1e4;               % maximum number of time steps
 NUM.tend   = 1e16;              % model run time [s]

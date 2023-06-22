@@ -16,8 +16,8 @@ IO.svop    = 1;                % save output
 IO.restart = 0;
 
 NUM.NPHS   = 3;                 % number of phases
-NUM.N      = 4000;              % number of grid points in each direction
-NUM.Lfac   = 16;                % domain dimension in each direction [delta0]
+NUM.N      = 5000;              % number of grid points in each direction
+NUM.Lfac   = 8;                 % domain dimension in each direction [delta0]
 NUM.BC     = 'opentop';         % boundary conditions: 'open', 'closed', 'periodic'
 NUM.NtMax  = 1e4;               % maximum number of time steps
 NUM.tend   = 1e16;              % model run time [s]
@@ -31,7 +31,7 @@ NUM.rtol   = 1e-6;              % residual tolerance for convergence of iterativ
 NUM.minits = 1;                 % minimum iteration count for iterative solver
 NUM.maxits = 100;               % maximum iteration count for iterative solver
 NUM.cfl    = 0.25;              % Courant number to limit physical time step size
-NUM.flim   = 1e-3;              % limit phase fractions in coefficient closures
+NUM.flim   = 1e-6;              % limit phase fractions in coefficient closures
 NUM.thtlim = 1e+6;              % limit phase-internal permission contrasts
 NUM.cfflim = 1e+9;              % limit inter-phase coefficient contrasts
 
