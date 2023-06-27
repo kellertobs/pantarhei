@@ -73,14 +73,15 @@ while time <= NUM.tend && step <= NUM.NtMax  % keep stepping until final run tim
         
         if step>0
             % update physical time step [s]
-            dt   = min([ 2*dto;
-                         NUM.cfl/(max(abs([qfx(:);qfz(:)]))/(NUM.h/2) + max(abs(Gf(:)))./1e-2);
-                         NUM.cfl*(NUM.h/2)./max(abs([ushr(:);wshr(:)]) + NUM.TINY) ]);
+            dt    = min([ 2*dto;
+                          NUM.cfl/(max(abs([qfx(:);qfz(:)]))/(NUM.h/2) + max(abs(Gf(:)))./1e-2);
+                          NUM.cfl*(NUM.h/2)./max(abs([ushr(:);wshr(:)]) + NUM.TINY) ]);
 
-            fadv = -advect(f, ushr, wshr, NUM.h, {NUM.advn, 'vdf'}, [2,3], NUM.BC);
-            dfdt = fadv + Gf;
-            f    = (a2*fo+a3*foo + (b1*dfdt + b2*dfdto + b3*dfdtoo)*dt)/a1;
-            f    = max(NUM.flim,min(1-NUM.flim, f ));
+            fadv  = -advect(f, ushr, wshr, NUM.h, {NUM.advn, 'vdf'}, [2,3], NUM.BC);
+            dfdt  = fadv + Gf;
+            res_f = (a1*f - a2*fo - a3*foo)/dt - (b1*dfdt + b2*dfdto + b3*dfdtoo);
+            f     = f - 0.9*res_f*dt/a1;
+            f     = max(NUM.flim,min(1-NUM.flim, f ));
         end
 
         % update source fields
