@@ -44,8 +44,13 @@ PHS.Mf = kf.'./kf;      % volume diffusivity ratios
 [PHS] = scales(PHS,NUM);
 
 % reset domain depth to multiple of max segr-comp-length
-if length(NUM.Lfac)==1, NUM.Lfac = [NUM.Lfac, NUM.Lfac]; end
-NUM.L  = NUM.Lfac.*max(PHS.delta0(:)); NUM.Lmax = max(NUM.L);
+if isfield(NUM,'Lfac')
+    if length(NUM.Lfac)==1; NUM.Lfac = [NUM.Lfac, NUM.Lfac]; end
+    NUM.L = NUM.Lfac.*max(PHS.delta0); NUM.Lmax = max(NUM.L);
+else 
+    if length(NUM.L)==1; NUM.L = [NUM.L, NUM.L]; end
+    NUM.Lfac = NUM.L./max(PHS.delta0); NUM.Lmax = max(NUM.L);
+end
 NUM.h  = NUM.L(1)/NUM.N;
 
 % reset shear rate to multiple of max segr velocity scale
@@ -98,10 +103,12 @@ else
     % initialise smoothed random and gaussian perturbation fields
     rng(15);
     rnd = randn(NUM.NPHS,NUM.Nz,NUM.Nx);
-    for i = 1:PHS.smth
-        rnd = rnd + diff(rnd(:,NUM.icz,:),2,2)./12 + diff(rnd(:,:,NUM.icx),2,3)./12;
+    if any(PHS.dfr>0)
+        for i = 1:PHS.smth
+            rnd = rnd + diff(rnd(:,NUM.icz,:),2,2)./12 + diff(rnd(:,:,NUM.icx),2,3)./12;
+        end
+        rnd = rnd./max(abs(rnd(:)));
     end
-    rnd = rnd./max(abs(rnd(:)));
     gsn = exp(-NUM.X.^2./(NUM.L(2)/12).^2).*exp(-NUM.Z.^2./(NUM.L(1)/12).^2);
     f   = PHS.f0 + PHS.dfr.*rnd + PHS.dfg.*gsn;
 end
